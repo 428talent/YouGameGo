@@ -1,7 +1,6 @@
 package api_web
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/config"
 	"you_game_go/models"
