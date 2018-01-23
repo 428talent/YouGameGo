@@ -20,6 +20,6 @@ func init() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", connectString)
 	orm.RegisterModel(new(models.User))
-	orm.RunSyncdb("default", true, true)
+	orm.RunSyncdb("default", false, true)
 
 }
