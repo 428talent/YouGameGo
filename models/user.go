@@ -1,8 +1,11 @@
 package models
 
 import (
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/config"
 	"github.com/astaxie/beego/orm"
 	"time"
+	"you_game_go/util"
 )
 
 //用户模块
@@ -29,4 +32,18 @@ func CreateUserAccount(username string, password string) error {
 	}
 	_, err := o.Insert(&user)
 	return err
+}
+
+func CheckUserValidate(loginUser *User) bool {
+	appConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
+	if err != nil {
+		beego.Error(err)
+	}
+	loginUser.Password = util.EncryptSha1(loginUser.Password + appConfig.String("salt"))
+	o := orm.NewOrm()
+	if err = o.Read(loginUser, "username", "password"); err == orm.ErrNoRows {
+		beego.Error(err)
+		return false
+	}
+	return true
 }

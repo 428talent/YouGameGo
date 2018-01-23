@@ -23,5 +23,5 @@ func (c *CreateUserController) Post() {
 	if err != nil {
 		beego.Error(err)
 	}
-	c.Redirect("/register", 302)
+	c.Redirect("/login", 302)
 }
