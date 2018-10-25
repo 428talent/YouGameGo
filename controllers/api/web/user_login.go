@@ -2,9 +2,8 @@ package api_web
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/pborman/uuid"
-	"time"
-	"you_game_go/models"
+	"yougame.com/letauthsdk/client"
+	"yougame.com/yougame-server/auth"
 )
 
 type UserLoginController struct {
@@ -14,23 +13,19 @@ type UserLoginController struct {
 func (c *UserLoginController) Post() {
 	username := c.GetString("username")
 	password := c.GetString("password")
-	user := models.User{
-		Username: username,
+	authReqeustBody := client.LoginRequestBody{
+		LoginName: username,
 		Password: password,
 	}
-	isValidate := models.CheckUserValidate(&user)
-	if isValidate {
-		beego.Info(user)
-		loginToken := models.Token{
-			UserId:    user.Id,
-			LoginTime: time.Now(),
-		}
-		userToken := uuid.New()
-		models.InsertTokenToRedis(&loginToken, userToken)
-		c.Ctx.SetCookie("token", userToken)
-		c.Redirect("/",302)
-	} else {
-		beego.Error("用户名或密码错误")
+	response,err := auth.AuthClient.Login(authReqeustBody)
+	if err != nil {
+		beego.Error(err)
 	}
-	c.Redirect("/login", 302)
+	if response.Success {
+		beego.Debug(response.Sign)
+		c.Ctx.SetCookie("yougame_token", response.Sign)
+		c.Redirect("/", 302)
+	}else{
+		c.Redirect("/login", 302)
+	}
 }

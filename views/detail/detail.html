@@ -1,0 +1,306 @@
+{{template "/layout.html" .}}
+<div style="min-height: 2048px ; background-color: #EEEEEE">
+    <div style="background-image: url('/{{.game.Band.Path}}');width: 100% ; height: 500px ;background-size: cover;padding-top: 70px;padding-left: 70px;filter: blur(20px);display: flow;position: absolute"></div>
+    <div class="container" style="padding-top: 200px">
+
+
+        <div class="ui grid container stackable">
+            <h1 class="ten wide column">{{ .game.Name }}</h1>
+            <div class="ten wide column">
+                <div class="ui segment inverted">
+                    <div class="glide">
+                        <div class="glide__track" data-glide-el="track">
+                            <ul class="glide__slides">
+                                {{range .game.PreviewImages}}
+                                    <li class="glide__slide">
+                                        <img class="ui centered rounded image" src="/{{.Path}}">
+                                    </li>
+                                {{end}}
+
+                            </ul>
+                        </div>
+                        <div class=" ui glide__arrows centered" data-glide-el="controls">
+                            <button class="ui left labeled icon button glide__arrow glide__arrow--left"
+                                    data-glide-dir="<">
+                                <i class="left arrow icon"></i>
+                                Prev
+                            </button>
+                            <button class="ui right labeled icon button glide__arrow glide__arrow--right"
+                                    data-glide-dir=">">
+                                <i class="right arrow icon"></i>
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="six wide column">
+                <div class="ui segment container">
+                    <img class="ui rounded image" src="/{{.game.Band.Path}}">
+                    <h3>{{ .game.Name }}</h3>
+                    <div>{{ .game.Publisher }}</div>
+                    <div>{{ .game.ReleaseTime }}</div>
+                    <p>{{ .game.Intro }} </p>
+                    <div>
+                        {{range .game.Tags}}
+                            <div class="ui label">
+                                {{.Name}}
+                            </div>
+                        {{end}}
+
+
+                    </div>
+                    <div>
+                        <form method="post" action="/wishlist">
+                            <input type="hidden" name="GameId" value="{{.game.Id}}">
+                            <button class="ui right primary button" type="submit" style="margin-top: 8px">
+                                加入愿望单
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="ten wide column">
+                <div class="ui segment">
+                    <div class="ui divided items">
+                        {{range .game.Goods}}
+                            <div class="item">
+                                <div class="middle aligned content">
+                                    {{.Name}} ({{.Price}})
+                                    <div class="right floated content">
+                                        <div class="ui button">加入购物车</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            <div class="six wide column">
+
+                <div class="ui segment">
+                    <h3 class="ui header">系统需求</h3>
+                    <table class="ui very basic table">
+                        <tbody>
+                        <tr>
+                            <td>John</td>
+                            <td>Approved</td>
+                        </tr>
+                        <tr>
+                            <td>Jamie</td>
+                            <td>Approved</td>
+                        </tr>
+                        <tr>
+                            <td>Jill</td>
+                            <td>Denied</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="sixteen wide column">
+
+                <div class="ui segment" style="min-height: 300px">
+                    <h3 class="ui header">介绍</h3>
+                    <p>介绍</p>
+                </div>
+            </div>
+            <div class="twelve wide column">
+
+                <div class="ui segment" style="min-height: 300px">
+                    <h3 class="ui header">评价</h3>
+                    <div class="ui pointing secondary menu container">
+                        <a class="item active" data-tab="first">好评</a>
+                        <a class="item" data-tab="second">差评</a>
+                    </div>
+                    <div class="ui bottom attached tab  active" data-tab="first">
+                        <div class="ui feed">
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui bottom attached tab " data-tab="second">
+                        <div class="ui feed">
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="event">
+                                <div class="label">
+                                    <img src="/static/img/user.png">
+                                </div>
+                                <div class="content">
+                                    <div class="summary">
+                                        <a>Joe Henderson</a> posted on his page
+                                        <div class="date">
+                                            3 days ago
+                                        </div>
+                                    </div>
+                                    <div class="extra text">
+                                        Ours is a life of constant reruns. We're always circling back to where we'd we
+                                        started, then starting all over again. Even if we don't run extra laps that day,
+                                        we surely will come back for more of the same another day soon.
+                                    </div>
+                                    <div class="meta">
+                                        <a class="like">
+                                            <i class="like icon"></i> 5 Likes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="four wide column">
+
+                <div class="ui segment">
+                    <div class="ui statistic">
+                        <div class="value">
+                            5,550
+                        </div>
+                        <div class="label">
+                            购买
+                        </div>
+                    </div>
+                    <div class="ui divider"></div>
+                    <div class="ui statistic">
+                        <div class="value">
+                            5,550
+                        </div>
+                        <div class="label">
+                            评论
+                        </div>
+                    </div>
+                    <div class="ui divider"></div>
+                    <div class="ui statistic">
+                        <div class="value">
+                            95.9%
+                        </div>
+                        <div class="label">
+                            好评
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <link href="https://cdn.bootcss.com/Glide.js/3.2.3/css/glide.core.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/Glide.js/3.2.3/glide.js"></script>
+    <script>
+        new Glide('.glide').mount()
+    </script>
+</div>
+{{template "/layout_foot.html" .}}

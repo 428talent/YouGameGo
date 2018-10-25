@@ -2,11 +2,14 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	_ "you_game_go/database"
-	_ "you_game_go/models"
-	_ "you_game_go/routers"
+	_ "yougame.com/yougame-server/auth"
+	_ "yougame.com/yougame-server/database"
+	_ "yougame.com/yougame-server/models"
+	_ "yougame.com/yougame-server/routers"
+	_ "yougame.com/yougame-server/security"
 )
 
 func main() {
+	beego.SetStaticPath("/static","static")
 	beego.Run()
 }

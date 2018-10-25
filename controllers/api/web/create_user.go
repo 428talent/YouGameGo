@@ -2,9 +2,8 @@ package api_web
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/config"
-	"you_game_go/models"
-	"you_game_go/util"
+	"yougame.com/letauthsdk/client"
+	"yougame.com/yougame-server/auth"
 )
 
 type CreateUserController struct {
@@ -14,14 +13,14 @@ type CreateUserController struct {
 func (c *CreateUserController) Post() {
 	username := c.GetString("username")
 	password := c.GetString("password")
-	appConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
+
+	authBody, err := auth.AuthClient.CreateUser(client.CreateUserRequestBody{
+		Username: username,
+		Password: password,
+	})
 	if err != nil {
 		beego.Error(err)
 	}
-	enPassword := util.EncryptSha1(password + appConfig.String("salt"))
-	err = models.CreateUserAccount(username, enPassword)
-	if err != nil {
-		beego.Error(err)
-	}
+	beego.Debug(authBody.Success)
 	c.Redirect("/login", 302)
 }

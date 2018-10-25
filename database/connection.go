@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego/config"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"you_game_go/models"
+	"yougame.com/yougame-server/models"
 )
 
 func init() {
@@ -16,10 +16,10 @@ func init() {
 	}
 	mysqlUsername := appConfig.DefaultString("mysql_username", "root")
 	mysqlPassword := appConfig.DefaultString("mysql_password", "root")
-	connectString := fmt.Sprintf("%s:%s@/you_game_go?charset=utf8", mysqlUsername, mysqlPassword)
+	connectString := fmt.Sprintf("%s:%s@/you_game?charset=utf8", mysqlUsername, mysqlPassword)
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", connectString)
-	orm.RegisterModel(new(models.User), new(models.Game))
+	orm.RegisterModel(new(models.Game), new(models.Image),new(models.Tag),new(models.Good),new(models.WishList))
 	orm.RunSyncdb("default", false, true)
 
 }
