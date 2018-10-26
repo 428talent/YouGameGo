@@ -113,3 +113,20 @@ func (c *CartController) RemoveCartItem() {
 	c.Redirect("/cart", 302)
 
 }
+
+func (c *CartController)ClearAll() {
+	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	if err != nil {
+		beego.Error(err)
+	}
+	if claims == nil {
+		c.Redirect("/login", 302)
+		return
+	}
+	cartItem := models.CartItem{UserId:claims.UserId}
+	err = cartItem.DeleteAll()
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Redirect("/cart", 302)
+}

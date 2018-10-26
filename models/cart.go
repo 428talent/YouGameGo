@@ -43,3 +43,8 @@ func (c *CartItem) Delete() error {
 	_, err := o.Delete(c, "id")
 	return err
 }
+func (c *CartItem) DeleteAll() error {
+	o := orm.NewOrm()
+	_, err := o.Delete(c, "user_id")
+	return err
+}

@@ -9,6 +9,7 @@ import (
 	"yougame.com/yougame-server/controllers/web"
 	"yougame.com/yougame-server/controllers/web/admin"
 	"yougame.com/yougame-server/controllers/web/cart"
+	order2 "yougame.com/yougame-server/controllers/web/order"
 	"yougame.com/yougame-server/controllers/web/wishlist"
 )
 
@@ -23,6 +24,9 @@ func init() {
 	beego.Router("/wishlist", &wishlist.WishListController{}, "post:SaveWishList")
 	beego.Router("/cart", &cart.CartController{})
 	beego.Router("/cart/:id/delete", &cart.CartController{}, "post:RemoveCartItem")
+	beego.Router("/order/:id", &order2.OrderController{})
+	beego.Router("/order", &order2.OrderController{}, "post:CreateOrder")
+	beego.Router("/cart/delete", &cart.CartController{}, "post:ClearAll")
 	beego.Router("/admin/dashboard", &admin.AdminDashboardController{})
 	beego.Router("/api/web/user/create", &api_web.CreateUserController{})
 	beego.Router("/api/web/user/login", &api_web.UserLoginController{})

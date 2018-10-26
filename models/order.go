@@ -48,3 +48,24 @@ func (order *Order) SaveOrder() error {
 	}
 	return nil
 }
+func (order *Order) QueryById() error {
+	o := orm.NewOrm()
+	return o.Read(order)
+}
+
+func (orderGood *OrderGood) QueryById() error {
+	o := orm.NewOrm()
+	return o.Read(orderGood)
+}
+
+func (order *Order) ReadOrderGoods() error {
+	o := orm.NewOrm()
+	_,err := o.LoadRelated(order,"Goods")
+	return err
+}
+
+func (orderGood *OrderGood)ReadGood() error {
+	o := orm.NewOrm()
+	err := o.Read(orderGood)
+	return err
+}
