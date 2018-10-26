@@ -15,6 +15,7 @@ const app = dva({
 app.router(({history}) => <App/>);
 app.model(require('./layout/components/pagenav/model').default);
 app.model(require('./model/app').default);
+app.model(require('./page/home/model').default);
 
 app.start('#root');
 // ReactDOM.render(<App />, document.getElementById('root'));

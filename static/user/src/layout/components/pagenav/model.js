@@ -15,11 +15,8 @@ export default {
         'changePage'(state, {tag: tag}) {
             return {
                 ...state,
-
                 activeTab: tag
-
             }
         },
-
     },
 };

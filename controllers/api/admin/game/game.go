@@ -201,3 +201,29 @@ func (c *GameController) AddGood() {
 	c.Data["json"] = game
 	c.ServeJSON()
 }
+
+func (c *GameController) GetGame() {
+	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		beego.Error(err)
+		controllers.AbortServerError(c.Controller)
+		return
+	}
+
+	game := models.Game{
+		Id:gameId,
+	}
+	err = game.QueryById()
+	if err != nil {
+		beego.Error(err)
+		controllers.AbortServerError(c.Controller)
+		return
+	}
+
+	game.ReadGameBand()
+	game.ReadGamePreviewImage()
+	game.ReadTags()
+	game.ReadGoods()
+	c.Data["json"] = game
+	c.ServeJSON()
+}

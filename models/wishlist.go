@@ -33,3 +33,9 @@ func GetWishList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*WishL
 	count, err := filter(seter).Count()
 	return &count, wishlist, err
 }
+
+func (w *WishList) ReadGame() error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(w.Game, "Game")
+	return err
+}

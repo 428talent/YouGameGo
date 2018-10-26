@@ -36,3 +36,7 @@ func (c *ApiWishListController) GetWishList() {
 	c.Data["json"] = response
 	c.ServeJSON()
 }
+
+func (c *ApiWishListController) DeleteWishList() {
+
+}

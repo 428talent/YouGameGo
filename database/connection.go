@@ -19,7 +19,17 @@ func init() {
 	connectString := fmt.Sprintf("%s:%s@/you_game?charset=utf8", mysqlUsername, mysqlPassword)
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", connectString)
-	orm.RegisterModel(new(models.Game), new(models.Image),new(models.Tag),new(models.Good),new(models.WishList))
+	orm.RegisterModel(
+		new(models.Game),
+		new(models.Image),
+		new(models.Tag),
+		new(models.Good),
+		new(models.WishList),
+		new(models.CartItem),
+		new(models.Order),
+		new(models.OrderGood),
+		new(models.Wallet),
+	)
 	orm.RunSyncdb("default", false, true)
 
 }

@@ -5,17 +5,18 @@ import 'semantic-ui-css/semantic.min.css';
 import UserCard from "./layout/components/usercard";
 import {Container} from "semantic-ui-react";
 import {BrowserRouter as Router, Route} from "react-router-dom";
-import HomePage from "./page/home";
+import HomePage from "./page/home/home";
 import GamePage from "./page/game";
 import PageNav from "./layout/components/pagenav/pagenav";
 import {connect} from "dva";
 import PropTypes from "prop-types";
+import HashRouter from "react-router-dom/es/HashRouter";
 
 const App = ({history, ...props}) => {
     let {user} = props;
     return (
         <div className="App">
-            <Router history={history}>
+            <HashRouter history={history}>
                 <div>
                     <MainNavBar/>
                     <Container>
@@ -26,13 +27,13 @@ const App = ({history, ...props}) => {
                         </div>
                     </Container>
                 </div>
-            </Router>
+            </HashRouter>
         </div>
     );
 };
 
 App.propTypes = {
-    user: PropTypes.object.isRequired
+    user: PropTypes.object
 };
 export default connect(({app}) => ({
     user: app.user
