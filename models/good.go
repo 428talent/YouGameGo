@@ -19,3 +19,9 @@ func (g *Good) QueryById() error {
 	err := o.Read(g)
 	return err
 }
+
+func (g *Good) ReadGame() error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(g, "Game")
+	return err
+}

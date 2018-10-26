@@ -67,9 +67,12 @@
                             <div class="item">
                                 <div class="middle aligned content">
                                     {{.Name}} ({{.Price}})
-                                    <div class="right floated content">
-                                        <div class="ui button">加入购物车</div>
-                                    </div>
+                                    <form method="post" action="/cart">
+                                        <input type="hidden" value="{{.Id}}" name="GoodId">
+                                        <div class="right floated content">
+                                            <button type="submit" class="ui button">加入购物车</button>
+                                        </div>
+                                    </form>
                                 </div>
 
                             </div>
