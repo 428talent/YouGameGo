@@ -2,10 +2,12 @@ package order
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/serializer"
 )
 
 type ApiOrderController struct {
@@ -44,5 +46,28 @@ func (c *ApiOrderController) CreateOrder() {
 	if err != nil {
 		beego.Error(err)
 	}
+	c.ServeJSON()
+}
+
+func (c *ApiOrderController) GetOrderList() {
+	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	if claims == nil {
+		return
+	}
+	orders,err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.Filter("user_id",3)
+	})
+	if err != nil {
+		beego.Error(err)
+	}
+	serializedData,err := serializer.SerializeOrderList(orders,serializer.OrderSerializer{})
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = serializedData
 	c.ServeJSON()
 }

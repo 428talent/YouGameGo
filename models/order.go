@@ -53,6 +53,13 @@ func (order *Order) QueryById() error {
 	return o.Read(order)
 }
 
+func GetOrderList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Order, error) {
+	o := orm.NewOrm()
+	var orderList []*Order
+	seter := o.QueryTable("order")
+	_, err := filter(seter).All(&orderList)
+	return orderList, err
+}
 func (orderGood *OrderGood) QueryById() error {
 	o := orm.NewOrm()
 	return o.Read(orderGood)
@@ -60,11 +67,11 @@ func (orderGood *OrderGood) QueryById() error {
 
 func (order *Order) ReadOrderGoods() error {
 	o := orm.NewOrm()
-	_,err := o.LoadRelated(order,"Goods")
+	_, err := o.LoadRelated(order, "Goods")
 	return err
 }
 
-func (orderGood *OrderGood)ReadGood() error {
+func (orderGood *OrderGood) ReadGood() error {
 	o := orm.NewOrm()
 	err := o.Read(orderGood)
 	return err

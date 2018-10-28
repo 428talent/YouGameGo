@@ -29,6 +29,8 @@ func init() {
 		new(models.Order),
 		new(models.OrderGood),
 		new(models.Wallet),
+		new(models.User),
+		new(models.Profile),
 	)
 	orm.RunSyncdb("default", false, true)
 

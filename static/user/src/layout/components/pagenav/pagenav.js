@@ -27,6 +27,13 @@ const PageNav = ({dispatch, ...props}) => {
                     onClick={() => handleItemClick('games')}
                 />
             </Link>
+            <Link exect to="/orders">
+                <Menu.Item
+                    name='订单'
+                    active={activeTab === 'orders'}
+                    onClick={() => handleItemClick('orders')}
+                />
+            </Link>
         </Menu>
     )
 

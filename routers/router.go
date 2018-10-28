@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"yougame.com/yougame-server/controllers/api/admin/game"
 	"yougame.com/yougame-server/controllers/api/admin/order"
+	"yougame.com/yougame-server/controllers/api/admin/user"
 	ApiWishlist "yougame.com/yougame-server/controllers/api/admin/wishlist"
 	"yougame.com/yougame-server/controllers/api/web"
 	"yougame.com/yougame-server/controllers/web"
@@ -18,6 +19,7 @@ func init() {
 	beego.Router("/register", &web.RegisterController{})
 	beego.Router("/login", &web.LoginController{})
 	beego.Router("/signout", &web.LoginController{}, "get:Logout")
+	beego.Router("/login/auth", &web.LoginController{}, "post:Login")
 	beego.Router("/search/:key", &web.SearchController{})
 	beego.Router("/game/:id", &web.DetailController{})
 	beego.Router("/user/:id", &web.UserController{})
@@ -29,7 +31,6 @@ func init() {
 	beego.Router("/cart/delete", &cart.CartController{}, "post:ClearAll")
 	beego.Router("/admin/dashboard", &admin.AdminDashboardController{})
 	beego.Router("/api/web/user/create", &api_web.CreateUserController{})
-	beego.Router("/api/web/user/login", &api_web.UserLoginController{})
 	beego.Router("/api/game/:id/band", &api_admin_game.GameController{}, "post:UploadGameBand")
 	beego.Router("/api/game/:id", &api_admin_game.GameController{}, "get:GetGame")
 	beego.Router("/api/game/:id/preview/image", &api_admin_game.GameController{}, "post:UploadGamePreviewImage")
@@ -37,5 +38,7 @@ func init() {
 	beego.Router("/api/game/:id/goods", &api_admin_game.GameController{}, "post:AddGood")
 	beego.Router("/api/user/:id/wishlist", &ApiWishlist.ApiWishListController{}, "get:GetWishList")
 	beego.Router("/api/orders", &order.ApiOrderController{}, "post:CreateOrder")
+	beego.Router("/api/user/:id/orders", &order.ApiOrderController{}, "get:GetOrderList")
 	beego.Router("/api/admin/game", &api_admin_game.GameController{})
+	user.RegisterUserApiRouter()
 }
