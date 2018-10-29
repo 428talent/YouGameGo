@@ -8,12 +8,12 @@ type CartSerializer struct {
 		Id    int     `json:"id"`
 		Name  string  `json:"name"`
 		Price float64 `json:"price"`
-	}
+	} `json:"good"`
 	Game struct {
 		Id   int    `json:"id"`
 		Name string `json:"name"`
 		Band string `json:"band"`
-	}
+	} `json:"game"`
 	Created int64 `json:"created"`
 }
 

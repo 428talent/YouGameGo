@@ -5,20 +5,19 @@ import {connect} from "dva";
 import React from "react";
 import CartGroup from "../components/CartGroup";
 
-const CartPage = ({dispatch, ...props}) => {
-    const {wishGameList} = props;
+const CartPage = ({dispatch,cartListItems,totalPrice,...props}) => {
     return (
         <div>
             <Segment className="page-container" style={{textAlign: "left"}}>
                 <h3>购物车</h3>
-                <CartGroup/>
+                <CartGroup cartItems={[...cartListItems]} />
                 <Divider/>
                 <div style={{textAlign: "right", paddingRight: 20}}>
                     <div>
                         <div>
-                            <Statistic size="mini" label='合计' value='￥5,550'/>
+                            <Statistic size="mini" label='合计' value={`￥${totalPrice}`}/>
                         </div>
-                        <div style={{marginTop:8}}>
+                        <div style={{marginTop: 8}}>
                             <Button primary>付款</Button>
                         </div>
                     </div>
@@ -28,6 +27,10 @@ const CartPage = ({dispatch, ...props}) => {
     )
 };
 CartPage.propTypes = {
-    wishlist: PropTypes.array.isRequired
+    cartListItems: PropTypes.array.isRequired,
+    totalPrice: PropTypes.number.isRequired
 };
-export default connect(({cartpage}) => ({}))(CartPage)
+export default connect(({cartpage}) => ({
+    cartListItems: cartpage.cartListItems,
+    totalPrice :cartpage.totalPrice
+}))(CartPage)

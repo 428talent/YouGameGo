@@ -4,5 +4,5 @@ export const Api = {
     getUser: BaseAuthUrl + "/v1/user/:id",
     getWishListItems: ServerUrl + "/api/user/:id/wishlist",
     getGame: ServerUrl + "/api/game/:id",
-    getCartList: ServerUrl + "/api/user/:id/cart"
+    getCartList: ServerUrl + "/api/user/:id/carts"
 };

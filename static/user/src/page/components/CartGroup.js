@@ -1,13 +1,16 @@
 import {Image, Item} from "semantic-ui-react";
 import React from "react";
 import CartItem from "./CartItem";
-const CartGroup = () =>{
+
+const CartGroup = ({cartItems}) => {
+    const content = cartItems.map((cartItem, idx) => {
+        return (
+            <CartItem cartItem={cartItem} key={idx}/>
+        )
+    });
     return (
         <Item.Group>
-            <CartItem/>
-            <CartItem/>
-            <CartItem/>
-            <CartItem/>
+            {content}
         </Item.Group>
     )
 }

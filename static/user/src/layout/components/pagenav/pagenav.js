@@ -7,13 +7,12 @@ import {connect} from 'dva';
 const PageNav = ({dispatch, ...props}) => {
     let {activeTab} = props;
 
-    const handleItemClick = (tag) => {
+    const handleItemClick = (activeTab) => {
         dispatch({
-            type: "pagenav/changePage",
-            tag: tag
+            type: "app/changeTab",
+            activeTab,
         })
     };
-    console.log(props);
     return (
         <Menu secondary>
             <Link exect to="/">
@@ -25,7 +24,8 @@ const PageNav = ({dispatch, ...props}) => {
                     name='games'
                     active={activeTab === 'games'}
                     onClick={() => handleItemClick('games')}
-                />
+                >
+                </Menu.Item>
             </Link>
             <Link exect to="/orders">
                 <Menu.Item
@@ -45,11 +45,11 @@ const PageNav = ({dispatch, ...props}) => {
     )
 
 
-}
+};
 
 PageNav.propTypes = {
-    activeTab: PropTypes.number.isRequired
+    activeTab: PropTypes.string.isRequired
 };
-export default connect(({pagenav}) => ({
-    activeTab: pagenav.activeTab
+export default connect(({app}) => ({
+    activeTab: app.activeTab
 }))(PageNav);

@@ -129,3 +129,9 @@ func (u *User) ReadCart(offset int64, limit int64, order string) error {
 	_, err := o.LoadRelated(u, "ShoppingCart", 3, limit, offset, order)
 	return err
 }
+
+func (u *User) ReadOrders(offset int64, limit int64, order string) error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(u, "ShoppingCart", 3, limit, offset, order)
+	return err
+}

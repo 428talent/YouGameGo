@@ -3,7 +3,7 @@ import {Api} from "../config/api";
 
 export async function FetchCartList(userId) {
     let response = await request({
-        url: Api.getGame,
+        url: Api.getCartList,
         method: 'get',
         pathParams: {
             id: userId

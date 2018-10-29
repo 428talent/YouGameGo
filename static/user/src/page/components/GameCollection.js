@@ -11,11 +11,11 @@ const GameCollection = ({colCount,title, gameList, dispatch}) => {
     let gameGrid = [];
     while (gameList.length) gameGrid.push(gameList.splice(0, colCount));
     console.log(gameGrid);
-    const content = gameGrid.map(col => {
-        const rowContent = col.map(game => {
+    const content = gameGrid.map((col,cidx) => {
+        const rowContent = col.map((game,ridx) => {
                 return (
-                    <Grid.Column key={game.Id}>
-                        <GameItem game={game}/>
+                    <Grid.Column key={cidx}>
+                        <GameItem game={game} key={ridx * cidx} />
                     </Grid.Column>
                 )
             }

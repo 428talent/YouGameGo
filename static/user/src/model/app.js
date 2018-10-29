@@ -3,7 +3,8 @@ import {FetchUser} from "../service/user";
 export default {
     namespace: 'app',
     state: {
-        user: null
+        user: null,
+        activeTab: "Home"
     },
     subscriptions: {
         setup({dispatch}) {
@@ -33,5 +34,11 @@ export default {
                 user: result
             }
         },
+        'changeTab'(state, {activeTab}){
+            return {
+                ...state,
+                activeTab: activeTab
+            }
+        }
     },
 };
