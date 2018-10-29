@@ -5,20 +5,20 @@ import (
 )
 
 type OrderSerializer struct {
-	Id      int
-	Goods   []*OrderItemSerializer
-	State   string
-	Created int64
-	Updated int64
+	Id      int                    `json:"id"`
+	Goods   []*OrderItemSerializer `json:"goods"`
+	State   string                 `json:"state"`
+	Created int64                  `json:"created"`
+	Updated int64                  `json:"updated"`
 }
 type OrderItemSerializer struct {
-	Id       int
-	GoodName string
-	Name     string
-	GameId   int
-	Price    float64
-	BandPic  string
-	Created  int64
+	Id       int     `json:"id"`
+	GoodName string  `json:"good_name"`
+	Name     string  `json:"name"`
+	GameId   int     `json:"game_id"`
+	Price    float64 `json:"price"`
+	BandPic  string  `json:"band_pic"`
+	Created  int64   `json:"created"`
 }
 
 func SerializeOrder(data models.Order, template interface{}) (interface{}, error) {

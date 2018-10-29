@@ -15,12 +15,13 @@ type User struct {
 	Password     string
 	LastLogin    time.Time `orm:"null"`
 	Enable       bool
-	ShoppingCart []*CartItem `orm:"reverse(many)"`
-	Orders       []*Order    `orm:"reverse(many)"`
-	Created      time.Time   `orm:"auto_now_add;type(datetime)"`
-	Updated      time.Time   `orm:"auto_now;type(datetime)"`
-	Profile      *Profile    `orm:"null;rel(one);on_delete(set_null)"`
-	Wallet       *Wallet     `orm:"null;rel(one);on_delete(set_null)"`
+	ShoppingCart []*CartItem    `orm:"reverse(many)"`
+	Orders       []*Order       `orm:"reverse(many)"`
+	Transactions []*Transaction `orm:"reverse(many)"`
+	Created      time.Time      `orm:"auto_now_add;type(datetime)"`
+	Updated      time.Time      `orm:"auto_now;type(datetime)"`
+	Profile      *Profile       `orm:"null;rel(one);on_delete(set_null)"`
+	Wallet       *Wallet        `orm:"null;rel(one);on_delete(set_null)"`
 }
 
 func (u *User) TableName() string {
@@ -124,7 +125,11 @@ func (u *User) ReadProfile() error {
 	err := o.Read(u.Profile)
 	return err
 }
-
+func (u *User) ReadWallet() error {
+	o := orm.NewOrm()
+	err := o.Read(u.Wallet)
+	return err
+}
 func (u *User) ReadCart(offset int64, limit int64, order string) error {
 	o := orm.NewOrm()
 	_, err := o.LoadRelated(u, "ShoppingCart", 3, limit, offset, order)

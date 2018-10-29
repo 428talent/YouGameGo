@@ -6,12 +6,13 @@ import (
 )
 
 type Order struct {
-	Id      int
-	State   string
-	User *User `orm:"rel(fk)"`
-	Goods   []*OrderGood `orm:"reverse(many)"`
-	Created time.Time    `orm:"auto_now_add;type(datetime)"`
-	Updated time.Time    `orm:"auto_now;type(datetime)"`
+	Id          int
+	State       string
+	User        *User        `orm:"rel(fk)"`
+	Transaction *Transaction `orm:"reverse(one)"`
+	Goods       []*OrderGood `orm:"reverse(many)"`
+	Created     time.Time    `orm:"auto_now_add;type(datetime)"`
+	Updated     time.Time    `orm:"auto_now;type(datetime)"`
 }
 
 type OrderGood struct {
@@ -74,5 +75,10 @@ func (order *Order) ReadOrderGoods() error {
 func (orderGood *OrderGood) ReadGood() error {
 	o := orm.NewOrm()
 	err := o.Read(orderGood)
+	return err
+}
+func (d *Order) Update(fields ...string) error {
+	o := orm.NewOrm()
+	_, err := o.Update(d, fields...)
 	return err
 }

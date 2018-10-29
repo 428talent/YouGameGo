@@ -31,6 +31,7 @@ func init() {
 		new(models.Wallet),
 		new(models.User),
 		new(models.Profile),
+		new(models.Transaction),
 	)
 	orm.RunSyncdb("default", false, true)
 

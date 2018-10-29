@@ -2,7 +2,9 @@ package order
 
 import (
 	"github.com/astaxie/beego"
+	"strconv"
 	"yougame.com/letauthsdk/auth"
+	ApiError "yougame.com/yougame-server/error"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
@@ -71,6 +73,86 @@ func (c *ApiOrderController) GetOrderList() {
 	if err != nil {
 		beego.Error(err)
 	}
-	c.Data["json"] = serializedData
+	c.Data["json"] = util.PageResponse{
+		Page:     page,
+		PageSize: pageSize,
+		Result:   serializedData,
+		Count:    int64(len(serializedData)),
+	}
+	c.ServeJSON()
+}
+
+func (c *ApiOrderController) PayOrder() {
+	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	if err != nil {
+		beego.Error(err)
+
+	}
+	if claims == nil {
+
+	}
+	orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		beego.Error(err)
+
+	}
+	order := models.Order{Id: orderId}
+	if err = order.QueryById(); err != nil {
+		beego.Error(err)
+
+	}
+	user, err := models.GetUserById(claims.UserId)
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	if err = order.ReadOrderGoods(); err != nil {
+		beego.Error(err)
+		return
+	}
+	totalPrice := 0.0
+	for _, orderGood := range order.Goods {
+		totalPrice += orderGood.Price
+	}
+	if err = user.ReadWallet(); err != nil {
+		beego.Error(err)
+		return
+	}
+	if totalPrice > user.Wallet.Balance {
+		errorResponse := ApiError.APIErrorResponse{
+			Err:    "not sufficient funds",
+			Detail: "not sufficient funds",
+			Code:   ApiError.NotSufficientFunds,
+		}
+		errorResponse.ServerError(c.Controller, 400)
+		return
+	}
+	transaction := models.Transaction{
+		Type:    "Order",
+		Balance: user.Wallet.Balance,
+		Amount:  -totalPrice,
+		Order:   &order,
+		User:    user,
+	}
+	err = transaction.Save()
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	order.State = "Done"
+	err = order.Update("State")
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	user.Wallet.Balance += transaction.Amount
+	err = user.Wallet.Update("Balance")
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	c.Data["json"] = &serializer.CommonApiResponseBody{
+		Success: true,
+	}
 	c.ServeJSON()
 }

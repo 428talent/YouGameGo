@@ -38,6 +38,7 @@ func init() {
 	beego.Router("/api/game/:id/goods", &api_admin_game.GameController{}, "post:AddGood")
 	beego.Router("/api/user/:id/wishlist", &ApiWishlist.ApiWishListController{}, "get:GetWishList")
 	beego.Router("/api/orders", &order.ApiOrderController{}, "post:CreateOrder")
+	beego.Router("/api/order/:id/pay", &order.ApiOrderController{}, "post:PayOrder")
 	beego.Router("/api/user/:id/orders", &order.ApiOrderController{}, "get:GetOrderList")
 	beego.Router("/api/user/:id/carts", &cart2.ApiCartController{}, "get:GetCartList")
 	beego.Router("/api/admin/game", &api_admin_game.GameController{})
