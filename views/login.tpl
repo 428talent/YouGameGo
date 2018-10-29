@@ -15,7 +15,7 @@
 
     <style type="text/css">
         body {
-            background-color: #DADADA;
+
         }
 
         body > .grid {
@@ -32,55 +32,56 @@
     </style>
     <script>
         $(document)
-                .ready(function () {
-                    $('.ui.form')
-                            .form({
-                                fields: {
-                                    email: {
-                                        identifier: 'email',
-                                        rules: [
-                                            {
-                                                type: 'empty',
-                                                prompt: 'Please enter your e-mail'
-                                            },
-                                            {
-                                                type: 'email',
-                                                prompt: 'Please enter a valid e-mail'
-                                            }
-                                        ]
+            .ready(function () {
+                $('.ui.form')
+                    .form({
+                        fields: {
+                            email: {
+                                identifier: 'email',
+                                rules: [
+                                    {
+                                        type: 'empty',
+                                        prompt: 'Please enter your e-mail'
                                     },
-                                    password: {
-                                        identifier: 'password',
-                                        rules: [
-                                            {
-                                                type: 'empty',
-                                                prompt: 'Please enter your password'
-                                            },
-                                            {
-                                                type: 'length[6]',
-                                                prompt: 'Your password must be at least 6 characters'
-                                            }
-                                        ]
+                                    {
+                                        type: 'email',
+                                        prompt: 'Please enter a valid e-mail'
                                     }
-                                }
-                            })
-                    ;
-                })
+                                ]
+                            },
+                            password: {
+                                identifier: 'password',
+                                rules: [
+                                    {
+                                        type: 'empty',
+                                        prompt: 'Please enter your password'
+                                    },
+                                    {
+                                        type: 'length[6]',
+                                        prompt: 'Your password must be at least 6 characters'
+                                    }
+                                ]
+                            }
+                        }
+                    })
+                ;
+            })
         ;
     </script>
 </head>
 <body>
-
-<div class="ui middle aligned center aligned grid">
+{{template "/components/nav.html" .}}
+<div class="ui middle aligned center aligned grid"
+     style='background: url("/static/img/login-bg.png") no-repeat;background-size: cover'>
     <div class="column">
-        <h2 class="ui teal image header">
-        {{/*<img src="assets/images/logo.png" class="image">*/}}
-            <div class="content">
-                登录你的账户
-            </div>
-        </h2>
-        <form class="ui large form" method="post" action="/api/web/user/login">
+        <form class="ui large form" method="post" action="/login/auth">
             <div class="ui stacked segment">
+                <h2 class="ui teal image header">
+                    {{/*<img src="assets/images/logo.png" class="image">*/}}
+                    <div class="content">
+                        登录你的账户
+                    </div>
+                </h2>
                 <div class="field">
                     <div class="ui left icon input">
                         <i class="user icon"></i>
@@ -93,6 +94,14 @@
                         <input type="password" name="password" placeholder="密码">
                     </div>
                 </div>
+                {{if .flash.ErrorTitle}}
+                    <div class="ui negative message">
+                        <div class="header">
+                            {{.flash.ErrorTitle}}
+                        </div>
+                        <p>{{.flash.ErrorContent}}
+                        </p></div>
+                {{end}}
                 <button class="ui fluid large teal submit button" type="submit">登录</button>
             </div>
 
@@ -102,6 +111,7 @@
 
     </div>
 </div>
+{{template "/components/footer.html" .}}
 
 </body>
 

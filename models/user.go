@@ -10,14 +10,16 @@ import (
 
 //用户模块
 type User struct {
-	Id        int
-	Username  string `orm:"unique"`
-	Password  string
-	LastLogin time.Time `orm:"null"`
-	Enable    bool
-	Created   time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated   time.Time `orm:"auto_now;type(datetime)"`
-	Profile   *Profile  `orm:"null;rel(one);on_delete(set_null)"`
+	Id           int
+	Username     string `orm:"unique"`
+	Password     string
+	LastLogin    time.Time `orm:"null"`
+	Enable       bool
+	ShoppingCart []*CartItem `orm:"reverse(many)"`
+	Created      time.Time   `orm:"auto_now_add;type(datetime)"`
+	Updated      time.Time   `orm:"auto_now;type(datetime)"`
+	Profile      *Profile    `orm:"null;rel(one);on_delete(set_null)"`
+	Wallet       *Wallet     `orm:"null;rel(one);on_delete(set_null)"`
 }
 
 func (u *User) TableName() string {
@@ -48,12 +50,12 @@ func CreateUserAccount(username string, password string) (*int64, error) {
 		Email:    "",
 	}
 	profileId, err := o.Insert(&profile)
-
 	if err != nil {
 		beego.Error(err)
 		err = o.Rollback()
 		return nil, err
 	}
+
 	user := User{
 		Username: username,
 		Password: *encryptPassword,
@@ -116,3 +118,14 @@ func CheckUserValidate(loginUser *User) (bool) {
 	return true
 }
 
+func (u *User) ReadProfile() error {
+	o := orm.NewOrm()
+	err := o.Read(u.Profile)
+	return err
+}
+
+func (u *User) ReadCart(offset int64, limit int64, order string) error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(u, "ShoppingCart", 3, limit, offset, order)
+	return err
+}

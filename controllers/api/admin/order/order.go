@@ -59,7 +59,7 @@ func (c *ApiOrderController) GetOrderList() {
 		return
 	}
 	orders,err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.Filter("user_id",3)
+		return o.Filter("user_id",claims.Id)
 	})
 	if err != nil {
 		beego.Error(err)

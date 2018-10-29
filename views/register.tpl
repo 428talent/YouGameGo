@@ -70,17 +70,19 @@
     </script>
 </head>
 <body>
-
-<div class="ui middle aligned center aligned grid">
+{{template "/components/nav.html" .}}
+<div class="ui middle aligned center aligned grid" style='background: url("/static/img/login-bg.png") no-repeat;background-size: cover'>
     <div class="column">
-        <h2 class="ui teal image header">
-        {{/*<img src="assets/images/logo.png" class="image">*/}}
-            <div class="content">
-                注册你的账户
-            </div>
-        </h2>
-        <form class="ui large form" method="post" action="/api/web/user/create">
+
+        <form class="ui large form" method="post" action="/user">
+
             <div class="ui stacked segment">
+                <h2 class="ui teal image header">
+                    {{/*<img src="assets/images/logo.png" class="image">*/}}
+                    <div class="content">
+                        注册你的账户
+                    </div>
+                </h2>
                 <div class="field">
                     <div class="ui left icon input">
                         <i class="user icon"></i>
@@ -108,7 +110,7 @@
 
     </div>
 </div>
-
+{{template "/components/footer.html" .}}
 </body>
 
 </html>

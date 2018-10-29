@@ -3,6 +3,7 @@ package error
 import (
 	"fmt"
 	"github.com/astaxie/beego"
+	"net/http"
 )
 
 type APIError struct {
@@ -34,5 +35,16 @@ func NewApiError(err APIError) *APIErrorResponse {
 func (r *APIErrorResponse) ServerError(c beego.Controller,statusCode int) {
 	c.Data["json"] = *r
 	c.Ctx.ResponseWriter.WriteHeader(statusCode)
+	c.ServeJSON()
+}
+
+func ServerNoAuthError(c beego.Controller) {
+	c.Data["json"] = &APIErrorResponse{
+		Success: false,
+		Err:     "Authorization failed",
+		Detail:  "Authorization failed",
+		Code:    "000003",
+	}
+	c.Ctx.ResponseWriter.WriteHeader(http.StatusUnauthorized)
 	c.ServeJSON()
 }

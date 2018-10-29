@@ -75,7 +75,7 @@ func (c *CartController) Post() {
 		Good: &models.Good{
 			Id: goodId,
 		},
-		UserId: claims.UserId,
+		User: &models.User{Id: claims.UserId},
 	}
 	err = cartItem.Save()
 	if err != nil {
@@ -102,7 +102,7 @@ func (c *CartController) RemoveCartItem() {
 	if err != nil {
 		beego.Error(err)
 	}
-	if cartItem.UserId != claims.UserId {
+	if cartItem.User.Id != claims.UserId {
 		c.Redirect("/login", 302)
 		return
 	}
@@ -114,7 +114,7 @@ func (c *CartController) RemoveCartItem() {
 
 }
 
-func (c *CartController)ClearAll() {
+func (c *CartController) ClearAll() {
 	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
 	if err != nil {
 		beego.Error(err)
@@ -123,7 +123,7 @@ func (c *CartController)ClearAll() {
 		c.Redirect("/login", 302)
 		return
 	}
-	cartItem := models.CartItem{UserId:claims.UserId}
+	cartItem := models.CartItem{User: &models.User{Id: claims.UserId}}
 	err = cartItem.DeleteAll()
 	if err != nil {
 		beego.Error(err)

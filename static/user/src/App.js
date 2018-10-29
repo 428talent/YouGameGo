@@ -8,6 +8,7 @@ import {Route} from "react-router-dom";
 import HomePage from "./page/home/home";
 import GamePage from "./page/game";
 import OrderPage from "./page/order/index";
+import CartPage from "./page/cart/cart";
 import {connect} from "dva";
 import PropTypes from "prop-types";
 import HashRouter from "react-router-dom/es/HashRouter";
@@ -25,6 +26,7 @@ const App = ({history, ...props}) => {
                             <Route exact path="/" component={HomePage}/>
                             <Route path="/games" component={GamePage}/>
                             <Route path="/orders" component={OrderPage}/>
+                            <Route path="/cart" component={CartPage}/>
                         </div>
                     </Container>
                 </div>
