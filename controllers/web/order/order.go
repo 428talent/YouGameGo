@@ -86,7 +86,7 @@ func (c *OrderController) CreateOrder() {
 	}
 	order := models.Order{
 		State:  "Created",
-		UserId: claims.UserId,
+		User: &models.User{Id:claims.UserId,},
 	}
 	var orderGoodList []*models.OrderGood
 	for _, cartItem := range cartList {

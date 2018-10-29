@@ -16,6 +16,7 @@ type User struct {
 	LastLogin    time.Time `orm:"null"`
 	Enable       bool
 	ShoppingCart []*CartItem `orm:"reverse(many)"`
+	Orders       []*Order    `orm:"reverse(many)"`
 	Created      time.Time   `orm:"auto_now_add;type(datetime)"`
 	Updated      time.Time   `orm:"auto_now;type(datetime)"`
 	Profile      *Profile    `orm:"null;rel(one);on_delete(set_null)"`
@@ -132,6 +133,6 @@ func (u *User) ReadCart(offset int64, limit int64, order string) error {
 
 func (u *User) ReadOrders(offset int64, limit int64, order string) error {
 	o := orm.NewOrm()
-	_, err := o.LoadRelated(u, "ShoppingCart", 3, limit, offset, order)
+	_, err := o.LoadRelated(u, "Orders", 3, limit, offset, order)
 	return err
 }

@@ -45,6 +45,7 @@ func SerializeOrder(data models.Order, template interface{}) (interface{}, error
 			goodList = append(goodList, &OrderItemSerializer{
 				Id:       orderGood.Id,
 				GoodName: orderGood.Name,
+				Name:     orderGood.Good.Game.Name,
 				Price:    orderGood.Price,
 				GameId:   orderGood.Good.Game.Id,
 				BandPic:  orderGood.Good.Game.Band.Path,
@@ -63,14 +64,14 @@ func SerializeOrder(data models.Order, template interface{}) (interface{}, error
 	}
 	return nil, nil
 }
-func SerializeOrderList(data []*models.Order, template interface{}) ([]*interface{},error) {
+func SerializeOrderList(data []*models.Order, template interface{}) ([]*interface{}, error) {
 	var result []*interface{}
 	for _, order := range data {
-		item,err := SerializeOrder(*order, template)
+		item, err := SerializeOrder(*order, template)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		result = append(result, &item)
 	}
-	return result,nil
+	return result, nil
 }

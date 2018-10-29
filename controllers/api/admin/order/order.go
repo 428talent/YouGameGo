@@ -2,12 +2,12 @@ package order
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
+	"yougame.com/yougame-server/util"
 )
 
 type ApiOrderController struct {
@@ -38,9 +38,9 @@ func (c *ApiOrderController) CreateOrder() {
 		})
 	}
 	order := models.Order{
-		UserId: claims.UserId,
-		State:  "Created",
-		Goods:  goodList,
+		User:  &models.User{Id: claims.UserId},
+		State: "Created",
+		Goods: goodList,
 	}
 	err = order.SaveOrder()
 	if err != nil {
@@ -58,13 +58,16 @@ func (c *ApiOrderController) GetOrderList() {
 	if claims == nil {
 		return
 	}
-	orders,err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.Filter("user_id",claims.Id)
-	})
+	page, pageSize := util.ParsePageRequest(c.Controller)
+	user, err := models.GetUserById(claims.UserId)
 	if err != nil {
 		beego.Error(err)
+		return
 	}
-	serializedData,err := serializer.SerializeOrderList(orders,serializer.OrderSerializer{})
+	if err = user.ReadOrders((page-1)*pageSize, pageSize, "-created"); err != nil {
+		beego.Error(err)
+	}
+	serializedData, err := serializer.SerializeOrderList(user.Orders, serializer.OrderSerializer{})
 	if err != nil {
 		beego.Error(err)
 	}
