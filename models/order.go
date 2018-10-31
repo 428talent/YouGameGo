@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	OrderStateCreated   = OrderState("Created")
-	OrderStateDone =  OrderState("Done")
+	OrderStateCreated = "Created"
+	OrderStateDone    = "Done"
 )
 
 type OrderState string
@@ -30,7 +30,6 @@ type OrderGood struct {
 	Good    *Good     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
-
 
 func (order *Order) SaveOrder() error {
 	o := orm.NewOrm()
@@ -85,8 +84,7 @@ func (orderGood *OrderGood) ReadGood() error {
 	err := o.Read(orderGood)
 	return err
 }
-func (d *Order) Update(fields ...string) error {
-	o := orm.NewOrm()
+func (d *Order) Update(o orm.Ormer, fields ...string) error {
 	_, err := o.Update(d, fields...)
 	return err
 }

@@ -13,8 +13,7 @@ type Wallet struct {
 	Updated time.Time `orm:"auto_now;type(datetime)"`
 }
 
-func (w *Wallet) Update(fields ...string) error {
-	o := orm.NewOrm()
+func (w *Wallet) Update(o orm.Ormer, fields ...string) error {
 	_, err := o.Update(w)
 	return err
 }

@@ -15,8 +15,7 @@ type Transaction struct {
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
-func (t *Transaction) Save() error {
-	o := orm.NewOrm()
+func (t *Transaction) Save(o orm.Ormer) error {
 	transaction, err := o.Insert(t)
 	t.Id = int(transaction)
 	return err
