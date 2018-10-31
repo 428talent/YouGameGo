@@ -26,6 +26,7 @@ func SerializeUserObject(data models.User, template interface{}) (interface{}, e
 		return SerializeUser{
 			Id:        data.Id,
 			LastLogin: data.LastLogin.Unix(),
+			Username:data.Username,
 			CreateAt:  data.Created.Unix(),
 			Profile: &SerializerUserProfile{
 				Nickname: data.Profile.Nickname,

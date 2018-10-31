@@ -11,3 +11,14 @@ export async function FetchOrderList(userId) {
     });
     return await response.json()
 }
+
+export async function PayOrder(orderId) {
+    let response = await request({
+        url: Api.payOrder,
+        method: 'post',
+        pathParams: {
+            id: orderId
+        }
+    });
+    return await response.json()
+}

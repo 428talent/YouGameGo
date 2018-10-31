@@ -54,7 +54,7 @@ func SerializeOrder(data models.Order, template interface{}) (interface{}, error
 		}
 		order := OrderSerializer{
 			Id:      data.Id,
-			State:   data.State,
+			State:   string(data.State),
 			Goods:   goodList,
 			Created: data.Created.Unix(),
 			Updated: data.Updated.Unix(),

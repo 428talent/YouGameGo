@@ -6,4 +6,5 @@ const (
 	InvalidateUserCheck = "000003"
 
 	NotSufficientFunds = "000004"
+	NotSupportAction = "000005"
 )

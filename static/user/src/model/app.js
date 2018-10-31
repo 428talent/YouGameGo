@@ -4,11 +4,12 @@ export default {
     namespace: 'app',
     state: {
         user: null,
-        activeTab: "Home"
+        activeTab: "Home",
+        isLoadingModalShow: false
     },
     subscriptions: {
         setup({dispatch}) {
-            dispatch({type: 'fetchUser', payload: {uid: 2}})
+            dispatch({type: 'fetchUser', payload: {uid: 3}})
         },
     },
     effects: {
@@ -17,9 +18,7 @@ export default {
             const result = yield call(FetchUser, uid);
             yield put({
                 type: 'fetchUserSucceed',
-
                 result: result
-
             })
         }
     },
@@ -34,10 +33,16 @@ export default {
                 user: result
             }
         },
-        'changeTab'(state, {activeTab}){
+        'changeTab'(state, {activeTab}) {
             return {
                 ...state,
                 activeTab: activeTab
+            }
+        },
+        'setLoadingModalShow'(state, {isShow}) {
+            return {
+                ...state,
+                isLoadingModalShow: isShow
             }
         }
     },

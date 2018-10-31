@@ -4,11 +4,11 @@ import (
 	"github.com/astaxie/beego"
 	"strconv"
 	"yougame.com/letauthsdk/auth"
-	ApiError "yougame.com/yougame-server/error"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
+	"yougame.com/yougame-server/service/pay"
 	"yougame.com/yougame-server/util"
 )
 
@@ -89,7 +89,7 @@ func (c *ApiOrderController) PayOrder() {
 
 	}
 	if claims == nil {
-
+		return
 	}
 	orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
@@ -101,55 +101,9 @@ func (c *ApiOrderController) PayOrder() {
 		beego.Error(err)
 
 	}
-	user, err := models.GetUserById(claims.UserId)
+	err = pay.PayOrder(order)
 	if err != nil {
 		beego.Error(err)
-		return
-	}
-	if err = order.ReadOrderGoods(); err != nil {
-		beego.Error(err)
-		return
-	}
-	totalPrice := 0.0
-	for _, orderGood := range order.Goods {
-		totalPrice += orderGood.Price
-	}
-	if err = user.ReadWallet(); err != nil {
-		beego.Error(err)
-		return
-	}
-	if totalPrice > user.Wallet.Balance {
-		errorResponse := ApiError.APIErrorResponse{
-			Err:    "not sufficient funds",
-			Detail: "not sufficient funds",
-			Code:   ApiError.NotSufficientFunds,
-		}
-		errorResponse.ServerError(c.Controller, 400)
-		return
-	}
-	transaction := models.Transaction{
-		Type:    "Order",
-		Balance: user.Wallet.Balance,
-		Amount:  -totalPrice,
-		Order:   &order,
-		User:    user,
-	}
-	err = transaction.Save()
-	if err != nil {
-		beego.Error(err)
-		return
-	}
-	order.State = "Done"
-	err = order.Update("State")
-	if err != nil {
-		beego.Error(err)
-		return
-	}
-	user.Wallet.Balance += transaction.Amount
-	err = user.Wallet.Update("Balance")
-	if err != nil {
-		beego.Error(err)
-		return
 	}
 	c.Data["json"] = &serializer.CommonApiResponseBody{
 		Success: true,

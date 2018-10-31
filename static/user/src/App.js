@@ -12,9 +12,10 @@ import CartPage from "./page/cart/cart";
 import {connect} from "dva";
 import PropTypes from "prop-types";
 import HashRouter from "react-router-dom/es/HashRouter";
+import LoadingModal from "./layout/components/LoadingModal";
 
 const App = ({history, ...props}) => {
-    let {user} = props;
+    let {user,isLoadingModalShow} = props;
     return (
         <div className="App">
             <HashRouter history={history}>
@@ -29,6 +30,7 @@ const App = ({history, ...props}) => {
                             <Route path="/cart" component={CartPage}/>
                         </div>
                     </Container>
+                    <LoadingModal open={isLoadingModalShow}/>
                 </div>
             </HashRouter>
         </div>
@@ -36,8 +38,10 @@ const App = ({history, ...props}) => {
 };
 
 App.propTypes = {
-    user: PropTypes.object
+    user: PropTypes.object,
+    isLoadingModalShow:PropTypes.bool.isRequired
 };
 export default connect(({app}) => ({
-    user: app.user
+    user: app.user,
+    isLoadingModalShow:app.isLoadingModalShow
 }))(App);

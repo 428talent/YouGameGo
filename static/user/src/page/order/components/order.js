@@ -2,7 +2,7 @@ import {Button, Divider, Item, Label, Segment, Statistic} from "semantic-ui-reac
 import React from "react";
 import OrderItem from "./order-item";
 
-const Order = ({orders, ...prop}) => {
+const Order = ({orders, onPayButtonClick, ...prop}) => {
     const content = orders.map((order => {
         let totalPrice = 0;
         const orderItems = order.goods.map(good => {
@@ -22,7 +22,7 @@ const Order = ({orders, ...prop}) => {
                     <div style={{textAlign: "left"}}>
                         <Statistic size='mini' label='合计' value={`￥${totalPrice}`}/>
                         <div>
-                            <Button content='付款' primary/>
+                            <Button content={order.state === "Done"?"已付款":"付款"} disabled={order.state === "Done"} primary onClick={() => onPayButtonClick(order)}/>
                         </div>
                     </div>
                 </div>

@@ -5,9 +5,16 @@ import (
 	"time"
 )
 
+const (
+	OrderStateCreated   = OrderState("Created")
+	OrderStateDone =  OrderState("Done")
+)
+
+type OrderState string
+
 type Order struct {
 	Id          int
-	State       string
+	State       OrderState
 	User        *User        `orm:"rel(fk)"`
 	Transaction *Transaction `orm:"reverse(one)"`
 	Goods       []*OrderGood `orm:"reverse(many)"`
@@ -23,6 +30,7 @@ type OrderGood struct {
 	Good    *Good     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
+
 
 func (order *Order) SaveOrder() error {
 	o := orm.NewOrm()

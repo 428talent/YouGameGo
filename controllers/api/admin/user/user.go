@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/astaxie/beego"
 	"net/http"
+	"strconv"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 
@@ -16,15 +17,14 @@ type UserController struct {
 }
 
 func RegisterUserApiRouter() {
-	beego.Router("/api/users",&UserController{},"post:CreateUser")
-	beego.Router("/api/user/auth",&UserController{},"post:UserLogin")
+	beego.Router("/api/users", &UserController{}, "post:CreateUser")
+	beego.Router("/api/user/auth", &UserController{}, "post:UserLogin")
 }
 
 type CreateUserResponsePayload struct {
 	Username string `json:"username"`
 	Id       int64  `json:"id"`
 }
-
 
 func (c *UserController) CreateUser() {
 	var requestBody parser.CreateUserRequestStruct
@@ -51,7 +51,6 @@ func (c *UserController) CreateUser() {
 	}
 	c.ServeJSON()
 }
-
 
 func (c *UserController) UserLogin() {
 	var requestStruct = parser.GetTokenRequestStruct{}
@@ -109,22 +108,25 @@ func (c *UserController) UserLogin() {
 //	return serializerData
 //}
 
+func (c *UserController) GetUser() {
+	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = serializeData
+	c.ServeJSON()
+}
 
-//func (c *UserController) GetUser() {
-//	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-//	if err != nil {
-//		beego.Error(err)
-//		return
-//	}
-//	user, err := models.GetUserById(userId)
-//	if err != nil {
-//		beego.Error(err)
-//		return
-//	}
-//	serializeData := SerializerUser(user)
-//	c.Data["json"] = serializeData
-//	c.ServeJSON()
-//}
 //
 //
 //func (c *UserController) GetUserList() {
