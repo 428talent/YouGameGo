@@ -3,11 +3,12 @@ package api_admin_game
 import (
 	"encoding/json"
 	"github.com/astaxie/beego"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/letauth/controllers"
 	"yougame.com/letauth/security"
 	"yougame.com/letauth/util"
-	"yougame.com/yougame-server/controllers/api/admin"
+	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/request"
 )
@@ -38,30 +39,27 @@ func (c *GameController) Post() {
 	}
 	newGame, err := serializer.produce()
 	if err != nil {
-		apiError := api_admin.ApiError{
-			Message:   "请求格式出错",
-			ErrorCode: 3001,
-			Reason:    err.Error(),
-		}
-		c.Data["json"] = apiError
-		c.Ctx.Output.SetStatus(400)
-		c.ServeJSON()
-		return
+		panic(api.ParseJsonDataError)
 	}
 	err = newGame.Save()
 	if err != nil {
-		apiError := api_admin.ApiError{
-			Message:   "数据库错误",
-			ErrorCode: 3002,
-			Reason:    err.Error(),
-		}
-		c.Data["json"] = apiError
-		c.Ctx.Output.SetStatus(500)
-		c.ServeJSON()
-		return
+		panic(err)
 	}
-	c.Data["json"] = newGame
-	c.ServeJSON()
+	defer func() {
+		troubleMaker := recover()
+		if troubleMaker != nil {
+			err = troubleMaker.(error)
+			switch err {
+			default:
+				logrus.Error(err)
+				api.HandleApiError(c.Controller, err)
+			}
+		} else {
+			c.Data["json"] = newGame
+			c.ServeJSON()
+		}
+
+	}()
 
 }
 
@@ -211,7 +209,7 @@ func (c *GameController) GetGame() {
 	}
 
 	game := models.Game{
-		Id:gameId,
+		Id: gameId,
 	}
 	err = game.QueryById()
 	if err != nil {

@@ -4,11 +4,12 @@ import (
 	"github.com/astaxie/beego"
 	"strconv"
 	"yougame.com/letauthsdk/auth"
+	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
-	"yougame.com/yougame-server/service/pay"
+	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
 
@@ -85,28 +86,44 @@ func (c *ApiOrderController) GetOrderList() {
 func (c *ApiOrderController) PayOrder() {
 	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 
 	}
 	if claims == nil {
-		return
+		panic(service.NoAuthError)
 	}
 	orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 
 	}
 	order := models.Order{Id: orderId}
 	if err = order.QueryById(); err != nil {
 		beego.Error(err)
-
 	}
-	err = pay.PayOrder(order)
+	err = service.PayOrder(order)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
-	c.Data["json"] = &serializer.CommonApiResponseBody{
-		Success: true,
-	}
-	c.ServeJSON()
+
+	defer func() {
+		troubleMaker := recover()
+		if troubleMaker != nil {
+			err = troubleMaker.(error)
+			switch err {
+			case service.NotSufficientFundsError:
+				NotSufficientFunds.ServerError(c.Controller)
+			case service.WrongOrderStateError:
+				WrongOrderState.ServerError(c.Controller)
+			default:
+				api.HandleApiError(c.Controller, err)
+			}
+		} else {
+			c.Data["json"] = &serializer.CommonApiResponseBody{
+				Success: true,
+			}
+			c.ServeJSON()
+		}
+
+	}()
 }

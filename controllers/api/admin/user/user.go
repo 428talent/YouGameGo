@@ -2,23 +2,22 @@ package user
 
 import (
 	"github.com/astaxie/beego"
-	"net/http"
 	"strconv"
-	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/serializer"
+	"yougame.com/yougame-server/service"
 
-	AppError "yougame.com/yougame-server/error"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 )
 
-type UserController struct {
+type ApiUserController struct {
 	beego.Controller
 }
 
 func RegisterUserApiRouter() {
-	beego.Router("/api/users", &UserController{}, "post:CreateUser")
-	beego.Router("/api/user/auth", &UserController{}, "post:UserLogin")
+	beego.Router("/api/users", &ApiUserController{}, "post:CreateUser")
+	beego.Router("/api/user/auth", &ApiUserController{}, "post:UserLogin")
 }
 
 type CreateUserResponsePayload struct {
@@ -26,62 +25,67 @@ type CreateUserResponsePayload struct {
 	Id       int64  `json:"id"`
 }
 
-func (c *UserController) CreateUser() {
+func (c *ApiUserController) CreateUser() {
 	var requestBody parser.CreateUserRequestStruct
 	err := requestBody.Parse(c.Ctx.Input.RequestBody)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	userId, err := models.CreateUserAccount(requestBody.Username, requestBody.Password)
 	if err != nil {
-		if apiErr, ok := err.(*AppError.APIError); ok {
-			AppError.NewApiError(*apiErr).ServerError(c.Controller, 400)
-		} else {
-			beego.Error(err)
-		}
-		return
-	}
-
-	c.Data["json"] = serializer.CommonApiResponseBody{
-		Success: true,
-		Payload: CreateUserResponsePayload{
-			Username: requestBody.Username,
-			Id:       *userId,
-		},
+		panic(err)
 	}
 	c.ServeJSON()
+	defer func() {
+		troubleMaker := recover()
+		if troubleMaker != nil {
+			err = troubleMaker.(error)
+			switch err {
+			case service.UserExistError:
+				UserExistError.ServerError(c.Controller)
+			default:
+				api.HandleApiError(c.Controller, err)
+			}
+		} else {
+			c.Data["json"] = serializer.CommonApiResponseBody{
+				Success: true,
+				Payload: CreateUserResponsePayload{
+					Username: requestBody.Username,
+					Id:       *userId,
+				},
+			}
+		}
+	}()
 }
 
-func (c *UserController) UserLogin() {
+func (c *ApiUserController) UserLogin() {
 	var requestStruct = parser.GetTokenRequestStruct{}
 	requestData, err := requestStruct.ParseGetTokenRequestBody(c.Ctx.Input.RequestBody)
 	if err != nil {
-		beego.Error(err)
-		return
-	}
-	user := models.User{
-		Username: requestData.LoginName,
-		Password: requestData.Password,
+		panic(err)
 	}
 
-	if !models.CheckUserValidate(&user) {
-		wrongUserError := AppError.APIError{
-			Err:    "login name or password wrong!",
-			Detail: "login name or password wrong!",
-			Code:   AppError.InvalidateUserCheck,
-		}
-		AppError.NewApiError(wrongUserError).ServerError(c.Controller, http.StatusUnauthorized)
-		return
-	}
-	signString, err := security.GenerateJWTSign(&user)
+	signString,user,err :=  service.UserLogin(requestData.LoginName,requestData.Password)
 	if err != nil {
-		beego.Error(err)
-		return
+		panic(err)
 	}
-	responseBody := serializer.UserLoginResponseBody{}
+	defer func() {
+		troubleMaker := recover()
+		if troubleMaker != nil {
+			err = troubleMaker.(error)
+			switch err {
+			case service.LoginUserFailed:
+				api.AuthFailedError.ServerError(c.Controller)
+			default:
+				api.HandleApiError(c.Controller, err)
+			}
+		} else {
+			responseBody := serializer.UserLoginResponseBody{}
+			c.Data["json"] = responseBody.Serialize(signString, *user)
+			c.ServeJSON()
+		}
+	}()
 
-	c.Data["json"] = responseBody.Serialize(*signString, user)
-	c.ServeJSON()
 }
 
 //type GetUserResponseBody struct {
@@ -108,7 +112,7 @@ func (c *UserController) UserLogin() {
 //	return serializerData
 //}
 
-func (c *UserController) GetUser() {
+func (c *ApiUserController) GetUser() {
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		beego.Error(err)
@@ -129,7 +133,7 @@ func (c *UserController) GetUser() {
 
 //
 //
-//func (c *UserController) GetUserList() {
+//func (c *ApiUserController) GetUserList() {
 //	page, pageSize := util.ReadPageParam(c.Controller)
 //	count, userList, err := models.GetAllUser(page, pageSize)
 //	if err != nil {
@@ -150,7 +154,7 @@ func (c *UserController) GetUser() {
 //}
 //
 //
-//func (c *UserController) UploadAvatar() {
+//func (c *ApiUserController) UploadAvatar() {
 //	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 //	if err != nil {
 //		beego.Error(err)
@@ -199,7 +203,7 @@ func (c *UserController) GetUser() {
 //}
 //
 //
-//func (c *UserController) ChangeUserProfile() {
+//func (c *ApiUserController) ChangeUserProfile() {
 //	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 //	if err != nil {
 //		beego.Error(err)

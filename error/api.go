@@ -17,24 +17,26 @@ func (e *APIError) Error() string {
 }
 
 type APIErrorResponse struct {
-	Success bool `json:"success"`
-	Err     string `json:"error"`
-	Detail  string `json:"detail"`
-	Code    string `json:"code"`
+	Success    bool   `json:"success"`
+	Err        string `json:"error"`
+	Detail     string `json:"detail"`
+	Code       string `json:"code"`
+	StatusCode int    `json:"-"`
 }
 
-func NewApiError(err APIError) *APIErrorResponse {
+func NewApiError(err APIError, statusCode int) *APIErrorResponse {
 	return &APIErrorResponse{
-		Success: false,
-		Err:     err.Err,
-		Detail:  err.Detail,
-		Code:    err.Code,
+		Success:    false,
+		Err:        err.Err,
+		Detail:     err.Detail,
+		Code:       err.Code,
+		StatusCode: statusCode,
 	}
 }
 
-func (r *APIErrorResponse) ServerError(c beego.Controller,statusCode int) {
-	c.Ctx.ResponseWriter.WriteHeader(statusCode)
-	c.Ctx.ResponseWriter.Header().Set("Content-Type","application/json; charset=utf-8")
+func (r *APIErrorResponse) ServerError(c beego.Controller) {
+	c.Ctx.ResponseWriter.WriteHeader(r.StatusCode)
+	c.Ctx.ResponseWriter.Header().Set("Content-Type", "application/json; charset=utf-8")
 	c.Data["json"] = *r
 	c.ServeJSON()
 }
