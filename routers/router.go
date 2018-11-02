@@ -2,11 +2,11 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
-	cart2 "yougame.com/yougame-server/controllers/api/admin/cart"
-	"yougame.com/yougame-server/controllers/api/admin/game"
-	"yougame.com/yougame-server/controllers/api/admin/order"
-	"yougame.com/yougame-server/controllers/api/admin/user"
-	ApiWishlist "yougame.com/yougame-server/controllers/api/admin/wishlist"
+	cart2 "yougame.com/yougame-server/controllers/api/cart"
+	"yougame.com/yougame-server/controllers/api/game"
+	"yougame.com/yougame-server/controllers/api/order"
+	"yougame.com/yougame-server/controllers/api/user"
+	ApiWishlist "yougame.com/yougame-server/controllers/api/wishlist"
 	"yougame.com/yougame-server/controllers/web"
 	"yougame.com/yougame-server/controllers/web/admin"
 	"yougame.com/yougame-server/controllers/web/cart"

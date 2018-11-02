@@ -32,6 +32,8 @@ func init() {
 		new(models.User),
 		new(models.Profile),
 		new(models.Transaction),
+		new(models.UserGroup),
+		new(models.Permission),
 	)
 	orm.RunSyncdb("default", false, true)
 

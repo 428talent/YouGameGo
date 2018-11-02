@@ -15,6 +15,7 @@ type User struct {
 	Password     string
 	LastLogin    time.Time `orm:"null"`
 	Enable       bool
+	UserGroups []*UserGroup `orm:"rel(m2m)"`
 	ShoppingCart []*CartItem    `orm:"reverse(many)"`
 	Orders       []*Order       `orm:"reverse(many)"`
 	Transactions []*Transaction `orm:"reverse(many)"`

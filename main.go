@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
-	_ "yougame.com/yougame-server/auth"
 	_ "yougame.com/yougame-server/database"
 	_ "yougame.com/yougame-server/models"
 	_ "yougame.com/yougame-server/routers"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"net/http"
 	"strings"
 	AppError "yougame.com/yougame-server/error"
 )
@@ -12,7 +13,7 @@ type ValidateError struct {
 	Errors []*validation.Error
 }
 
-func (e *ValidateError) Error() string {
+func (e ValidateError) Error() string {
 	var errorStringList []string
 	for _, validateError := range e.Errors {
 		errorStringList = append(errorStringList, fmt.Sprintf("[%s : %s]", validateError.Key, validateError.Message))
@@ -26,6 +27,7 @@ func (e *ValidateError) BuildResponse() *AppError.APIErrorResponse {
 		Err:     "Validate error",
 		Detail:  e.Error(),
 		Code:    AppError.ValidateError,
+		StatusCode:http.StatusBadRequest,
 	}
 }
 func ValidateData(r interface{}) error {

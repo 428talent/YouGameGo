@@ -1,9 +1,8 @@
 package cart
 
 import (
-	"github.com/astaxie/beego"
-	"yougame.com/letauthsdk/auth"
-	ApiError "yougame.com/yougame-server/error"
+	"yougame.com/yougame-server/controllers"
+	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
@@ -11,33 +10,35 @@ import (
 )
 
 type ApiCartController struct {
-	beego.Controller
+	controllers.ApiController
 }
 
 func (c ApiCartController) GetCartList() {
-	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	var err error
+	defer api.CheckError(func(e error) {
+		api.HandleApiError(c.Controller, err)
+	})
+	claims, err := c.GetAuth()
 	if err != nil {
-		beego.Error(err)
-		ApiError.ServerNoAuthError(c.Controller)
-		return
+		panic(security.ReadAuthorizationFailed)
 	}
 	if claims == nil {
-		ApiError.ServerNoAuthError(c.Controller)
-		return
+		panic(security.ReadAuthorizationFailed)
 	}
-	page, pageSize := util.ParsePageRequest(c.Controller)
+	page, pageSize := c.GetPage()
 
 	user, err := models.GetUserById(claims.UserId)
 	if err != nil {
-		beego.Error(err)
+		panic(security.ReadAuthorizationFailed)
 	}
+
 	err = user.ReadCart((page-1)*pageSize, pageSize, "-created")
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	serializedCartList, err := serializer.SerializeCartList(user.ShoppingCart, serializer.CartSerializer{})
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	c.Data["json"] = &util.PageResponse{
 		Page:     page,

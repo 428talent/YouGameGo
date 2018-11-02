@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 	"net/http"
 	ApiError "yougame.com/yougame-server/error"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/service"
 )
 
@@ -37,7 +38,16 @@ func HandleApiError(controller beego.Controller, err error) {
 		AuthFailedError.ServerError(controller)
 	case ParseJsonDataError:
 		ParseRequestDataError.ServerError(controller)
+	case security.ReadAuthorizationFailed:
+		AuthFailedError.ServerError(controller)
 	default:
 		ServerError.ServerError(controller)
+	}
+}
+func CheckError(errorHandle func(error)) {
+	troubleMaker := recover()
+	if troubleMaker != nil {
+		err := troubleMaker.(error)
+		errorHandle(err)
 	}
 }

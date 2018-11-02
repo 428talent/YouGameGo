@@ -3,7 +3,6 @@ package web
 import (
 	"github.com/astaxie/beego"
 	"yougame.com/letauthsdk/auth"
-	AppAuth "yougame.com/yougame-server/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
@@ -17,20 +16,7 @@ func (c *SearchController) Get() {
 	if err != nil {
 		beego.Error(err)
 	}
-
-	if claims != nil {
-		user, err := AppAuth.AuthClient.GetUser(claims.UserId)
-		if err != nil {
-			beego.Error(err)
-		}
-		c.Data["Nickname"] = user.Profile.Nickname
-		if len(user.Profile.Avatar) == 0 {
-			c.Data["Avatar"] = "/static/img/user.png"
-		} else {
-			c.Data["Avatar"] = user.Profile.Avatar
-		}
-	}
-
+	SetPageAuthInfo(c.Controller,claims)
 	key := c.Ctx.Input.Param(":key")
 	gameList, err := models.SearchGame(key)
 	if err != nil {

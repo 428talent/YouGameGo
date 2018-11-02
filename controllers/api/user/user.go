@@ -3,16 +3,18 @@ package user
 import (
 	"github.com/astaxie/beego"
 	"strconv"
+	"yougame.com/yougame-server/controllers"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/validate"
 
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 )
 
 type ApiUserController struct {
-	beego.Controller
+	controllers.ApiController
 }
 
 func RegisterUserApiRouter() {
@@ -26,8 +28,26 @@ type CreateUserResponsePayload struct {
 }
 
 func (c *ApiUserController) CreateUser() {
+	var err error
+	defer api.CheckError(func(e error) {
+		if validateError, ok := e.(*validate.ValidateError); ok {
+			validateError.BuildResponse().ServerError(c.Controller)
+			return
+		}
+		switch err {
+		case service.UserExistError:
+			UserExistError.ServerError(c.Controller)
+			return
+		default:
+			api.HandleApiError(c.Controller, err)
+		}
+	})
 	var requestBody parser.CreateUserRequestStruct
-	err := requestBody.Parse(c.Ctx.Input.RequestBody)
+	err = requestBody.Parse(c.Ctx.Input.RequestBody)
+	if err != nil {
+		panic(err)
+	}
+	err = validate.ValidateData(requestBody)
 	if err != nil {
 		panic(err)
 	}
@@ -35,27 +55,14 @@ func (c *ApiUserController) CreateUser() {
 	if err != nil {
 		panic(err)
 	}
-	c.ServeJSON()
-	defer func() {
-		troubleMaker := recover()
-		if troubleMaker != nil {
-			err = troubleMaker.(error)
-			switch err {
-			case service.UserExistError:
-				UserExistError.ServerError(c.Controller)
-			default:
-				api.HandleApiError(c.Controller, err)
-			}
-		} else {
-			c.Data["json"] = serializer.CommonApiResponseBody{
-				Success: true,
-				Payload: CreateUserResponsePayload{
-					Username: requestBody.Username,
-					Id:       *userId,
-				},
-			}
-		}
-	}()
+	c.Data["json"] = serializer.CommonApiResponseBody{
+		Success: true,
+		Payload: CreateUserResponsePayload{
+			Username: requestBody.Username,
+			Id:       *userId,
+		},
+	}
+
 }
 
 func (c *ApiUserController) UserLogin() {
@@ -65,7 +72,7 @@ func (c *ApiUserController) UserLogin() {
 		panic(err)
 	}
 
-	signString,user,err :=  service.UserLogin(requestData.LoginName,requestData.Password)
+	signString, user, err := service.UserLogin(requestData.LoginName, requestData.Password)
 	if err != nil {
 		panic(err)
 	}

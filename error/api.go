@@ -35,8 +35,8 @@ func NewApiError(err APIError, statusCode int) *APIErrorResponse {
 }
 
 func (r *APIErrorResponse) ServerError(c beego.Controller) {
-	c.Ctx.ResponseWriter.WriteHeader(r.StatusCode)
 	c.Ctx.ResponseWriter.Header().Set("Content-Type", "application/json; charset=utf-8")
+	c.Ctx.ResponseWriter.WriteHeader(r.StatusCode)
 	c.Data["json"] = *r
 	c.ServeJSON()
 }

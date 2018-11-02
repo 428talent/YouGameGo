@@ -5,24 +5,18 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"strconv"
-	"yougame.com/letauth/controllers"
-	"yougame.com/letauth/security"
 	"yougame.com/letauth/util"
+	"yougame.com/yougame-server/controllers"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
+	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/request"
+	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/service"
 )
 
 type GameController struct {
-	beego.Controller
-}
-
-type CreateGameRequest struct {
-	Name        string  `json:"name"`
-	Price       float32 `json:"price"`
-	ReleaseTime string  `json:"release_time"`
-	Publisher   string  `json:"publisher"`
-	Intro       string  `json:"intro"`
+	controllers.ApiController
 }
 
 //func (c *GameController) Get(){
@@ -30,49 +24,43 @@ type CreateGameRequest struct {
 //
 //}
 func (c *GameController) Post() {
-	_, err := security.ParseAuthHeader(c.Controller)
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		api.HandleApiError(c.Controller, err)
+	})
+
+	_, err = security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
+		beego.Error(security.ReadAuthorizationFailed)
 	}
-	serializer := GameSerializer{
-		requestBody: c.Ctx.Input.RequestBody,
-	}
-	newGame, err := serializer.produce()
-	if err != nil {
+	requestBodyStruct := parser.CreateGameRequestBody{}
+	if err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody); err != nil {
 		panic(api.ParseJsonDataError)
+	}
+	newGame := models.Game{
+		Name:      requestBodyStruct.Name,
+		Price:     requestBodyStruct.Price,
+		Intro:     requestBodyStruct.Intro,
+		Publisher: requestBodyStruct.Publisher,
 	}
 	err = newGame.Save()
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		troubleMaker := recover()
-		if troubleMaker != nil {
-			err = troubleMaker.(error)
-			switch err {
-			default:
-				logrus.Error(err)
-				api.HandleApiError(c.Controller, err)
-			}
-		} else {
-			c.Data["json"] = newGame
-			c.ServeJSON()
-		}
-
-	}()
+	c.Data["json"] = newGame
+	c.ServeJSON()
 
 }
 
 func (c *GameController) UploadGameBand() {
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
-		return
+		panic(err)
 	}
 	_, err = security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
+		panic(service.NoAuthError)
 	}
 
 	game := models.Game{Id: gameId}
@@ -86,7 +74,6 @@ func (c *GameController) UploadGameBand() {
 	}
 	defer f.Close()
 
-	//err = os.Remove(user.Profile.Avatar)
 	path := "static/upload/img/" + util.EncodeFileName(h.Filename)
 	err = c.SaveToFile("image", path)
 	if err != nil {
@@ -99,93 +86,101 @@ func (c *GameController) UploadGameBand() {
 }
 
 func (c *GameController) UploadGamePreviewImage() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		api.HandleApiError(c.Controller, err)
+	})
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
+		panic(err)
 		return
 	}
 	_, err = security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 
 	game := models.Game{Id: gameId}
 	err = game.QueryById()
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	f, h, err := c.GetFile("image")
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	defer f.Close()
 
-	//err = os.Remove(user.Profile.Avatar)
 	path := "static/upload/img/" + util.EncodeFileName(h.Filename)
 	err = c.SaveToFile("image", path)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	err = game.SavePreviewImage(path)
-	beego.Error(err)
 	c.Data["json"] = game
 	c.ServeJSON()
 }
 
 func (c *GameController) AddTags() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		api.HandleApiError(c.Controller, err)
+	})
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
-		return
+		panic(err)
 	}
 	_, err = security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
-	var requestBodyStruct request.AddGameTagRequestBody
-	err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyStruct)
+	var requestBodyStruct parser.AddGameTagRequestBody
+
+	err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
 	if err != nil {
-		beego.Error(err)
-		return
+		panic(err)
+
 	}
 
 	game := models.Game{Id: gameId}
 	err = game.QueryById()
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	err = game.SaveTags(requestBodyStruct.Tags)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	c.Data["json"] = game
 	c.ServeJSON()
 }
 
 func (c *GameController) AddGood() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		api.HandleApiError(c.Controller, err)
+	})
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
-		return
+		panic(err)
 	}
 	_, err = security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	var requestBodyStruct request.AddGoodRequestBody
 	err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyStruct)
 	if err != nil {
-		beego.Error(err)
-		return
+		panic(err)
 	}
 
 	game := models.Game{Id: gameId}
 	err = game.QueryById()
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	good := models.Good{
 		Name:  requestBodyStruct.Name,
@@ -194,18 +189,21 @@ func (c *GameController) AddGood() {
 	}
 	err = game.AddGood(good)
 	if err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	c.Data["json"] = game
 	c.ServeJSON()
 }
 
 func (c *GameController) GetGame() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		api.HandleApiError(c.Controller, err)
+	})
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
-		return
+		panic(err)
 	}
 
 	game := models.Game{
@@ -213,8 +211,7 @@ func (c *GameController) GetGame() {
 	}
 	err = game.QueryById()
 	if err != nil {
-		beego.Error(err)
-		controllers.AbortServerError(c.Controller)
+		panic(err)
 		return
 	}
 
