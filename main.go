@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
 	_ "yougame.com/yougame-server/database"
 	_ "yougame.com/yougame-server/models"
@@ -18,5 +19,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin"},
 		AllowCredentials: true,
 	}))
+	orm.Debug = true
 	beego.Run()
 }

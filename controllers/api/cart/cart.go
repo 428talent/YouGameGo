@@ -25,6 +25,8 @@ func (c ApiCartController) GetCartList() {
 	if claims == nil {
 		panic(security.ReadAuthorizationFailed)
 	}
+	
+
 	page, pageSize := c.GetPage()
 
 	user, err := models.GetUserById(claims.UserId)
