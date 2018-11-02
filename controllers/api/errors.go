@@ -27,6 +27,12 @@ var (
 		Detail: "Parse request data error,check request data",
 		Code:   "100001",
 	}, http.StatusBadRequest)
+
+	PermissionNotAllowError = ApiError.NewApiError(ApiError.APIError{
+		Err:    "PermissionNotAllowError",
+		Detail: "permission denied",
+		Code:   "100002",
+	}, http.StatusForbidden)
 )
 var (
 	ParseJsonDataError = errors.New("cannot parse json request")
@@ -40,6 +46,8 @@ func HandleApiError(controller beego.Controller, err error) {
 		ParseRequestDataError.ServerError(controller)
 	case security.ReadAuthorizationFailed:
 		AuthFailedError.ServerError(controller)
+	case PermissionDeniedError:
+		PermissionNotAllowError.ServerError(controller)
 	default:
 		ServerError.ServerError(controller)
 	}

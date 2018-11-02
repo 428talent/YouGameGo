@@ -3,7 +3,6 @@ package user
 import (
 	"github.com/astaxie/beego"
 	"strconv"
-	"yougame.com/yougame-server/controllers"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
@@ -14,7 +13,7 @@ import (
 )
 
 type ApiUserController struct {
-	controllers.ApiController
+	api.ApiController
 }
 
 func RegisterUserApiRouter() {

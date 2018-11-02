@@ -1,7 +1,7 @@
 package cart
 
 import (
-	"yougame.com/yougame-server/controllers"
+	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
@@ -10,13 +10,13 @@ import (
 )
 
 type ApiCartController struct {
-	controllers.ApiController
+	api.ApiController
 }
 
 func (c ApiCartController) GetCartList() {
 	var err error
 	defer api.CheckError(func(e error) {
-		api.HandleApiError(c.Controller, err)
+		api.HandleApiError(c.Controller, e)
 	})
 	claims, err := c.GetAuth()
 	if err != nil {
@@ -25,8 +25,24 @@ func (c ApiCartController) GetCartList() {
 	if claims == nil {
 		panic(security.ReadAuthorizationFailed)
 	}
-	
 
+	cartUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+
+	permissionContext := map[string]interface{}{
+		"claims":     *claims,
+		"cartUserId": cartUserId,
+	}
+	permissions := []api.ApiPermissionInterface{
+		GetOtherCartPermission{},
+		GetSelfCartPermission{},
+	}
+	err = c.CheckPermission(permissions, permissionContext)
+	if err != nil {
+		panic(err)
+	}
 	page, pageSize := c.GetPage()
 
 	user, err := models.GetUserById(claims.UserId)

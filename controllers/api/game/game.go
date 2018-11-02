@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/letauth/util"
-	"yougame.com/yougame-server/controllers"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -16,7 +15,7 @@ import (
 )
 
 type GameController struct {
-	controllers.ApiController
+	api.ApiController
 }
 
 //func (c *GameController) Get(){

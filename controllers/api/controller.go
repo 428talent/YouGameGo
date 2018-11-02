@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"encoding/json"
@@ -39,4 +39,13 @@ func (c ApiController) SerializeData(data interface{}) {
 func (c ApiController) GetPage() (page int64, pageSize int64) {
 	page, pageSize = util.ParsePageRequest(c.Controller)
 	return
+}
+
+func (c ApiController) CheckPermission(permissions []ApiPermissionInterface, context map[string]interface{}) error {
+	for _, permission := range permissions {
+		if hasPermission := permission.CheckPermission(context); !hasPermission {
+			return PermissionDeniedError
+		}
+	}
+	return nil
 }
