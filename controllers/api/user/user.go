@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/serializer"
@@ -65,6 +66,15 @@ func (c *ApiUserController) CreateUser() {
 }
 
 func (c *ApiUserController) UserLogin() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		if e == service.LoginUserFailed{
+			api.AuthFailedError.ServerError(c.Controller)
+			return
+		}
+		api.HandleApiError(c.Controller, err)
+	})
 	var requestStruct = parser.GetTokenRequestStruct{}
 	requestData, err := requestStruct.ParseGetTokenRequestBody(c.Ctx.Input.RequestBody)
 	if err != nil {
@@ -75,22 +85,9 @@ func (c *ApiUserController) UserLogin() {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		troubleMaker := recover()
-		if troubleMaker != nil {
-			err = troubleMaker.(error)
-			switch err {
-			case service.LoginUserFailed:
-				api.AuthFailedError.ServerError(c.Controller)
-			default:
-				api.HandleApiError(c.Controller, err)
-			}
-		} else {
-			responseBody := serializer.UserLoginResponseBody{}
-			c.Data["json"] = responseBody.Serialize(signString, *user)
-			c.ServeJSON()
-		}
-	}()
+	responseBody := serializer.UserLoginResponseBody{}
+	c.Data["json"] = responseBody.Serialize(signString, *user)
+	c.ServeJSON()
 
 }
 

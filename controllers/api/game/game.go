@@ -1,4 +1,4 @@
-package api_admin_game
+package game
 
 import (
 	"encoding/json"
@@ -28,15 +28,30 @@ func (c *GameController) Post() {
 		logrus.Error(err)
 		api.HandleApiError(c.Controller, err)
 	})
-
-	_, err = security.ParseAuthHeader(c.Controller)
+	// read authentic
+	claims, err := c.GetAuth()
 	if err != nil {
-		beego.Error(security.ReadAuthorizationFailed)
+		panic(security.ReadAuthorizationFailed)
 	}
+
+	//check permission
+	permissionContext := map[string]interface{}{
+		"claims": *claims,
+	}
+	permission := []api.ApiPermissionInterface{
+		CreateGamePermission{},
+	}
+	err = c.CheckPermission(permission,permissionContext)
+	if err != nil {
+		panic(err)
+	}
+	//parse request body
 	requestBodyStruct := parser.CreateGameRequestBody{}
 	if err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody); err != nil {
 		panic(api.ParseJsonDataError)
 	}
+
+	//handle
 	newGame := models.Game{
 		Name:      requestBodyStruct.Name,
 		Price:     requestBodyStruct.Price,

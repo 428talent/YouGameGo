@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/astaxie/beego/orm"
+	"time"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/util"
@@ -57,21 +58,23 @@ func CreateUserAccount(username string, password string) (*int64, error) {
 }
 // 用户登录
 func UserLogin(username string, password string) (string, *models.User, error) {
+	o := orm.NewOrm()
 	user := models.User{
 		Username: username,
 		Password: password,
 	}
 	if !models.CheckUserValidate(&user) {
-		panic(LoginUserFailed)
+		return "",nil,LoginUserFailed
 	}
+	user.LastLogin = time.Now()
+	_,err := o.Update(&user,"LastLogin")
+	if err != nil {
+		return "",nil,err
+	}
+
 	signString, err := security.GenerateJWTSign(&user)
 	if err != nil {
-		panic(err)
+		return "",nil,err
 	}
-	defer func() {
-		if troubleMaker := recover(); troubleMaker != nil {
-			err = troubleMaker.(error)
-		}
-	}()
 	return *signString, &user, err
 }
