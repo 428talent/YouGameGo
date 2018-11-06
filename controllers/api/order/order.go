@@ -2,8 +2,9 @@ package order
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	"github.com/sirupsen/logrus"
 	"strconv"
-	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -14,11 +15,11 @@ import (
 )
 
 type ApiOrderController struct {
-	beego.Controller
+	api.ApiController
 }
 
 func (c *ApiOrderController) CreateOrder() {
-	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthHeader(c.Controller)
 	if err != nil {
 		beego.Error(err)
 		return
@@ -53,26 +54,64 @@ func (c *ApiOrderController) CreateOrder() {
 }
 
 func (c *ApiOrderController) GetOrderList() {
-	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(e)
+		api.HandleApiError(c.Controller, e)
+	})
+	claims, err := security.ParseAuthHeader(c.Controller)
 	if err != nil {
-		beego.Error(err)
-		return
+		panic(err)
 	}
 	if claims == nil {
-		return
+		panic(security.ReadAuthorizationFailed)
+	}
+	orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
 	}
 	page, pageSize := util.ParsePageRequest(c.Controller)
 	user, err := models.GetUserById(claims.UserId)
 	if err != nil {
-		beego.Error(err)
-		return
+		panic(err)
 	}
-	if err = user.ReadOrders((page-1)*pageSize, pageSize, "-created"); err != nil {
-		beego.Error(err)
+	permissionContext := map[string]interface{}{
+		"claims":      *claims,
+		"orderUserId": orderUserId,
 	}
-	serializedData, err := serializer.SerializeOrderList(user.Orders, serializer.OrderSerializer{})
+	permissions := []api.ApiPermissionInterface{
+		GetOwnOrderPermission{},
+	}
+	err = c.CheckPermission(permissions, permissionContext)
 	if err != nil {
-		beego.Error(err)
+		panic(api.PermissionDeniedError)
+	}
+	//query filter
+
+	orders, err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
+		cond := orm.NewCondition().And("user_id", user.Id)
+		stateFilter := c.GetStrings("state")
+		if len(stateFilter) > 0 {
+			stateCond := orm.NewCondition()
+			for _, state := range stateFilter {
+				stateCond  = stateCond.Or("state",state)
+			}
+			cond = cond.AndCond(stateCond)
+		}
+		orderId := c.GetString("orderId")
+		if len(orderId) >0 {
+			cond = cond.And("id",orderId)
+		}
+
+		o = o.SetCond(cond)
+		return o
+	})
+	if err != nil {
+		panic(err)
+	}
+	serializedData, err := serializer.SerializeOrderList(orders, serializer.OrderSerializer{})
+	if err != nil {
+		panic(err)
 	}
 	c.Data["json"] = util.PageResponse{
 		Page:     page,
@@ -84,7 +123,7 @@ func (c *ApiOrderController) GetOrderList() {
 }
 
 func (c *ApiOrderController) PayOrder() {
-	claims, err := auth.ParseAuthHeader(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthHeader(c.Controller)
 	if err != nil {
 		panic(err)
 

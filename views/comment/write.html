@@ -1,0 +1,32 @@
+{{template "/layout.html" .}}
+<div style="min-height: 2048px ; background-color: #EEEEEE">
+    <div class="container" style="padding-top: 200px">
+
+
+        <div class="ui grid container stackable">
+            <div class="ui segment sixteen wide column" style="min-height: 600px">
+                <h2>写评论</h2>
+                <div id="editor" style="height: 400px">
+                    <p>Hello World!</p>
+                    <p>Some initial <strong>bold</strong> text</p>
+                    <p><br></p>
+                </div>
+                <div style="text-align: right;margin-top: 20px">
+                    <button class="ui primary button">
+                        完成
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        var quill = new Quill('#editor', {
+            theme: 'snow'
+        });
+    </script>
+</div>
+{{template "/layout_foot.html" .}}

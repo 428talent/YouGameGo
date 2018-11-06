@@ -1,4 +1,4 @@
-package admin
+package web
 
 import "github.com/astaxie/beego"
 

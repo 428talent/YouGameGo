@@ -25,7 +25,7 @@ export default {
         },
     },
     effects: {
-        * fetchOrderList(action, {put, call}) {
+        * fetchOrderList(action, {put, call, select}) {
             let uid = action.payload.uid;
             const result = yield call(FetchOrderList, uid);
             console.log(result);

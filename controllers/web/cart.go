@@ -1,4 +1,4 @@
-package cart
+package web
 
 import (
 	"github.com/astaxie/beego"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"yougame.com/letauth/util"
 	"yougame.com/letauthsdk/auth"
-	"yougame.com/yougame-server/controllers/web"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
@@ -20,7 +19,7 @@ func (c *CartController) Get() {
 	if err != nil {
 		beego.Error(err)
 	}
-	web.SetPageAuthInfo(c.Controller, claims)
+	SetPageAuthInfo(c.Controller, claims)
 
 	page, pageSize := util.ReadPageParam(c.Controller)
 	if claims == nil {

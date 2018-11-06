@@ -1,4 +1,4 @@
-package order
+package web
 
 import (
 	"fmt"
@@ -6,9 +6,10 @@ import (
 	"github.com/astaxie/beego/orm"
 	"strconv"
 	"yougame.com/letauthsdk/auth"
-	"yougame.com/yougame-server/controllers/web"
+	"yougame.com/yougame-server/forms"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/service"
 )
 
 type OrderController struct {
@@ -21,7 +22,7 @@ func (c *OrderController) Get() {
 		beego.Error(err)
 	}
 
-	web.SetPageAuthInfo(c.Controller, claims)
+	SetPageAuthInfo(c.Controller, claims)
 
 	if claims == nil {
 		c.Redirect("/login", 302)
@@ -62,6 +63,7 @@ func (c *OrderController) Get() {
 			beego.Error(err)
 		}
 	}
+	c.Data["IsPaid"] = order.State == "Done"
 	c.Data["Order"] = order
 	c.Data["TotalPrice"] = totalPrice
 	c.TplName = "order/index.html"
@@ -94,6 +96,34 @@ func (c *OrderController) CreateOrder() {
 	}
 	order.Goods = orderGoodList
 	err = order.SaveOrder()
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Redirect(fmt.Sprintf("/order/%d", order.Id), 302)
+}
+
+func (c *OrderController) PayOrder() {
+	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	if claims == nil {
+		c.Redirect("/login", 302)
+		return
+	}
+
+	form := forms.PayOrderForm{}
+	err = c.ParseForm(&form)
+	if err != nil {
+		beego.Error(err)
+	}
+	order := models.Order{Id:form.OrderId}
+	err = order.QueryById()
+	if err != nil {
+		beego.Error(err)
+	}
+	err = service.PayOrder(order)
 	if err != nil {
 		beego.Error(err)
 	}

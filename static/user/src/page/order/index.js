@@ -6,6 +6,7 @@ import FilterGroup from "../../layout/components/filter/group";
 import PropTypes from "prop-types";
 import Order from "./components/order";
 import OrderModal from "./components/OrderModal";
+import {WebServer} from "../../config/api";
 
 const OrderPage = ({filters, orders, orderModal, dispatch, ...props}) => {
     const style = {
@@ -30,10 +31,7 @@ const OrderPage = ({filters, orders, orderModal, dispatch, ...props}) => {
         })
     };
     const onPayButtonClick = (isShow, order) => {
-        dispatch({
-            type: 'orderpage/setOrderModel',
-            isShow, order
-        })
+        window.open(`${WebServer}/order/${order.id}`)
     };
     const closeOrderModal = () => {
         dispatch({
