@@ -8,6 +8,7 @@ import (
 type WishList struct {
 	Id      int
 	UserId  int
+	Enable bool
 	Game    *Game     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }

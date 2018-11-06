@@ -14,6 +14,8 @@ type OrderState string
 
 type Order struct {
 	Id          int
+	Enable bool
+
 	State       OrderState
 	User        *User        `orm:"rel(fk)"`
 	Transaction *Transaction `orm:"reverse(one)"`

@@ -71,10 +71,6 @@ func (c *ApiOrderController) GetOrderList() {
 		panic(err)
 	}
 	page, pageSize := util.ParsePageRequest(c.Controller)
-	user, err := models.GetUserById(claims.UserId)
-	if err != nil {
-		panic(err)
-	}
 	permissionContext := map[string]interface{}{
 		"claims":      *claims,
 		"orderUserId": orderUserId,
@@ -87,24 +83,22 @@ func (c *ApiOrderController) GetOrderList() {
 		panic(api.PermissionDeniedError)
 	}
 	//query filter
-
+	queryParam := c.Input()
+	beego.Debug(queryParam)
 	orders, err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
-		cond := orm.NewCondition().And("user_id", user.Id)
-		stateFilter := c.GetStrings("state")
-		if len(stateFilter) > 0 {
+		cond := orm.NewCondition().And("user_id", orderUserId)
+		if stateFilter := c.GetStrings("state"); len(stateFilter) > 0 {
 			stateCond := orm.NewCondition()
 			for _, state := range stateFilter {
-				stateCond  = stateCond.Or("state",state)
+				stateCond = stateCond.Or("state", state)
 			}
 			cond = cond.AndCond(stateCond)
 		}
-		orderId := c.GetString("orderId")
-		if len(orderId) >0 {
-			cond = cond.And("id",orderId)
-		}
 
-		o = o.SetCond(cond)
-		return o
+		if orderId := c.GetString("orderId"); len(orderId) > 0 {
+			cond = cond.And("id", orderId)
+		}
+		return o.SetCond(cond)
 	})
 	if err != nil {
 		panic(err)
@@ -123,6 +117,21 @@ func (c *ApiOrderController) GetOrderList() {
 }
 
 func (c *ApiOrderController) PayOrder() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(e)
+		switch e {
+		case service.NotSufficientFundsError:
+			NotSufficientFunds.ServerError(c.Controller)
+			return
+		case service.WrongOrderStateError:
+			WrongOrderState.ServerError(c.Controller)
+			return
+		default:
+			api.HandleApiError(c.Controller, e)
+			return
+		}
+	})
 	claims, err := security.ParseAuthHeader(c.Controller)
 	if err != nil {
 		panic(err)
@@ -144,25 +153,9 @@ func (c *ApiOrderController) PayOrder() {
 	if err != nil {
 		panic(err)
 	}
-
-	defer func() {
-		troubleMaker := recover()
-		if troubleMaker != nil {
-			err = troubleMaker.(error)
-			switch err {
-			case service.NotSufficientFundsError:
-				NotSufficientFunds.ServerError(c.Controller)
-			case service.WrongOrderStateError:
-				WrongOrderState.ServerError(c.Controller)
-			default:
-				api.HandleApiError(c.Controller, err)
-			}
-		} else {
-			c.Data["json"] = &serializer.CommonApiResponseBody{
-				Success: true,
-			}
-			c.ServeJSON()
-		}
-
-	}()
+	
+	c.Data["json"] = &serializer.CommonApiResponseBody{
+		Success: true,
+	}
+	c.ServeJSON()
 }

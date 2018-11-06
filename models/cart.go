@@ -8,6 +8,7 @@ import (
 type CartItem struct {
 	Id      int
 	Good    *Good `orm:"rel(fk)"`
+	Enable bool
 	User *User `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }

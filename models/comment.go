@@ -6,6 +6,8 @@ type Comment struct {
 	Id         int
 	Game       *Game `orm:"rel(fk)"`
 	Evaluation string
+	Enable bool
+
 	Created    time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated    time.Time `orm:"auto_now;type(datetime)"`
 }
