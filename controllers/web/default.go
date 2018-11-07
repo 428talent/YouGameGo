@@ -3,22 +3,21 @@ package web
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
 
 type MainController struct {
-	beego.Controller
+	WebController
 }
 
 func (c *MainController) Get() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	SetPageAuthInfo(c.Controller, claims)
+	c.SetPageAuthInfo( claims)
 
 	gameList, err := models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
 		return o.Limit(8)

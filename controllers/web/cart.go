@@ -5,21 +5,20 @@ import (
 	"github.com/astaxie/beego/orm"
 	"strconv"
 	"yougame.com/letauth/util"
-	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
 
 type CartController struct {
-	beego.Controller
+	WebController
 }
 
 func (c *CartController) Get() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
-	SetPageAuthInfo(c.Controller, claims)
+	c.SetPageAuthInfo(claims)
 
 	page, pageSize := util.ReadPageParam(c.Controller)
 	if claims == nil {
@@ -57,7 +56,7 @@ func (c *CartController) Get() {
 }
 
 func (c *CartController) Post() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -84,7 +83,7 @@ func (c *CartController) Post() {
 }
 
 func (c *CartController) RemoveCartItem() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -114,7 +113,7 @@ func (c *CartController) RemoveCartItem() {
 }
 
 func (c *CartController) ClearAll() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}

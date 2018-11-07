@@ -3,22 +3,21 @@ package web
 import (
 	"github.com/astaxie/beego"
 	"strconv"
-	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
 
 type DetailController struct {
-	beego.Controller
+	WebController
 }
 
 func (c *DetailController) Get() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	SetPageAuthInfo(c.Controller,claims)
+	c.SetPageAuthInfo(claims)
 
 	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {

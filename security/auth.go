@@ -26,6 +26,20 @@ func ParseAuthHeader(c beego.Controller) (*UserClaims, error) {
 	beego.Debug(userClaims.UserId)
 	return &claims, nil
 }
+func ParseAuthCookies(c beego.Controller) (*UserClaims, error) {
+	jwtToken := c.Ctx.GetCookie("yougame_token")
+	beego.Debug(jwtToken)
+	var claims UserClaims
+	token, err := jwt.ParseWithClaims(jwtToken, &claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(AppSecret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	userClaims := token.Claims.(*UserClaims)
+	beego.Debug(userClaims.UserId)
+	return &claims, nil
+}
 func ParseAuthString(jwtToken string) (*UserClaims, error) {
 	beego.Debug(jwtToken)
 	var claims UserClaims

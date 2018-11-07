@@ -2,11 +2,15 @@ package web
 
 import (
 	"github.com/astaxie/beego"
-	"yougame.com/letauthsdk/auth"
 	"yougame.com/yougame-server/models"
+	"yougame.com/yougame-server/security"
 )
 
-func SetPageAuthInfo(c beego.Controller, claims *auth.UserClaims) {
+type WebController struct {
+	beego.Controller
+}
+
+func (c *WebController)SetPageAuthInfo(claims *security.UserClaims) {
 	if claims != nil {
 		user, err := models.GetUserById(claims.UserId)
 		if err != nil {

@@ -13,16 +13,16 @@ import (
 )
 
 type OrderController struct {
-	beego.Controller
+	WebController
 }
 
 func (c *OrderController) Get() {
-	claims, err := auth.ParseAuthCookie(c.Controller, security.AppSecret)
+	claims, err := security.ParseAuthCookies(c.Controller)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	SetPageAuthInfo(c.Controller, claims)
+	c.SetPageAuthInfo(claims)
 
 	if claims == nil {
 		c.Redirect("/login", 302)
