@@ -15,9 +15,11 @@ type User struct {
 	Password     string
 	LastLogin    time.Time `orm:"null"`
 	Enable       bool
-	UserGroups []*UserGroup `orm:"rel(m2m)"`
+	UserGroups   []*UserGroup   `orm:"rel(m2m)"`
 	ShoppingCart []*CartItem    `orm:"reverse(many)"`
 	Orders       []*Order       `orm:"reverse(many)"`
+	Comments     []*Comment     `orm:"reverse(many)"`
+	Good         []*Good        `orm:"rel(m2m)"`
 	Transactions []*Transaction `orm:"reverse(many)"`
 	Created      time.Time      `orm:"auto_now_add;type(datetime)"`
 	Updated      time.Time      `orm:"auto_now;type(datetime)"`
@@ -142,4 +144,5 @@ func (u *User) ReadOrders(offset int64, limit int64, order string) error {
 	_, err := o.LoadRelated(u, "Orders", 3, limit, offset, order)
 	return err
 }
+
 

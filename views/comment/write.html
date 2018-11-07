@@ -4,17 +4,53 @@
 
 
         <div class="ui grid container stackable">
+            <div class="ui segment">
+                <div class="ui items">
+                    <div class="item">
+                        <div class="image">
+                            <img src="/{{.Good.Game.Band.Path}}">
+                        </div>
+                        <div class="content">
+                            <a class="header">{{.Good.Game.Name}}</a>
+                            <div class="meta">
+                                <span>{{.Good.Name}}</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="ui segment sixteen wide column" style="min-height: 600px">
                 <h2>写评论</h2>
                 <div id="editor" style="height: 400px">
-                    <p>Hello World!</p>
-                    <p>Some initial <strong>bold</strong> text</p>
-                    <p><br></p>
+
                 </div>
                 <div style="text-align: right;margin-top: 20px">
-                    <button class="ui primary button">
-                        完成
-                    </button>
+                    <form id="comment-form" method="post" action="/comments/create">
+                        <div class="ui form">
+                            <div class="inline fields">
+                                <label>您的评价</label>
+                                <div class="field">
+                                    <div class="ui radio checkbox">
+                                        <input type="radio" name="evaluation" value="Positive" checked="true" tabindex="0" class="hidden">
+                                        <label><i class="thumbs up outline icon"></i>好评</label>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="ui radio checkbox">
+                                        <input type="radio" value="Negative" name="evaluation" tabindex="0" class="hidden">
+                                        <label><i class="thumbs up outline icon"></i>差评</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="goodId" value="{{.Good.Id}}">
+                        <input type="hidden" value="" id="comment-content" name="content">
+                        <button class="ui primary button" onclick="onSubmitButtonClick()">
+                            完成
+                        </button>
+                    </form>
+
                 </div>
             </div>
 
@@ -22,13 +58,21 @@
 
     </div>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="/static/quill/quill.snow.css" rel="stylesheet">
+    <script src="/static/quill/quill.js"></script>
     <script>
         var quill = new Quill('#editor', {
             theme: 'snow'
         });
-        let content = quill.container.firstChild.innerHTML;
+        const onSubmitButtonClick = () => {
+            let content = quill.container.firstChild.innerHTML;
+            $('#comment-content').val(content);
+            $('#comment-form').submit()
+        };
+        $('.ui.radio.checkbox')
+            .checkbox()
+        ;
+
 
     </script>
 </div>

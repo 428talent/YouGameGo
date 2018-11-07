@@ -34,6 +34,7 @@ func init() {
 		new(models.Transaction),
 		new(models.UserGroup),
 		new(models.Permission),
+		new(models.Comment),
 	)
 	orm.RunSyncdb("default", false, true)
 

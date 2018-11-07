@@ -12,9 +12,9 @@
                         <div class="glide__track" data-glide-el="track">
                             <ul class="glide__slides">
                                 {{range .game.PreviewImages}}
-                                    <li class="glide__slide">
-                                        <img class="ui centered rounded image" src="/{{.Path}}">
-                                    </li>
+                                <li class="glide__slide">
+                                    <img class="ui centered rounded image" src="/{{.Path}}">
+                                </li>
                                 {{end}}
 
                             </ul>
@@ -43,14 +43,15 @@
                     <p>{{ .game.Intro }} </p>
                     <div>
                         {{range .game.Tags}}
-                            <div class="ui label">
-                                {{.Name}}
-                            </div>
+                        <div class="ui label">
+                            {{.Name}}
+                        </div>
                         {{end}}
 
 
                     </div>
                     <div>
+
                         <form method="post" action="/wishlist">
                             <input type="hidden" name="GameId" value="{{.game.Id}}">
                             <button class="ui right primary button" type="submit" style="margin-top: 8px">
@@ -63,19 +64,35 @@
             <div class="ten wide column">
                 <div class="ui segment">
                     <div class="ui divided items">
-                        {{range .game.Goods}}
-                            <div class="item">
-                                <div class="middle aligned content">
-                                    {{.Name}} ({{.Price}})
-                                    <form method="post" action="/cart">
-                                        <input type="hidden" value="{{.Id}}" name="GoodId">
-                                        <div class="right floated content">
-                                            <button type="submit" class="ui button">加入购物车</button>
-                                        </div>
-                                    </form>
+                        {{range .GameGoods}}
+                        <div class="item">
+                            <div class="middle aligned content">
+                                <div class="ui tiny horizontal statistic">
+                                    <div class="value">
+                                        ￥{{.Good.Price}}
+                                    </div>
+                                    <div class="label">
+                                        {{.Good.Name}}
+                                    </div>
                                 </div>
-
+                                {{if .Bought}}
+                                <div class="right floated content">
+                                    <a class="ui labeled  icon primary button" href="/game/{{$.game.Id}}/good/{{.Good.Id}}/comment/write">
+                                        <i class="edit outline icon"></i>
+                                        写评论
+                                    </a>
+                                </div>
+                                {{else}}
+                                <form method="post" action="/cart">
+                                    <input type="hidden" value="{{.Good.Id}}" name="GoodId">
+                                    <div class="right floated content">
+                                        <button type="submit" class="ui button">加入购物车</button>
+                                    </div>
+                                </form>
+                                {{end}}
                             </div>
+
+                        </div>
                         {{end}}
                     </div>
                 </div>
@@ -106,7 +123,7 @@
 
                 <div class="ui segment" style="min-height: 300px">
                     <h3 class="ui header">介绍</h3>
-                    <p>介绍</p>
+                    <p>{{.game.Intro}}</p>
                 </div>
             </div>
             <div class="twelve wide column">
@@ -117,10 +134,7 @@
                             <h2 class="ui header">评价</h2>
                         </div>
                         <div class="six wide  column" style="text-align: right">
-                            <a class="ui labeled icon primary button" href="/game/{{.game.Id}}/comment/write">
-                                <i class="edit outline icon"></i>
-                                写评论
-                            </a>
+
                         </div>
                     </div>
 

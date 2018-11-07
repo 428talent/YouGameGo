@@ -31,3 +31,18 @@ func CheckClaimsPermission(claims UserClaims, permissionName string) error {
 	}
 	return nil
 }
+
+func CheckUserPermission(user models.User, permissionName string) error {
+	o := orm.NewOrm()
+	result := new(models.Permission)
+	err := o.Raw(`select distinct permission.*
+		from permission
+        	inner join user_group_permissions on permission.id = user_group_permissions.permission_id
+        	inner join user_group on user_group.id = user_group_permissions.user_group_id
+        	inner join auth_user_user_groups on auth_user_user_groups.user_group_id = user_group.id
+		where auth_user_id = ? and permission.name = ?`, user.Id, permissionName).QueryRow(&result)
+	if err != nil {
+		return err
+	}
+	return nil
+}

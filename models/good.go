@@ -6,14 +6,15 @@ import (
 )
 
 type Good struct {
-	Id      int
-	Name    string
-	Price   float64
-	Enable bool
-
-	Game    *Game     `orm:"rel(fk)"`
-	Created time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated time.Time `orm:"auto_now;type(datetime)"`
+	Id       int
+	Name     string
+	Price    float64
+	Enable   bool
+	Users    []*User    `orm:"reverse(many)"`
+	Comments []*Comment `orm:"reverse(many)"`
+	Game     *Game      `orm:"rel(fk)"`
+	Created  time.Time  `orm:"auto_now_add;type(datetime)"`
+	Updated  time.Time  `orm:"auto_now;type(datetime)"`
 }
 
 func (g *Good) QueryById() error {
@@ -26,4 +27,14 @@ func (g *Good) ReadGame() error {
 	o := orm.NewOrm()
 	_, err := o.LoadRelated(g, "Game")
 	return err
+}
+
+func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Good, error) {
+	o := orm.NewOrm()
+	var goodList []*Good
+	_, err := filter(o.QueryTable("good")).All(&goodList)
+	if err != nil {
+		return nil, err
+	}
+	return goodList, nil
 }
