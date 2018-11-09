@@ -77,7 +77,8 @@
                                 </div>
                                 {{if .Bought}}
                                 <div class="right floated content">
-                                    <a class="ui labeled  icon primary button" href="/game/{{$.game.Id}}/good/{{.Good.Id}}/comment/write">
+                                    <a class="ui labeled  icon primary button"
+                                       href="/game/{{$.game.Id}}/good/{{.Good.Id}}/comment/write">
                                         <i class="edit outline icon"></i>
                                         写评论
                                     </a>
@@ -147,181 +148,106 @@
                     </div>
                     <div class="ui bottom attached tab  active" data-tab="first">
                         <div class="ui feed">
+                            {{if eq .commentPositiveCount 0}}
+                            暂无评论
+                            {{else}}
+                            {{range .positiveComment}}
                             <div class="event">
                                 <div class="label">
-                                    <img src="/static/img/user.png">
+                                    <img src="/{{.User.Profile.Avatar}}">
                                 </div>
                                 <div class="content">
                                     <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
+                                        <a>{{.User.Profile.Nickname}}</a>
                                         <div class="date">
-                                            3 days ago
+                                            {{.Created}}
                                         </div>
                                     </div>
                                     <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
+                                        {{str2html .Content}}
                                     </div>
                                     <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="event">
-                                <div class="label">
-                                    <img src="/static/img/user.png">
-                                </div>
-                                <div class="content">
-                                    <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
-                                        <div class="date">
-                                            3 days ago
+
+                                        <div class="ui mini label">
+                                            {{.Good.Name}}
                                         </div>
-                                    </div>
-                                    <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
-                                    </div>
-                                    <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
+
                                     </div>
                                 </div>
                             </div>
-                            <div class="event">
-                                <div class="label">
-                                    <img src="/static/img/user.png">
-                                </div>
-                                <div class="content">
-                                    <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
-                                        <div class="date">
-                                            3 days ago
-                                        </div>
-                                    </div>
-                                    <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
-                                    </div>
-                                    <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                            {{end}}
+                            {{end}}
+
+
                         </div>
                     </div>
                     <div class="ui bottom attached tab " data-tab="second">
                         <div class="ui feed">
+                            {{if eq .commentNegativeCount 0}}
+                            暂无评论
+                            {{else}}
+                            {{range .negativeComment}}
                             <div class="event">
                                 <div class="label">
-                                    <img src="/static/img/user.png">
+                                    <img src="/{{.User.Profile.Avatar}}">
                                 </div>
                                 <div class="content">
                                     <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
+                                        <a>{{.User.Profile.Nickname}}</a>
                                         <div class="date">
-                                            3 days ago
+                                            {{.Created}}
                                         </div>
                                     </div>
                                     <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
+                                        {{str2html .Content}}
                                     </div>
                                     <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="event">
-                                <div class="label">
-                                    <img src="/static/img/user.png">
-                                </div>
-                                <div class="content">
-                                    <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
-                                        <div class="date">
-                                            3 days ago
+
+                                        <div class="ui mini label">
+                                            {{.Good.Name}}
                                         </div>
-                                    </div>
-                                    <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
-                                    </div>
-                                    <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
+
                                     </div>
                                 </div>
                             </div>
-                            <div class="event">
-                                <div class="label">
-                                    <img src="/static/img/user.png">
-                                </div>
-                                <div class="content">
-                                    <div class="summary">
-                                        <a>Joe Henderson</a> posted on his page
-                                        <div class="date">
-                                            3 days ago
-                                        </div>
-                                    </div>
-                                    <div class="extra text">
-                                        Ours is a life of constant reruns. We're always circling back to where we'd we
-                                        started, then starting all over again. Even if we don't run extra laps that day,
-                                        we surely will come back for more of the same another day soon.
-                                    </div>
-                                    <div class="meta">
-                                        <a class="like">
-                                            <i class="like icon"></i> 5 Likes
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                            {{end}}
+                            {{end}}
+
                         </div>
                     </div>
                 </div>
             </div>
             <div class="four wide column">
 
-                <div class="ui segment">
-                    <div class="ui statistic">
+                <div class="ui segment" style="text-align: center">
+                    <div class="ui tiny statistic">
                         <div class="value">
-                            5,550
-                        </div>
-                        <div class="label">
-                            购买
-                        </div>
-                    </div>
-                    <div class="ui divider"></div>
-                    <div class="ui statistic">
-                        <div class="value">
-                            5,550
+                            {{.commentCount}}
                         </div>
                         <div class="label">
                             评论
                         </div>
                     </div>
                     <div class="ui divider"></div>
-                    <div class="ui statistic">
+                    <div class="ui tiny statistic">
                         <div class="value">
-                            95.9%
+                            {{.commentPositiveCount}}
                         </div>
                         <div class="label">
                             好评
                         </div>
                     </div>
+                    {{if .commentPositiveRate}}
+                    <div class="ui divider"></div>
+                    <div class="ui tiny statistic">
+                        <div class="value">
+                            {{.commentPositiveRate}}%
+                        </div>
+                        <div class="label">
+                            好评率
+                        </div>
+                    </div>
+                    {{end}}
                 </div>
             </div>
 

@@ -14,17 +14,29 @@ func (r *CreateUserRequestStruct) Parse(body []byte) error {
 	return err
 }
 
-
 type GetTokenRequestStruct struct {
 	LoginName string `json:"login_name"`
 	Password  string `json:"password"`
 }
 
-func (r *GetTokenRequestStruct)ParseGetTokenRequestBody(body []byte) (*GetTokenRequestStruct, error) {
+func (r *GetTokenRequestStruct) ParseGetTokenRequestBody(body []byte) (*GetTokenRequestStruct, error) {
 	var result GetTokenRequestStruct
 	err := json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+
+type UploadUserAvatarRequestStruct struct {
+	Avatar string `json:"avatar"`
+	ImageType string `json:"image_type"`
+}
+
+func (r *UploadUserAvatarRequestStruct ) Parse(body []byte) error {
+	err := json.Unmarshal(body, r)
+	if err != nil {
+		return err
+	}
+	return nil
 }

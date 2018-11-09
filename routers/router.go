@@ -50,6 +50,7 @@ func registerApiRouter() {
 		beego.NSNamespace("/user",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/orders", &order.ApiOrderController{}, "get:GetOrderList"),
+				beego.NSRouter("/avatar", &user.ApiUserController{}, "put:UploadJsonAvatar"),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
 		),

@@ -1,12 +1,15 @@
 package user
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 	"yougame.com/yougame-server/validate"
 
 	"yougame.com/yougame-server/models"
@@ -69,7 +72,7 @@ func (c *ApiUserController) UserLogin() {
 	var err error
 	defer api.CheckError(func(e error) {
 		logrus.Error(err)
-		if e == service.LoginUserFailed{
+		if e == service.LoginUserFailed {
 			api.AuthFailedError.ServerError(c.Controller)
 			return
 		}
@@ -256,3 +259,42 @@ func (c *ApiUserController) GetUser() {
 //	c.Data["json"] = &data
 //	c.ServeJSON()
 //}
+func (c *ApiUserController) UploadJsonAvatar() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(e)
+		switch e {
+		default:
+			api.HandleApiError(c.Controller, e)
+			return
+		}
+	})
+	claims, err := security.ParseAuthHeader(c.Controller)
+	if err != nil {
+		panic(err)
+
+	}
+	if claims == nil {
+		panic(service.NoAuthError)
+	}
+
+	requestBodyStruct := parser.UploadUserAvatarRequestStruct{}
+	err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
+	if err != nil {
+		panic(err)
+	}
+	filename := util.EncodeFileName(fmt.Sprintf("user_avatar_%d", claims.UserId))
+	var filePath string
+	switch requestBodyStruct.ImageType {
+	case "jpg":
+		filePath, err = util.Base64toJpg(requestBodyStruct.Avatar, filename)
+	case "png":
+		filePath, err = util.Base64toPng(requestBodyStruct.Avatar, filename)
+	}
+	err = service.UpdateUserAvatar(claims.UserId, filePath)
+	if err != nil {
+		panic(err)
+	}
+	c.Data["json"] = requestBodyStruct.Avatar
+	c.ServeJSON()
+}

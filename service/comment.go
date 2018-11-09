@@ -20,3 +20,16 @@ func CreateComment(content string, evaluate string, user *models.User, good *mod
 	comment.Id = int(commentId)
 	return &comment, nil
 }
+
+func GetGameCommentStatistics(gameId int) (count int64, positive int64, negative int64, err error) {
+	if count, err = models.GetGameCommentCount(gameId); err != nil {
+		return
+	}
+	if positive, err = models.GetGameCommentWithEvaluationCount(gameId, models.EvaluationPositive); err != nil {
+		return
+	}
+	if negative, err = models.GetGameCommentWithEvaluationCount(gameId, models.EvaluationNegative); err != nil {
+		return
+	}
+	return
+}

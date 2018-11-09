@@ -5,13 +5,13 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"strconv"
-	"yougame.com/letauth/util"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/request"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type GameController struct {

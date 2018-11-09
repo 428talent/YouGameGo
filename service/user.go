@@ -56,6 +56,7 @@ func CreateUserAccount(username string, password string) (*int64, error) {
 	}()
 	return &userId, err
 }
+
 // 用户登录
 func UserLogin(username string, password string) (string, *models.User, error) {
 	o := orm.NewOrm()
@@ -64,17 +65,33 @@ func UserLogin(username string, password string) (string, *models.User, error) {
 		Password: password,
 	}
 	if !models.CheckUserValidate(&user) {
-		return "",nil,LoginUserFailed
+		return "", nil, LoginUserFailed
 	}
 	user.LastLogin = time.Now()
-	_,err := o.Update(&user,"LastLogin")
+	_, err := o.Update(&user, "LastLogin")
 	if err != nil {
-		return "",nil,err
+		return "", nil, err
 	}
 
 	signString, err := security.GenerateJWTSign(&user)
 	if err != nil {
-		return "",nil,err
+		return "", nil, err
 	}
 	return *signString, &user, err
+}
+
+func UpdateUserAvatar(uid int, path string) error {
+	o := orm.NewOrm()
+	var profile models.Profile
+	err := o.QueryTable("profile").Filter("User__Id", uid).One(&profile)
+	if err != nil {
+		return err
+	}
+	err = util.DeleteFile(profile.Avatar)
+	if err != nil {
+		return err
+	}
+	profile.Avatar = path
+	_, err = o.Update(&profile)
+	return nil
 }
