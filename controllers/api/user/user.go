@@ -216,58 +216,43 @@ func (c *ApiUserController) UploadAvatar() {
 	c.ServeJSON()
 }
 
-//
-//
-//func (c *ApiUserController) ChangeUserProfile() {
-//	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	claims, err := security.ParseAuthHeader(c.Controller)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	c.ControllerContext = controllers.ControllerContext{
-//		AuthClaims: *claims,
-//	}
-//	var requestData request.ChangeUserProfileRequestBody
-//	err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestData)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//
-//	err = requestData.ValidRequest()
-//	if err != nil {
-//		if validateError, ok := err.(*APIError.ValidateError); ok {
-//			validateError.BuildResponse().ServerError(c.Controller, 400)
-//			return
-//		}
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//
-//	user, err := models.GetUserById(userId)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	if err = user.Profile.ChangeUserProfile(requestData.Email, requestData.Nickname); err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	data := c.Serialize(*user)
-//	c.Data["json"] = &data
-//	c.ServeJSON()
-//}
+
+func (c *ApiUserController) ChangeUserProfile() {
+	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+	claims, err := c.GetAuth()
+	if err != nil {
+		panic(err)
+	}
+	if claims == nil {
+		panic(api.ClaimsNoFoundError)
+	}
+	var requestData parser.ChangeProfileRequestStruct
+	err = parser.ParseReqeustBody(c.Ctx.Input.RequestBody, &requestData)
+	if err != nil {
+		panic(api.ParseJsonDataError)
+	}
+
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		panic(err)
+	}
+	if user.Id != claims.UserId {
+		panic(api.PermissionDeniedError)
+	}
+
+	if err = user.Profile.ChangeUserProfile("", requestData.Nickname); err != nil {
+		panic(err)
+	}
+	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = serializeData
+	c.ServeJSON()
+}
 func (c *ApiUserController) UploadJsonAvatar() {
 	var err error
 	defer api.CheckError(func(e error) {
@@ -287,6 +272,11 @@ func (c *ApiUserController) UploadJsonAvatar() {
 		panic(service.NoAuthError)
 	}
 
+	user, err := models.GetUserById(claims.UserId)
+	if err != nil {
+		panic(err)
+	}
+
 	requestBodyStruct := parser.UploadUserAvatarRequestStruct{}
 	err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
 	if err != nil {
@@ -304,6 +294,10 @@ func (c *ApiUserController) UploadJsonAvatar() {
 	if err != nil {
 		panic(err)
 	}
-	c.Data["json"] = requestBodyStruct.Avatar
+	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = serializeData
 	c.ServeJSON()
 }

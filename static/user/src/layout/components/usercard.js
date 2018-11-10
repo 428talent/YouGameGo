@@ -5,8 +5,6 @@ import PageNav from "./pagenav/pagenav";
 import {WebServer} from "../../config/api";
 
 const UserCard = ({user,history}) => {
-    // let {user} = props;
-    console.log(history);
     const style = {
         seg: {
             minHeight: 100

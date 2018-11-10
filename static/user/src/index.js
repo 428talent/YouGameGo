@@ -4,11 +4,15 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import dva from "dva";
+import {reducer as formReducer} from 'redux-form'
 
 const app = dva({
+    extraReducers: {
+        form: formReducer,
+    },
     initialState: {
-        pagenav:{
-            activeTab:"home"
+        pagenav: {
+            activeTab: "home"
         }
     },
 });

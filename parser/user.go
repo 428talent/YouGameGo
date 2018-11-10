@@ -40,3 +40,7 @@ func (r *UploadUserAvatarRequestStruct ) Parse(body []byte) error {
 	}
 	return nil
 }
+
+type ChangeProfileRequestStruct struct {
+	Nickname string `json:"nickname"`
+}

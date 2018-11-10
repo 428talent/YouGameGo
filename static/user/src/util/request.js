@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 
 const request = ({url, method, data, queryParams, pathParams}) => {
     console.log(pathParams)
+    console.log(data)
     if (queryParams) {
         url = url + "?" + Object.getOwnPropertyNames(queryParams).map(value => {
             return `${value}=${queryParams[value]}`

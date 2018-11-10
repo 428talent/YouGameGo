@@ -56,7 +56,9 @@ func registerApiRouter() {
 					beego.NSRouter("/upload", &user.ApiUserController{}, "post:UploadAvatar"),
 					beego.NSRouter("/", &user.ApiUserController{}, "put:UploadJsonAvatar"),
 				),
-
+				beego.NSNamespace("/profile",
+					beego.NSRouter("/", &user.ApiUserController{}, "put:ChangeUserProfile"),
+				),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
 		),

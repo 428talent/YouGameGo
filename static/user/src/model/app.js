@@ -27,6 +27,7 @@ export default {
                 return
             }
             const result = yield call(FetchUser, app.user.id);
+            console.log(result);
             yield put({
                 type: 'onRefreshUserProfileSucceed',
                 user: result
@@ -55,6 +56,7 @@ export default {
         onRefreshUserProfileSucceed(state, {user}) {
             let stateUser = state.user;
             stateUser.profile = user.profile;
+            console.log(user);
             return {
                 ...state,
                 user

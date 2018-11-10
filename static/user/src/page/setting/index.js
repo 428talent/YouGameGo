@@ -5,7 +5,7 @@ import {connect} from "dva";
 import PropTypes from 'prop-types';
 import ProfileSettingPanel from "./panels/profile";
 
-const SettingPage = ({profile, user,dispatch}) => {
+const SettingPage = ({profile, user, dispatch}) => {
     console.log(profile);
     console.log(user);
     const style = {
@@ -13,23 +13,32 @@ const SettingPage = ({profile, user,dispatch}) => {
             textAlign: "left"
         }
     };
-    const refreshUserProfile  = () =>{
+    const refreshUserProfile = () => {
         dispatch({
-            type:"app/refreshUserProfile"
+            type: "app/refreshUserProfile"
         })
     };
+    const changeUserProfile = ({nickname}) => {
+        console.log(nickname)
+        dispatch({
+            type: "settingpage/changeUserProfile",
+            payload: {
+                nickname
+            }
+        })
+    };
+
     const panes = [
         {
-            menuItem: '个人资料', render: () => <ProfileSettingPanel onRefreshUserProfile={refreshUserProfile} {...{user,profile}}/>
+            menuItem: '个人资料',
+            render: () => <ProfileSettingPanel onChangeUserProfile={changeUserProfile} onRefreshUserProfile={refreshUserProfile} {...{user, profile}}/>
         },
-        {menuItem: 'Tab 2', render: () => <Tab.Pane>Tab 2 Content</Tab.Pane>},
-        {menuItem: 'Tab 3', render: () => <Tab.Pane>Tab 3 Content</Tab.Pane>},
+       
     ];
 
     return (
         <div>
             <Tab menu={{fluid: true, vertical: true}} menuPosition='left' panes={panes}/>
-
         </div>
     )
 };
