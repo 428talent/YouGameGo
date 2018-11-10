@@ -17,6 +17,7 @@ app.model(require('./model/app').default);
 app.model(require('./page/home/model').default);
 app.model(require('./page/order/model').default);
 app.model(require('./page/cart/model').default);
+app.model(require('./page/setting/model').default);
 
 app.start('#root');
 // ReactDOM.render(<App />, document.getElementById('root'));

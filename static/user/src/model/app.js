@@ -16,6 +16,8 @@ export default {
         * fetchUser(action, {put, call}) {
             let uid = action.payload.uid;
             const result = yield call(FetchUser, uid);
+            console.log("fetched user");
+            console.log(result);
             yield put({
                 type: 'fetchUserSucceed',
                 result: result

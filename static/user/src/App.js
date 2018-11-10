@@ -6,6 +6,7 @@ import UserCard from "./layout/components/usercard";
 import {Container} from "semantic-ui-react";
 import {Route} from "react-router-dom";
 import HomePage from "./page/home/home";
+import SettingPage from "./page/setting/index";
 import GamePage from "./page/game";
 import OrderPage from "./page/order/index";
 import CartPage from "./page/cart/cart";
@@ -13,21 +14,22 @@ import {connect} from "dva";
 import PropTypes from "prop-types";
 import HashRouter from "react-router-dom/es/HashRouter";
 import LoadingModal from "./layout/components/LoadingModal";
-
+import "antd/dist/antd.css";
 const App = ({history, ...props}) => {
     let {user,isLoadingModalShow} = props;
+    console.log(history)
     return (
         <div className="App">
             <HashRouter history={history}>
                 <div>
-                    <MainNavBar/>
                     <Container>
-                        <UserCard user={user}/>
+                        <UserCard user={user} history={history}/>
                         <div>
                             <Route exact path="/" component={HomePage}/>
                             <Route path="/games" component={GamePage}/>
                             <Route path="/orders" component={OrderPage}/>
                             <Route path="/cart" component={CartPage}/>
+                            <Route path="/setting" component={SettingPage}/>
                         </div>
                     </Container>
                     <LoadingModal open={isLoadingModalShow}/>

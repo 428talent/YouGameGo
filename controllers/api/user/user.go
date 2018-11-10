@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
+	"os"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/security"
@@ -160,53 +161,61 @@ func (c *ApiUserController) GetUser() {
 //}
 //
 //
-//func (c *ApiUserController) UploadAvatar() {
-//	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	claims, err := security.ParseAuthHeader(c.Controller)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	c.ControllerContext = controllers.ControllerContext{
-//		AuthClaims: *claims,
-//	}
-//
-//	user, err := models.GetUserById(userId)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	f, h, err := c.GetFile("avatar")
-//	if err != nil {
-//		beego.Error(err)
-//	}
-//	defer f.Close()
-//	models.ReadProfile(user)
-//	err = os.Remove(user.Profile.Avatar)
-//	path := "static/upload/avatar/" + util.EncodeFileName(h.Filename)
-//	err = c.SaveToFile("avatar", path)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	err = user.Profile.SaveAvatar(path)
-//	if err != nil {
-//		beego.Error(err)
-//		controllers.AbortServerError(c.Controller)
-//		return
-//	}
-//	data := c.Serialize(*user)
-//	c.Data["json"] = &data
-//	c.ServeJSON()
-//}
+func (c *ApiUserController) UploadAvatar() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(err)
+		if e == service.LoginUserFailed {
+			api.AuthFailedError.ServerError(c.Controller)
+			return
+		}
+		api.HandleApiError(c.Controller, err)
+	})
+	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+	claims, err := c.GetAuth()
+	if err != nil {
+		panic(err)
+	}
+	if claims == nil {
+		panic(api.ClaimsNoFoundError)
+	}
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		panic(err)
+	}
+
+	//check user is itself
+	if user.Id != claims.UserId {
+		panic(api.PermissionDeniedError)
+	}
+
+	f, h, err := c.GetFile("avatar")
+	if err != nil {
+		beego.Error(err)
+	}
+	defer f.Close()
+	models.ReadProfile(user)
+	err = os.Remove(user.Profile.Avatar)
+	path := "static/upload/user/avatar/" + util.EncodeFileName(h.Filename)
+	err = c.SaveToFile("avatar", path)
+	if err != nil {
+		panic(err)
+	}
+	err = user.Profile.SaveAvatar(path)
+	if err != nil {
+		panic(err)
+	}
+	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = serializeData
+	c.ServeJSON()
+}
+
 //
 //
 //func (c *ApiUserController) ChangeUserProfile() {

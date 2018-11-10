@@ -2,10 +2,11 @@ import {Component} from "react";
 import React from "react";
 import {Dimmer, Divider, Grid, Header, Image, Loader, Segment} from "semantic-ui-react";
 import PageNav from "./pagenav/pagenav";
+import {WebServer} from "../../config/api";
 
-const UserCard = ({user}) => {
+const UserCard = ({user,history}) => {
     // let {user} = props;
-    console.log(user);
+    console.log(history);
     const style = {
         seg: {
             minHeight: 100
@@ -37,7 +38,7 @@ const UserCard = ({user}) => {
                 <Grid columns='equal'>
                     <Grid.Row columns={2}>
                         <Grid.Column width={2}>
-                            <Image src={`http://localhost:8080/${user.profile.avatar}`} size='tiny' rounded/>
+                            <Image src={`${WebServer}/${user.profile.avatar}`} size='tiny' rounded/>
                         </Grid.Column>
                         <Grid.Column>
                             <div style={style.nickname}>{user.profile.nickname}</div>
@@ -46,7 +47,7 @@ const UserCard = ({user}) => {
                     </Grid.Row>
                 </Grid>
                 <Divider/>
-                <PageNav/>
+                <PageNav history={history}/>
             </div>
         </Segment>
 

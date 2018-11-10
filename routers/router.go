@@ -27,7 +27,7 @@ func init() {
 	beego.Router("/order/pay", &web.OrderController{}, "post:PayOrder")
 	beego.Router("/cart/delete", &web.CartController{}, "post:ClearAll")
 	beego.Router("/admin/dashboard", &web.AdminDashboardController{})
-	beego.Router("/comments/create", &web.CommentController{},"post:SaveComment")
+	beego.Router("/comments/create", &web.CommentController{}, "post:SaveComment")
 	//beego.Router("/api/game/:id/band", &game.GameController{}, "post:UploadGameBand")
 	//beego.Router("/api/game/:id", &game.GameController{}, "get:GetGame")
 	//beego.Router("/api/game/:id/preview/image", &game.GameController{}, "post:UploadGamePreviewImage")
@@ -49,8 +49,14 @@ func registerApiRouter() {
 		beego.NSRouter("users", &user.ApiUserController{}, "post:CreateUser"),
 		beego.NSNamespace("/user",
 			beego.NSNamespace("/:id",
+				beego.NSRouter("/", &user.ApiUserController{}, "get:GetUser"),
 				beego.NSRouter("/orders", &order.ApiOrderController{}, "get:GetOrderList"),
-				beego.NSRouter("/avatar", &user.ApiUserController{}, "put:UploadJsonAvatar"),
+
+				beego.NSNamespace("/avatar",
+					beego.NSRouter("/upload", &user.ApiUserController{}, "post:UploadAvatar"),
+					beego.NSRouter("/", &user.ApiUserController{}, "put:UploadJsonAvatar"),
+				),
+
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
 		),

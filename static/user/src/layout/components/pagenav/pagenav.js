@@ -6,7 +6,6 @@ import {connect} from 'dva';
 
 const PageNav = ({dispatch, ...props}) => {
     let {activeTab} = props;
-
     const handleItemClick = (activeTab) => {
         dispatch({
             type: "app/changeTab",
@@ -17,7 +16,8 @@ const PageNav = ({dispatch, ...props}) => {
         <Menu secondary>
             <Link exect to="/">
                 <Menu.Item name='home' active={activeTab === 'home'}
-                           onClick={() => handleItemClick('home')}/>
+                           onClick={() => handleItemClick('home')}>
+                </Menu.Item>
             </Link>
             <Link exect to="/games">
                 <Menu.Item
@@ -39,6 +39,13 @@ const PageNav = ({dispatch, ...props}) => {
                     name='购物车'
                     active={activeTab === 'cart'}
                     onClick={() => handleItemClick('cart')}
+                />
+            </Link>
+            <Link exect to="/setting">
+                <Menu.Item
+                    name='设置'
+                    active={activeTab === 'setting'}
+                    onClick={() => handleItemClick('setting')}
                 />
             </Link>
         </Menu>

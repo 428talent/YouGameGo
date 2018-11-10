@@ -36,6 +36,7 @@ var (
 )
 var (
 	ParseJsonDataError = errors.New("cannot parse json request")
+	ClaimsNoFoundError = errors.New("cannot parse json request")
 )
 
 func HandleApiError(controller beego.Controller, err error) {
