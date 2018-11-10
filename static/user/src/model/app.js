@@ -16,20 +16,25 @@ export default {
         * fetchUser(action, {put, call}) {
             let uid = action.payload.uid;
             const result = yield call(FetchUser, uid);
-            console.log("fetched user");
-            console.log(result);
             yield put({
                 type: 'fetchUserSucceed',
                 result: result
+            })
+        },
+        * refreshUserProfile(action, {put, call, select}) {
+            const { app } = yield select();
+            if (app.user == null) {
+                return
+            }
+            const result = yield call(FetchUser, app.user.id);
+            yield put({
+                type: 'onRefreshUserProfileSucceed',
+                user: result
             })
         }
     },
     reducers: {
         'fetchUserSucceed'(state, {result: result}) {
-            console.log({
-                ...state,
-                user: result
-            });
             return {
                 ...state,
                 user: result
@@ -46,6 +51,15 @@ export default {
                 ...state,
                 isLoadingModalShow: isShow
             }
+        },
+        onRefreshUserProfileSucceed(state, {user}) {
+            let stateUser = state.user;
+            stateUser.profile = user.profile;
+            return {
+                ...state,
+                user
+            }
         }
+
     },
 };

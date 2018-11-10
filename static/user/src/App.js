@@ -22,6 +22,7 @@ const App = ({history, ...props}) => {
         <div className="App">
             <HashRouter history={history}>
                 <div>
+                    <MainNavBar/>
                     <Container>
                         <UserCard user={user} history={history}/>
                         <div>
