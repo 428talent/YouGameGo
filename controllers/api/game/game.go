@@ -10,6 +10,7 @@ import (
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/request"
 	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
@@ -41,7 +42,7 @@ func (c *GameController) Post() {
 	permission := []api.ApiPermissionInterface{
 		CreateGamePermission{},
 	}
-	err = c.CheckPermission(permission,permissionContext)
+	err = c.CheckPermission(permission, permissionContext)
 	if err != nil {
 		panic(err)
 	}
@@ -233,6 +234,9 @@ func (c *GameController) GetGame() {
 	game.ReadGamePreviewImage()
 	game.ReadTags()
 	game.ReadGoods()
-	c.Data["json"] = game
+
+	serializeData := serializer.Game{}
+	serializeData.Serialize(game)
+	c.Data["json"] = serializeData
 	c.ServeJSON()
 }

@@ -62,6 +62,11 @@ func registerApiRouter() {
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
 		),
+		beego.NSNamespace("/game",
+			beego.NSNamespace("/:id",
+				beego.NSRouter("/", &game.GameController{}, "get:GetGame"),
+			),
+		),
 
 	)
 	beego.AddNamespace(ns)

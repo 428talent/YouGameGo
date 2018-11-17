@@ -8,12 +8,12 @@ import (
 )
 
 type Game struct {
-	Id            int
-	Name          string
-	Price         float32
-	ReleaseTime   time.Time
-	Publisher     string
-	Enable        bool
+	Id            int `json:"id"`
+	Name          string `json:"name"`
+	Price         float32 `json:"price"`
+	ReleaseTime   time.Time `json:"release_time"`
+	Publisher     string `json:"publisher"`
+	Enable        bool `json:"enable"`
 	Band          *Image `orm:"null;rel(one);on_delete(set_null)"`
 	Intro         string
 	Tags          []*Tag    `orm:"rel(m2m)"`

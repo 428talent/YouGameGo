@@ -33,7 +33,7 @@ const SettingPage = ({profile, user, dispatch}) => {
             menuItem: '个人资料',
             render: () => <ProfileSettingPanel onChangeUserProfile={changeUserProfile} onRefreshUserProfile={refreshUserProfile} {...{user, profile}}/>
         },
-       
+
     ];
 
     return (
