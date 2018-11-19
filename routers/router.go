@@ -2,17 +2,14 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
+	"yougame.com/yougame-server/controllers/api/cart"
 	"yougame.com/yougame-server/controllers/api/game"
 	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/controllers/api/user"
 )
 
 func init() {
-	registerApiRouter()
-}
-
-func registerApiRouter() {
-	ns := beego.NewNamespace("/api",
+	beego.AddNamespace(beego.NewNamespace("/api",
 		beego.NSRouter("users", &user.ApiUserController{}, "post:CreateUser"),
 		beego.NSNamespace("/user",
 			beego.NSNamespace("/:id",
@@ -26,6 +23,9 @@ func registerApiRouter() {
 				beego.NSNamespace("/profile",
 					beego.NSRouter("/", &user.ApiUserController{}, "put:ChangeUserProfile"),
 				),
+				beego.NSNamespace("/carts",
+					beego.NSRouter("/",&cart.ApiCartController{},"get:GetCartList"),
+				),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
 		),
@@ -35,6 +35,5 @@ func registerApiRouter() {
 			),
 		),
 
-	)
-	beego.AddNamespace(ns)
+	))
 }
