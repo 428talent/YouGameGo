@@ -1,13 +1,10 @@
 package wishlist
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	"reflect"
-	"strconv"
 	"yougame.com/yougame-server/controllers/api"
-	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/serializer"
+	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
 
@@ -16,27 +13,28 @@ type ApiWishListController struct {
 }
 
 func (c *ApiWishListController) GetWishList() {
-	page, pageSize := c.GetPage()
-	c.GetPage()
-	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		beego.Error(err)
-	}
-	count, wishlist, err := models.GetWishList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.Filter("user_id", userId).Limit(pageSize).Offset((page - 1) * pageSize)
+	var err error
+	defer api.CheckError(func(e error) {
+		api.HandleApiError(c.Controller, e)
 	})
-	if err != nil {
-		beego.Error(err)
+
+	page, pageSize := c.GetPage()
+	queryContext := make(map[string]interface{})
+	userId, _ := c.GetInt64("user", 0)
+	if userId != 0 {
+		queryContext["user"] = userId
 	}
-	var serializerDataList []interface{}
-	for _, item := range wishlist {
-		serializeData := &serializer.WishListModel{}
-		serializeData.SerializeData(item, util.GetSiteAndPortUrl(c.Controller))
-		intf := reflect.ValueOf(serializeData).Interface()
-		serializerDataList = append(serializerDataList, intf)
+	count, wishlist, err := service.GetWishList(queryContext, page, pageSize)
+	if err != nil {
+		panic(err)
 	}
 
-	c.ServerPageResult(serializerDataList,*count,page,pageSize)
+	results := make([]interface{},0)
+	for _, item := range wishlist {
+		results = append(results, reflect.ValueOf(*item).Interface())
+	}
+	serializerDataList := serializer.SerializeMultipleData(&serializer.WishListModel{},results,util.GetSiteAndPortUrl(c.Controller))
+	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 
 func (c *ApiWishListController) DeleteWishList() {

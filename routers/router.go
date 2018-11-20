@@ -28,7 +28,7 @@ func init() {
 					beego.NSRouter("/", &cart.ApiCartController{}, "get:GetCartList"),
 				),
 				beego.NSNamespace("wishlist",
-					beego.NSRouter("/", &wishlist.ApiWishListController{}, "get:GetWishList"),
+					beego.NSRouter("/", &user.ApiUserController{}, "get:GetUserWishList"),
 				),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
@@ -37,6 +37,9 @@ func init() {
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &game.GameController{}, "get:GetGame"),
 			),
+		),
+		beego.NSNamespace("wishlist",
+			beego.NSRouter("/", &wishlist.ApiWishListController{}, "get:GetWishList"),
 		),
 
 	))

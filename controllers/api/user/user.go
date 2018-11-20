@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"os"
+	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/security"
@@ -216,7 +217,6 @@ func (c *ApiUserController) UploadAvatar() {
 	c.ServeJSON()
 }
 
-
 func (c *ApiUserController) ChangeUserProfile() {
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
@@ -300,4 +300,35 @@ func (c *ApiUserController) UploadJsonAvatar() {
 	}
 	c.Data["json"] = serializeData
 	c.ServeJSON()
+}
+
+func (c *ApiUserController) GetUserWishList() {
+	var err error
+	defer api.CheckError(func(e error) {
+		api.HandleApiError(c.Controller, e)
+	})
+
+	page, pageSize := c.GetPage()
+	queryContext := make(map[string]interface{})
+	beego.Debug(c.Ctx.Input.Param(":id"))
+	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+	if userId > 0 {
+		queryContext["user"] = int64(userId)
+	}else{
+		panic(api.ParseJsonDataError)
+	}
+	count, wishlist, err := service.GetWishList(queryContext, page, pageSize)
+	if err != nil {
+		panic(err)
+	}
+
+	results := make([]interface{}, 0)
+	for _, item := range wishlist {
+		results = append(results, reflect.ValueOf(*item).Interface())
+	}
+	serializerDataList := serializer.SerializeMultipleData(&serializer.WishListModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
