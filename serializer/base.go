@@ -1,11 +1,11 @@
 package serializer
 
-type Serializer interface {
-	SerializeList() []*interface{}
-	SerializeSerialize(data interface{}, output interface{})
+type Model interface {
+	SerializeData()
 }
 
 type CommonApiResponseBody struct {
 	Success bool `json:"success"`
 	Payload interface{} `json:"payload"`
 }
+

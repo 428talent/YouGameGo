@@ -1,6 +1,8 @@
 package util
 
-import "github.com/astaxie/beego"
+import (
+	"github.com/astaxie/beego"
+)
 
 func ParsePageRequest(c beego.Controller) (int64, int64) {
 	page, err := c.GetInt64("page", 1)
@@ -17,14 +19,12 @@ func ParsePageRequest(c beego.Controller) (int64, int64) {
 }
 
 type PageResponse struct {
-	Count    int64 `json:"count"`
-	Page     int64 `json:"page"`
-	PageSize int64 `json:"page_size"`
+	Count    int64       `json:"count"`
+	Page     int64       `json:"page"`
+	PageSize int64       `json:"page_size"`
+	NextPage *string      `json:"next_page"`
+	PrevPage *string      `json:"prev_page"`
 	Result   interface{} `json:"result"`
 }
 
-func ApplyPage(response PageResponse, count int64, page int64, pageSize int64) {
-	response.Count = count
-	response.Page = page
-	response.PageSize = pageSize
-}
+

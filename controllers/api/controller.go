@@ -1,17 +1,15 @@
 package api
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
+	"strings"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/util"
-	"yougame.com/yougame-server/validate"
 )
 
 type ApiController struct {
 	beego.Controller
-	RequestStruct      interface{}
-	SerializerTemplate interface{}
 }
 
 func (c ApiController) GetAuth() (*security.UserClaims, error) {
@@ -20,16 +18,6 @@ func (c ApiController) GetAuth() (*security.UserClaims, error) {
 	} else {
 		return claims, err
 	}
-}
-
-func (c ApiController) ParseRequestBody() error {
-	err := json.Unmarshal(c.Ctx.Input.RequestBody, &c.RequestStruct)
-	return err
-}
-
-func (c ApiController) ValidateRequestData() error {
-	err := validate.ValidateData(c.RequestStruct)
-	return err
 }
 
 func (c ApiController) SerializeData(data interface{}) {
@@ -48,4 +36,25 @@ func (c ApiController) CheckPermission(permissions []ApiPermissionInterface, con
 		}
 	}
 	return nil
+}
+
+func (c ApiController) ServerPageResult(result []interface{}, count int64,Page int64,PageSize int64) {
+	response := util.PageResponse{
+		Count:    count,
+		Page:     Page,
+		PageSize: PageSize,
+		Result:result,
+	}
+	if count > Page*PageSize {
+		urlString := fmt.Sprintf("%s%s", util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URI())
+		nextPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page+1), 1)
+		response.NextPage = &nextPage
+	}
+	if Page > 1 {
+		urlString := fmt.Sprintf("%s%s", util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URI())
+		nextPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page-1), 1)
+		response.NextPage = &nextPage
+	}
+	c.Data["json"] = response
+	c.ServeJSON()
 }

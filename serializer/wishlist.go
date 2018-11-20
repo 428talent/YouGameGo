@@ -1,32 +1,20 @@
 package serializer
 
-import "yougame.com/yougame-server/models"
+import (
+	"fmt"
+	"yougame.com/yougame-server/models"
+)
 
-type WishListSerializer struct {
-	Id      int   `json:"id"`
-	UserId  int   `json:"user_id"`
-	Game    int   `json:"game_id"`
-	Created int64 `json:"created"`
+type WishListModel struct {
+	Id      int    `json:"id"`
+	User    string `json:"user"`
+	Game    string `json:"game"`
+	Created int64  `json:"created"`
 }
 
-func SerializeWishList(data models.WishList, template interface{}) interface{} {
-	switch template.(type) {
-	case WishListSerializer:
-		return WishListSerializer{
-			Id:      data.Id,
-			UserId:  data.UserId,
-			Game:    data.Game.Id,
-			Created: data.Created.Unix(),
-		}
-	}
-	return nil
-}
-
-func SerializeWishListMultiple(data []*models.WishList, template interface{}) []*interface{} {
-	var result []*interface{}
-	for _, wishlist := range data {
-		item := SerializeWishList(*wishlist, template)
-		result = append(result, &item)
-	}
-	return result
+func (s *WishListModel) SerializeData(model *models.WishList, site string) {
+	s.Id = model.Id
+	s.User = fmt.Sprintf("%s/api/user/%d", site, model.UserId)
+	s.Game = fmt.Sprintf("%s/api/game/%d", site, model.Game.Id)
+	s.Created = model.Created.Unix()
 }
