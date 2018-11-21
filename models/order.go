@@ -15,7 +15,6 @@ type OrderState string
 type Order struct {
 	Id          int
 	Enable bool
-
 	State       OrderState
 	User        *User        `orm:"rel(fk)"`
 	Transaction *Transaction `orm:"reverse(one)"`
@@ -63,12 +62,13 @@ func (order *Order) QueryById() error {
 	return o.Read(order)
 }
 
-func GetOrderList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Order, error) {
+func GetOrderList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64,[]*Order, error) {
 	o := orm.NewOrm()
 	var orderList []*Order
 	seter := o.QueryTable("order")
 	_, err := filter(seter).All(&orderList)
-	return orderList, err
+	count, err := filter(seter).Count()
+	return count,orderList, err
 }
 func (orderGood *OrderGood) QueryById() error {
 	o := orm.NewOrm()

@@ -2,8 +2,8 @@ package order
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	"github.com/sirupsen/logrus"
+	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
@@ -66,54 +66,43 @@ func (c *ApiOrderController) GetOrderList() {
 	if claims == nil {
 		panic(security.ReadAuthorizationFailed)
 	}
-	orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
+	//orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	//if err != nil {
+	//	panic(err)
+	//}
 	page, pageSize := util.ParsePageRequest(c.Controller)
-	permissionContext := map[string]interface{}{
-		"claims":      *claims,
-		"orderUserId": orderUserId,
-	}
-	permissions := []api.ApiPermissionInterface{
-		GetOwnOrderPermission{},
-	}
-	err = c.CheckPermission(permissions, permissionContext)
-	if err != nil {
-		panic(api.PermissionDeniedError)
-	}
+	//permissionContext := map[string]interface{}{
+	//	"claims":      *claims,
+	//	"orderUserId": orderUserId,
+	//}
+	//permissions := []api.ApiPermissionInterface{
+	//	GetOwnOrderPermission{},
+	//}
+	//err = c.CheckPermission(permissions, permissionContext)
+	//if err != nil {
+	//	panic(api.PermissionDeniedError)
+	//}
 	//query filter
-	queryParam := c.Input()
-	beego.Debug(queryParam)
-	orders, err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
-		cond := orm.NewCondition().And("user_id", orderUserId)
-		if stateFilter := c.GetStrings("state"); len(stateFilter) > 0 {
-			stateCond := orm.NewCondition()
-			for _, state := range stateFilter {
-				stateCond = stateCond.Or("state", state)
-			}
-			cond = cond.AndCond(stateCond)
+	builder := service.GetOrderListBuilder{}
+	if userIdParam := c.GetString("user"); len(userIdParam) != 0 {
+		userId,err := strconv.Atoi(userIdParam)
+		if err == nil {
+			builder.SetUser(int64(userId))
 		}
-
-		if orderId := c.GetString("orderId"); len(orderId) > 0 {
-			cond = cond.And("id", orderId)
-		}
-		return o.SetCond(cond)
-	})
+	}
+	if states := c.GetStrings("state"); len(states) > 0 {
+		builder.SetState(states)
+	}
+	count, orders, err := service.GetOrderList(builder)
 	if err != nil {
 		panic(err)
 	}
-	serializedData, err := serializer.SerializeOrderList(orders, serializer.OrderSerializer{})
-	if err != nil {
-		panic(err)
+	results := make([]interface{}, 0)
+	for _, item := range orders {
+		results = append(results, reflect.ValueOf(*item).Interface())
 	}
-	c.Data["json"] = util.PageResponse{
-		Page:     page,
-		PageSize: pageSize,
-		Result:   serializedData,
-		Count:    int64(len(serializedData)),
-	}
-	c.ServeJSON()
+	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 
 func (c *ApiOrderController) PayOrder() {
@@ -153,7 +142,7 @@ func (c *ApiOrderController) PayOrder() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	c.Data["json"] = &serializer.CommonApiResponseBody{
 		Success: true,
 	}

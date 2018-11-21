@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
@@ -301,7 +302,52 @@ func (c *ApiUserController) UploadJsonAvatar() {
 	c.Data["json"] = serializeData
 	c.ServeJSON()
 }
-
+func (c *ApiUserController) GetOrderList() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(e)
+		api.HandleApiError(c.Controller, e)
+	})
+	claims, err := security.ParseAuthHeader(c.Controller)
+	if err != nil {
+		panic(err)
+	}
+	if claims == nil {
+		panic(security.ReadAuthorizationFailed)
+	}
+	orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+	page, pageSize := util.ParsePageRequest(c.Controller)
+	permissionContext := map[string]interface{}{
+		"claims":      *claims,
+		"orderUserId": orderUserId,
+	}
+	permissions := []api.ApiPermissionInterface{
+		order.GetOwnOrderPermission{},
+	}
+	err = c.CheckPermission(permissions, permissionContext)
+	if err != nil {
+		panic(api.PermissionDeniedError)
+	}
+	//query filter
+	builder := service.GetOrderListBuilder{}
+	builder.SetUser(int64(claims.UserId))
+	if states := c.GetStrings("state"); len(states) > 0 {
+		builder.SetState(states)
+	}
+	count,orders,err := service.GetOrderList(builder)
+	if err != nil {
+		panic(err)
+	}
+	results := make([]interface{},0)
+	for _, item := range orders {
+		results = append(results, reflect.ValueOf(*item).Interface())
+	}
+	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{},results,util.GetSiteAndPortUrl(c.Controller))
+	c.ServerPageResult(serializerDataList, count, page, pageSize)
+}
 func (c *ApiUserController) GetUserWishList() {
 	var err error
 	defer api.CheckError(func(e error) {

@@ -1,15 +1,16 @@
 package serializer
 
 import (
+	"fmt"
 	"yougame.com/yougame-server/models"
 )
 
-type OrderSerializer struct {
+type OrderModel struct {
 	Id      int                    `json:"id"`
-	Goods   []*OrderItemSerializer `json:"goods"`
 	State   string                 `json:"state"`
 	Created int64                  `json:"created"`
 	Updated int64                  `json:"updated"`
+	Link    []*ApiLink             `json:"link"`
 }
 type OrderItemSerializer struct {
 	Id       int     `json:"id"`
@@ -21,57 +22,22 @@ type OrderItemSerializer struct {
 	Created  int64   `json:"created"`
 }
 
-func SerializeOrder(data models.Order, template interface{}) (interface{}, error) {
-	switch template.(type) {
-	case OrderSerializer:
-		err := data.ReadOrderGoods()
-		if err != nil {
-			return nil, err
-		}
-		var goodList []*OrderItemSerializer
-		for _, orderGood := range data.Goods {
-			err = orderGood.ReadGood()
-			if err != nil {
-				return nil, err
-			}
-			err = orderGood.Good.ReadGame()
-			if err != nil {
-				return nil, err
-			}
-			err = orderGood.Good.Game.ReadGameBand()
-			if err != nil {
-				return nil, err
-			}
-			goodList = append(goodList, &OrderItemSerializer{
-				Id:       orderGood.Id,
-				GoodName: orderGood.Name,
-				Name:     orderGood.Good.Game.Name,
-				Price:    orderGood.Price,
-				GameId:   orderGood.Good.Game.Id,
-				BandPic:  orderGood.Good.Game.Band.Path,
-				Created:  orderGood.Created.Unix(),
-			})
-		}
-		order := OrderSerializer{
-			Id:      data.Id,
-			State:   string(data.State),
-			Goods:   goodList,
-			Created: data.Created.Unix(),
-			Updated: data.Updated.Unix(),
-		}
-		return order, nil
-
+func (o *OrderModel) SerializeData(model interface{}, site string) interface{} {
+	order := model.(models.Order)
+	serializeData := OrderModel{
+		Id:      order.Id,
+		State:   string(order.State),
+		Created: order.Created.Unix(),
+		Updated: order.Updated.Unix(),
 	}
-	return nil, nil
-}
-func SerializeOrderList(data []*models.Order, template interface{}) ([]*interface{}, error) {
-	var result []*interface{}
-	for _, order := range data {
-		item, err := SerializeOrder(*order, template)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, &item)
-	}
-	return result, nil
+	serializeData.Link = append(serializeData.Link, &ApiLink{
+		Rel:  "goods",
+		Href: fmt.Sprintf("%s/api/order/%d/goods", site, order.Id),
+		Type: "GET",
+	}, &ApiLink{
+		Rel:  "user",
+		Href: fmt.Sprintf("%s/api/user/%d", site, order.User.Id),
+		Type: "GET",
+	})
+	return serializeData
 }
