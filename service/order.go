@@ -20,6 +20,14 @@ func (builder *GetOrderListBuilder) SetState(state []string) *GetOrderListBuilde
 	builder.state = state
 	return builder
 }
+func (builder *GetOrderListBuilder) SetPage(page int64) *GetOrderListBuilder{
+	builder.page = page
+	return builder
+}
+func (builder *GetOrderListBuilder) SetPageSize(pageSize int64) *GetOrderListBuilder{
+	builder.pageSize = pageSize
+	return builder
+}
 func (builder *GetOrderListBuilder) build() *orm.Condition {
 	cond := orm.NewCondition()
 	if builder.user != 0 {
@@ -48,3 +56,7 @@ func GetOrderList(builder GetOrderListBuilder) (int64, []*models.Order, error) {
 	})
 	return count, orders, err
 }
+
+//func GetOrderById(id int64) (*models.Order,error){
+//
+//}

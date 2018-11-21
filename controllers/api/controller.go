@@ -52,8 +52,8 @@ func (c ApiController) ServerPageResult(result []interface{}, count int64,Page i
 	}
 	if Page > 1 {
 		urlString := fmt.Sprintf("%s%s", util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URI())
-		nextPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page-1), 1)
-		response.NextPage = &nextPage
+		prevPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page-1), 1)
+		response.PrevPage = &prevPage
 	}
 	c.Data["json"] = response
 	c.ServeJSON()

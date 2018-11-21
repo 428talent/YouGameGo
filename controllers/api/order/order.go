@@ -84,8 +84,9 @@ func (c *ApiOrderController) GetOrderList() {
 	//}
 	//query filter
 	builder := service.GetOrderListBuilder{}
+	builder.SetPage(page).SetPageSize(pageSize)
 	if userIdParam := c.GetString("user"); len(userIdParam) != 0 {
-		userId,err := strconv.Atoi(userIdParam)
+		userId, err := strconv.Atoi(userIdParam)
 		if err == nil {
 			builder.SetUser(int64(userId))
 		}
@@ -105,6 +106,58 @@ func (c *ApiOrderController) GetOrderList() {
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 
+func (c *ApiOrderController) GetOrderGoods() {
+	var err error
+	defer api.CheckError(func(e error) {
+		logrus.Error(e)
+		api.HandleApiError(c.Controller, e)
+	})
+	claims, err := security.ParseAuthHeader(c.Controller)
+	if err != nil {
+		panic(err)
+	}
+	if claims == nil {
+		panic(security.ReadAuthorizationFailed)
+	}
+	//orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	//if err != nil {
+	//	panic(err)
+	//}
+	page, pageSize := util.ParsePageRequest(c.Controller)
+	//permissionContext := map[string]interface{}{
+	//	"claims":      *claims,
+	//	"orderUserId": orderUserId,
+	//}
+	//permissions := []api.ApiPermissionInterface{
+	//	GetOwnOrderPermission{},
+	//}
+	//err = c.CheckPermission(permissions, permissionContext)
+	//if err != nil {
+	//	panic(api.PermissionDeniedError)
+	//}
+	//query filter
+	builder := service.GetOrderListBuilder{}
+	builder.SetPage(page).SetPageSize(pageSize)
+	if userIdParam := c.GetString("user"); len(userIdParam) != 0 {
+		userId, err := strconv.Atoi(userIdParam)
+		if err == nil {
+			builder.SetUser(int64(userId))
+		}
+	}
+	if states := c.GetStrings("state"); len(states) > 0 {
+		builder.SetState(states)
+	}
+	count, orders, err := service.GetOrderList(builder)
+	if err != nil {
+		panic(err)
+	}
+	results := make([]interface{}, 0)
+	for _, item := range orders {
+		results = append(results, reflect.ValueOf(*item).Interface())
+	}
+	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	c.ServerPageResult(serializerDataList, count, page, pageSize)
+}
 func (c *ApiOrderController) PayOrder() {
 	var err error
 	defer api.CheckError(func(e error) {

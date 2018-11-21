@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/astaxie/beego"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	ApiError "yougame.com/yougame-server/error"
 	"yougame.com/yougame-server/security"
@@ -49,9 +50,13 @@ func HandleApiError(controller beego.Controller, err error) {
 		AuthFailedError.ServerError(controller)
 	case PermissionDeniedError:
 		PermissionNotAllowError.ServerError(controller)
-	default:
-		ServerError.ServerError(controller)
+
 	}
+	if _,isJWTValidateError := err.(*jwt.ValidationError);isJWTValidateError{
+		AuthFailedError.ServerError(controller)
+		return
+	}
+	ServerError.ServerError(controller)
 }
 func CheckError(errorHandle func(error)) {
 	troubleMaker := recover()
