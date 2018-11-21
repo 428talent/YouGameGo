@@ -6,11 +6,12 @@ import (
 )
 
 type OrderModel struct {
-	Id      int                    `json:"id"`
-	State   string                 `json:"state"`
-	Created int64                  `json:"created"`
-	Updated int64                  `json:"updated"`
-	Link    []*ApiLink             `json:"link"`
+	Id      int        `json:"id"`
+	State   string     `json:"state"`
+	UserId  int      `json:"user_id"`
+	Created int64      `json:"created"`
+	Updated int64      `json:"updated"`
+	Link    []*ApiLink `json:"link"`
 }
 type OrderItemSerializer struct {
 	Id       int     `json:"id"`
@@ -27,6 +28,7 @@ func (o *OrderModel) SerializeData(model interface{}, site string) interface{} {
 	serializeData := OrderModel{
 		Id:      order.Id,
 		State:   string(order.State),
+		UserId:  order.User.Id,
 		Created: order.Created.Unix(),
 		Updated: order.Updated.Unix(),
 	}
