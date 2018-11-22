@@ -51,6 +51,9 @@ func init() {
 				beego.NSRouter("/goods", &order.ApiOrderController{}, "get:GetOrderGoodsWithOrder"),
 			),
 		),
+		beego.NSNamespace("/good",
+			beego.NSRouter("/:id", &game.GameController{}, "get:GetGood"),
+		),
 		beego.NSRouter("/ordergood", &order.ApiOrderController{}, "get:GetOrderGoods"),
 
 	))

@@ -51,7 +51,7 @@ type OrderGoodModel struct {
 	OrderId  int     `json:"order_id"`
 	GoodId   int     `json:"good_id"`
 	CreateAt int64   `json:"create_at"`
-	Link     []*ApiLink
+	Link     []*ApiLink `json:"link"`
 }
 
 func (o *OrderGoodModel) SerializeData(model interface{}, site string) interface{} {
@@ -66,7 +66,7 @@ func (o *OrderGoodModel) SerializeData(model interface{}, site string) interface
 	}
 	serializeData.Link = append(serializeData.Link, &ApiLink{
 		Rel:  "order",
-		Href: fmt.Sprintf("%s/api/order/%d", site, orderGood.Id),
+		Href: fmt.Sprintf("%s/api/order/%d", site, orderGood.Order.Id),
 		Type: "GET",
 	})
 	return serializeData

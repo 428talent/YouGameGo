@@ -1,6 +1,9 @@
 package serializer
 
-import "yougame.com/yougame-server/models"
+import (
+	"fmt"
+	"yougame.com/yougame-server/models"
+)
 
 type Game struct {
 	Id            int                 `json:"id"`
@@ -62,4 +65,28 @@ func (g *Game) Serialize(game models.Game) {
 	}
 	g.Goods = goods
 
+}
+
+type GoodModel struct {
+	Id     int        `json:"id"`
+	GameId int        `json:"game_id"`
+	Name   string     `json:"name"`
+	Price  float64    `json:"price"`
+	Link   []*ApiLink `json:"link"`
+}
+
+func (g *GoodModel) SerializeData(model interface{}, site string) interface{} {
+	good := model.(*models.Good)
+	goodModel := GoodModel{
+		Id:     good.Id,
+		GameId: good.Game.Id,
+		Name:   good.Name,
+		Price:  good.Price,
+		Link: []*ApiLink{{
+			Rel:  "game",
+			Href: fmt.Sprintf("%s/api/game/%d", site, good.Game.Id),
+			Type: "GET",
+		},},
+	}
+	return goodModel
 }
