@@ -14,7 +14,7 @@ type OrderState string
 
 type Order struct {
 	Id          int
-	Enable bool
+	Enable      bool
 	State       OrderState
 	User        *User        `orm:"rel(fk)"`
 	Transaction *Transaction `orm:"reverse(one)"`
@@ -30,6 +30,17 @@ type OrderGood struct {
 	Order   *Order    `orm:"rel(fk)"`
 	Good    *Good     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
+}
+
+func (orderGood *OrderGood) GetList(filter func(o orm.QuerySeter) orm.QuerySeter, md interface{}) (count int64, err error) {
+	o := orm.NewOrm()
+	seter := o.QueryTable("order_good")
+	_, err = filter(seter).All(md)
+	if err != nil {
+		return
+	}
+	count, err = filter(seter).Count()
+	return
 }
 
 func (order *Order) SaveOrder() error {
@@ -62,13 +73,21 @@ func (order *Order) QueryById() error {
 	return o.Read(order)
 }
 
-func GetOrderList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64,[]*Order, error) {
+func GetOrderList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*Order, error) {
 	o := orm.NewOrm()
 	var orderList []*Order
 	seter := o.QueryTable("order")
 	_, err := filter(seter).All(&orderList)
 	count, err := filter(seter).Count()
-	return count,orderList, err
+	return count, orderList, err
+}
+func GetOrderGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*OrderGood, error) {
+	o := orm.NewOrm()
+	var orderGoodList []*OrderGood
+	seter := o.QueryTable("order_good")
+	_, err := filter(seter).All(&orderGoodList)
+	count, err := filter(seter).Count()
+	return count, orderGoodList, err
 }
 func (orderGood *OrderGood) QueryById() error {
 	o := orm.NewOrm()

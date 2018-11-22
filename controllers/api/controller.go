@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/astaxie/beego"
-	"strings"
+	"strconv"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/util"
 )
@@ -38,21 +38,23 @@ func (c ApiController) CheckPermission(permissions []ApiPermissionInterface, con
 	return nil
 }
 
-func (c ApiController) ServerPageResult(result []interface{}, count int64,Page int64,PageSize int64) {
+func (c ApiController) ServerPageResult(result interface{}, count int64,Page int64,PageSize int64) {
 	response := util.PageResponse{
 		Count:    count,
 		Page:     Page,
 		PageSize: PageSize,
 		Result:result,
 	}
+	urlString := fmt.Sprint(util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URL())
+	queryParams := c.Ctx.Request.URL.Query()
 	if count > Page*PageSize {
-		urlString := fmt.Sprintf("%s%s", util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URI())
-		nextPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page+1), 1)
+		queryParams.Set("page",strconv.Itoa(int(Page + 1)))
+		nextPage := fmt.Sprint(urlString,"?",queryParams.Encode())
 		response.NextPage = &nextPage
 	}
 	if Page > 1 {
-		urlString := fmt.Sprintf("%s%s", util.GetSiteAndPortUrl(c.Controller), c.Ctx.Input.URI())
-		prevPage := strings.Replace(urlString, fmt.Sprint("page=", Page), fmt.Sprint("page=", Page-1), 1)
+		queryParams.Set("page",strconv.Itoa(int(Page - 1)))
+		prevPage := fmt.Sprint(urlString,"?",queryParams.Encode())
 		response.PrevPage = &prevPage
 	}
 	c.Data["json"] = response

@@ -20,11 +20,11 @@ func (builder *GetOrderListBuilder) SetState(state []string) *GetOrderListBuilde
 	builder.state = state
 	return builder
 }
-func (builder *GetOrderListBuilder) SetPage(page int64) *GetOrderListBuilder{
+func (builder *GetOrderListBuilder) SetPage(page int64) *GetOrderListBuilder {
 	builder.page = page
 	return builder
 }
-func (builder *GetOrderListBuilder) SetPageSize(pageSize int64) *GetOrderListBuilder{
+func (builder *GetOrderListBuilder) SetPageSize(pageSize int64) *GetOrderListBuilder {
 	builder.pageSize = pageSize
 	return builder
 }
@@ -57,6 +57,43 @@ func GetOrderList(builder GetOrderListBuilder) (int64, []*models.Order, error) {
 	return count, orders, err
 }
 
-//func GetOrderById(id int64) (*models.Order,error){
-//
-//}
+func GetOrderById(id int) (*models.Order, error) {
+	order := models.Order{Id: id,}
+	err := order.QueryById()
+	return &order, err
+}
+
+type GetOrderGoodListOption struct {
+	order int64
+	page  PageOption
+}
+
+func (option *GetOrderGoodListOption) SetOrder(orderId int64) *GetOrderGoodListOption {
+	option.order = orderId
+	return option
+}
+func (option *GetOrderGoodListOption) SetPage(pageOption PageOption) *GetOrderGoodListOption {
+	option.page = pageOption
+	return option
+}
+func (option *GetOrderGoodListOption) build() *orm.Condition {
+	cond := orm.NewCondition()
+	if option.order != 0 {
+		cond = cond.And("order_id", option.order)
+	}
+	if option.page.Page == 0 {
+		option.page.Page = 1
+	}
+	if option.page.PageSize == 0 {
+		option.page.PageSize = 10
+	}
+	return cond
+}
+func (option *GetOrderGoodListOption) Query(md interface{}) (int64, error) {
+	modelStruct :=  models.OrderGood{}
+	count, err :=modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
+		cond := option.build()
+		return o.SetCond(cond).Limit(option.page.PageSize).Offset((option.page.Page - 1) * option.page.PageSize)
+	}, md)
+	return count, err
+}
