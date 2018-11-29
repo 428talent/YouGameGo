@@ -5,6 +5,7 @@ import (
 	"yougame.com/yougame-server/models"
 )
 
+
 func CreateComment(content string, evaluate string, user *models.User, good *models.Good) (*models.Comment, error) {
 	o := orm.NewOrm()
 	comment := models.Comment{
@@ -13,7 +14,7 @@ func CreateComment(content string, evaluate string, user *models.User, good *mod
 		Good:       good,
 		User:       user,
 	}
-	commentId, err := o.Insert(comment)
+	commentId, err := o.Insert(&comment)
 	if err != nil {
 		return nil, err
 	}
