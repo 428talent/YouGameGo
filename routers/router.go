@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"yougame.com/yougame-server/controllers/api/cart"
+	"yougame.com/yougame-server/controllers/api/comment"
 	"yougame.com/yougame-server/controllers/api/game"
 	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/controllers/api/user"
@@ -55,6 +56,7 @@ func init() {
 			beego.NSRouter("/:id", &game.GameController{}, "get:GetGood"),
 		),
 		beego.NSRouter("/ordergood", &order.ApiOrderController{}, "get:GetOrderGoods"),
+		beego.NSRouter("/comments", &comment.ApiCommentController{}, "get:GetCommentList"),
 
 	))
 }

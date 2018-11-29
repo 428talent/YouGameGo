@@ -31,6 +31,16 @@ func GetCommentList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Comment, e
 	_, err := filter(seter).All(&commentList)
 	return commentList, err
 }
+func (comment *Comment) GetList(filter func(o orm.QuerySeter) orm.QuerySeter, md interface{}) (count int64, err error) {
+	o := orm.NewOrm()
+	seter := o.QueryTable("comment")
+	_, err = filter(seter).All(md)
+	if err != nil {
+		return
+	}
+	count, err = filter(seter).Count()
+	return
+}
 func GetGameCommentCount(gameId int) (int64, error) {
 	o := orm.NewOrm()
 	return o.QueryTable("comment").Filter("Good__Game__id", gameId).Filter("enable", true).Count()
