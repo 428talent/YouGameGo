@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	ApiError "yougame.com/yougame-server/error"
@@ -22,6 +23,12 @@ var (
 		Detail: "Authorization failed",
 		Code:   "100000",
 	}, http.StatusUnauthorized)
+
+	ResourceNoFoundError = ApiError.NewApiError(ApiError.APIError{
+		Err:    "ResourceNoFoundError",
+		Detail: "resource  not found",
+		Code:   "100004",
+	}, http.StatusNotFound)
 
 	ParseRequestDataError = ApiError.NewApiError(ApiError.APIError{
 		Err:    "ParseRequestDataError",
@@ -50,7 +57,8 @@ func HandleApiError(controller beego.Controller, err error) {
 		AuthFailedError.ServerError(controller)
 	case PermissionDeniedError:
 		PermissionNotAllowError.ServerError(controller)
-
+	case orm.ErrNoRows:
+		ResourceNoFoundError.ServerError(controller)
 	}
 	if _,isJWTValidateError := err.(*jwt.ValidationError);isJWTValidateError{
 		AuthFailedError.ServerError(controller)
