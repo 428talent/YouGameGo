@@ -1,13 +1,20 @@
 package service
 
 import (
+	"errors"
 	"github.com/astaxie/beego/orm"
 	"yougame.com/yougame-server/models"
 )
 
-
+var (
+	CommentExistError = errors.New("comment already exist")
+)
 func CreateComment(content string, evaluate string, user *models.User, good *models.Good) (*models.Comment, error) {
 	o := orm.NewOrm()
+
+	if o.QueryTable("comment").Filter("user_id",user.Id).Filter("good_id",good.Id).Exist() {
+		return nil,CommentExistError
+	}
 	comment := models.Comment{
 		Content:    content,
 		Evaluation: evaluate,

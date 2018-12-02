@@ -9,6 +9,7 @@ import (
 	ApiError "yougame.com/yougame-server/error"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/validate"
 )
 
 var (
@@ -48,20 +49,34 @@ var (
 )
 
 func HandleApiError(controller beego.Controller, err error) {
+
 	switch err {
 	case service.NoAuthError:
 		AuthFailedError.ServerError(controller)
+		return
 	case ParseJsonDataError:
 		ParseRequestDataError.ServerError(controller)
+		return
 	case security.ReadAuthorizationFailed:
 		AuthFailedError.ServerError(controller)
+		return
 	case PermissionDeniedError:
 		PermissionNotAllowError.ServerError(controller)
+		return
 	case orm.ErrNoRows:
 		ResourceNoFoundError.ServerError(controller)
+		return
 	}
-	if _,isJWTValidateError := err.(*jwt.ValidationError);isJWTValidateError{
+	if _, isJWTValidateError := err.(*jwt.ValidationError); isJWTValidateError {
 		AuthFailedError.ServerError(controller)
+		return
+	}
+	if validateError, ok := err.(*validate.ValidateError); ok {
+		ApiError.NewApiError(ApiError.APIError{
+			Err:    "InvalidateRequestDataError",
+			Detail: validateError.Error(),
+			Code:   "100005",
+		}, http.StatusBadRequest).ServerError(controller)
 		return
 	}
 	ServerError.ServerError(controller)

@@ -5,12 +5,50 @@ import (
 	"yougame.com/yougame-server/models"
 )
 
-func GetWishList(filter map[string]interface{}, page int64, pageSize int64) (int64, []*models.WishList, error) {
+type WishListQueryBuilder struct {
+	ids        []interface{}
+	userIds    []interface{}
+	pageOption PageOption
+}
+
+func (builder *WishListQueryBuilder) InId(ids ...interface{}) *WishListQueryBuilder {
+	builder.ids = append(builder.ids, ids...)
+	return builder
+}
+
+func (builder *WishListQueryBuilder) BelongToUser(userId ...interface{}) *WishListQueryBuilder {
+	builder.userIds = append(builder.userIds, userId...)
+	return builder
+}
+
+func (builder *WishListQueryBuilder) WithPage(option PageOption) *WishListQueryBuilder {
+	builder.pageOption = option
+	return builder
+}
+func (builder *WishListQueryBuilder) GetWishList() (int64, []*models.WishList, error) {
+	cond := orm.NewCondition()
+	if len(builder.userIds) > 0 {
+		cond = cond.And("user_id__in", builder.userIds...)
+	}
+	if len(builder.ids) > 0 {
+		cond = cond.And("id__in", builder.ids...)
+	}
 	count, wishlist, err := models.GetWishList(func(o orm.QuerySeter) orm.QuerySeter {
-		if userId, exist := filter["user"]; exist {
-			o = o.Filter("user_id", userId.(int64))
-		}
-		return o.Limit(pageSize).Offset((page - 1) * pageSize)
+		return o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset((builder.pageOption.Page - 1) * builder.pageOption.PageSize)
 	})
 	return *count, wishlist, err
+}
+
+func (builder *WishListQueryBuilder) DeleteWishList() error {
+	cond := orm.NewCondition()
+	if len(builder.userIds) > 0 {
+		cond = cond.And("user_id__in", builder.userIds...)
+	}
+	if len(builder.ids) > 0 {
+		cond = cond.And("id__in", builder.ids...)
+	}
+	err := models.DeleteWishList(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.SetCond(cond)
+	})
+	return err
 }

@@ -57,6 +57,11 @@ func (c *ApiCommentController) CreateComment() {
 	var err error
 	defer api.CheckError(func(e error) {
 		beego.Error(err)
+		switch e {
+		case service.CommentExistError:
+			CommentAlreadyExistError.ServerError(c.Controller)
+			return
+		}
 		api.HandleApiError(c.Controller, err)
 	})
 
@@ -80,10 +85,16 @@ func (c *ApiCommentController) CreateComment() {
 		panic(api.ParseJsonDataError)
 	}
 
+	err = requestBodyModel.Validate()
+	if err != nil {
+		panic(err)
+	}
+
 	goodId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		panic(err)
 	}
+
 	comment, err := service.CreateComment(requestBodyModel.Content, requestBodyModel.Evaluation, &models.User{Id: claims.UserId}, &models.Good{Id: goodId})
 	if err != nil {
 		panic(err)

@@ -354,19 +354,22 @@ func (c *ApiUserController) GetUserWishList() {
 		api.HandleApiError(c.Controller, e)
 	})
 
+	queryBuilder := service.WishListQueryBuilder{}
 	page, pageSize := c.GetPage()
-	queryContext := make(map[string]interface{})
-	beego.Debug(c.Ctx.Input.Param(":id"))
+	queryBuilder.WithPage(service.PageOption{
+		Page:page,
+		PageSize:pageSize,
+	})
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		panic(err)
 	}
 	if userId > 0 {
-		queryContext["user"] = int64(userId)
+		queryBuilder.BelongToUser(userId)
 	}else{
 		panic(api.ParseJsonDataError)
 	}
-	count, wishlist, err := service.GetWishList(queryContext, page, pageSize)
+	count, wishlist, err := queryBuilder.GetWishList()
 	if err != nil {
 		panic(err)
 	}

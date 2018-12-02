@@ -3,7 +3,6 @@ package security
 import (
 	"github.com/astaxie/beego"
 	"github.com/dgrijalva/jwt-go"
-	"letauth/security"
 	"yougame.com/yougame-server/models"
 )
 
@@ -15,6 +14,9 @@ type UserClaims struct {
 func ParseAuthHeader(c beego.Controller) (*UserClaims, error) {
 	jwtToken := c.Ctx.Request.Header.Get("Authorization")
 	beego.Debug(jwtToken)
+	if len(jwtToken) == 0{
+		return nil,ReadAuthorizationFailed
+	}
 	var claims UserClaims
 	token, err := jwt.ParseWithClaims(jwtToken, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(AppSecret), nil
@@ -68,7 +70,7 @@ func GenerateJWTSign(user *models.User) (*string, error) {
 		UserId: user.Id,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(security.AppSecret))
+	tokenString, err := token.SignedString([]byte(AppSecret))
 	if err != nil {
 		return nil, err
 	}

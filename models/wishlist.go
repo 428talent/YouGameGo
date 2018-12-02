@@ -8,7 +8,7 @@ import (
 type WishList struct {
 	Id      int
 	UserId  int
-	Enable bool
+	Enable  bool
 	Game    *Game     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
@@ -27,12 +27,23 @@ func GetWishList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*WishL
 	o := orm.NewOrm()
 	var wishlist []*WishList
 	seter := o.QueryTable("wish_list")
+
 	_, err := filter(seter).All(&wishlist)
 	if err != nil {
 		return nil, nil, err
 	}
 	count, err := filter(seter).Count()
 	return &count, wishlist, err
+}
+
+func DeleteWishList(filter func(o orm.QuerySeter) orm.QuerySeter) error {
+	o := orm.NewOrm()
+	seter := o.QueryTable("wish_list")
+	_, err := filter(seter).Update(orm.Params{"enable": false})
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func (w *WishList) ReadGame() error {
