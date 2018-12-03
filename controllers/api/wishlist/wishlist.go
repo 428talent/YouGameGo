@@ -31,6 +31,7 @@ func (c *ApiWishListController) GetWishList() {
 	if userId != 0 {
 		queryBuilder.BelongToUser(userId)
 	}
+	queryBuilder.OnlyEnable(true)
 	count, wishlist, err := queryBuilder.GetWishList()
 	if err != nil {
 		panic(err)
