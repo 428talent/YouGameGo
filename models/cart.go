@@ -25,12 +25,13 @@ func (c *CartItem) ReadGood() error {
 	return err
 }
 
-func GetCartList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*CartItem, error) {
+func GetCartList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64,[]*CartItem, error) {
 	o := orm.NewOrm()
 	var cartList []*CartItem
 	seter := o.QueryTable("cart_item")
 	_, err := filter(seter).All(&cartList)
-	return cartList, err
+	count, err := filter(seter).Count()
+	return count,cartList, err
 }
 
 func (c *CartItem) Save() error {
