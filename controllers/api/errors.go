@@ -44,8 +44,9 @@ var (
 	}, http.StatusForbidden)
 )
 var (
-	ParseJsonDataError = errors.New("cannot parse json request")
-	ClaimsNoFoundError = errors.New("cannot parse json request")
+	ParseJsonDataError    = errors.New("cannot parse json request")
+	ClaimsNoFoundError    = errors.New("claims not found")
+	ResourceNotFoundError = errors.New("resource not found")
 )
 
 func HandleApiError(controller beego.Controller, err error) {
@@ -66,7 +67,11 @@ func HandleApiError(controller beego.Controller, err error) {
 	case orm.ErrNoRows:
 		ResourceNoFoundError.ServerError(controller)
 		return
+	case ResourceNotFoundError:
+		ResourceNoFoundError.ServerError(controller)
+		return
 	}
+
 	if _, isJWTValidateError := err.(*jwt.ValidationError); isJWTValidateError {
 		AuthFailedError.ServerError(controller)
 		return

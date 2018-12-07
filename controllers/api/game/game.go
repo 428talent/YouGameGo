@@ -229,32 +229,37 @@ func (c *GameController) AddGood() {
 }
 
 func (c *GameController) GetGame() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(err)
-		api.HandleApiError(c.Controller, err)
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		queryBuilder := service.GameQueryBuilder{}
+		queryBuilder.InId(gameId)
+		count,result,err := queryBuilder.Query()
+		if err != nil {
+			panic(err)
+		}
+		if *count == 0{
+			panic(api.ResourceNotFoundError)
+		}
+		game := result[0]
+
+		if err = game.ReadGameBand();err != nil {
+			panic(err)
+		}
+		if err = game.ReadGamePreviewImage();err != nil{
+			panic(err)
+		}
+		if err = game.ReadTags();err != nil {
+			panic(err)
+		}
+		if err = game.ReadGoods();err != nil {
+			panic(err)
+		}
+		serializeData := serializer.Game{}
+		serializeData.Serialize(*game)
+		c.Data["json"] = serializeData
+		c.ServeJSON()
 	})
-	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-
-	game := models.Game{
-		Id: gameId,
-	}
-	err = game.QueryById()
-	if err != nil {
-		panic(err)
-		return
-	}
-
-	game.ReadGameBand()
-	game.ReadGamePreviewImage()
-	game.ReadTags()
-	game.ReadGoods()
-
-	serializeData := serializer.Game{}
-	serializeData.Serialize(game)
-	c.Data["json"] = serializeData
-	c.ServeJSON()
 }

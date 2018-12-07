@@ -8,13 +8,13 @@ import (
 )
 
 type Game struct {
-	Id            int `json:"id"`
-	Name          string `json:"name"`
-	Price         float32 `json:"price"`
+	Id            int       `json:"id"`
+	Name          string    `json:"name"`
+	Price         float32   `json:"price"`
 	ReleaseTime   time.Time `json:"release_time"`
-	Publisher     string `json:"publisher"`
-	Enable        bool `json:"enable"`
-	Band          *Image `orm:"null;rel(one);on_delete(set_null)"`
+	Publisher     string    `json:"publisher"`
+	Enable        bool      `json:"enable"`
+	Band          *Image    `orm:"null;rel(one);on_delete(set_null)"`
 	Intro         string
 	Tags          []*Tag    `orm:"rel(m2m)"`
 	PreviewImages []*Image  `orm:"rel(m2m)"`
@@ -70,12 +70,16 @@ func (g *Game) SaveGameBangImage(path string) error {
 	return err
 }
 
-func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Game, error) {
+func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game, error) {
 	o := orm.NewOrm()
 	var gameList []*Game
 	seter := o.QueryTable("game")
 	_, err := filter(seter).All(&gameList)
-	return gameList, err
+	if err != nil {
+		return nil, nil, err
+	}
+	count, err := filter(seter).Count()
+	return &count, gameList, err
 }
 
 func (g *Game) ReadGameBand() (err error) {
