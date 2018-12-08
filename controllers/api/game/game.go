@@ -146,12 +146,12 @@ func (c *GameController) GetGood() {
 	if err != nil {
 		panic(err)
 	}
-	good,err := service.GetGoodById(goodId)
+	good, err := service.GetGoodById(goodId)
 	if err != nil {
 		panic(err)
 	}
 	goodModel := serializer.GoodModel{}
-	c.Data["json"] = goodModel.SerializeData(good,util.GetSiteAndPortUrl(c.Controller))
+	c.Data["json"] = goodModel.SerializeData(good, util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 
@@ -191,41 +191,39 @@ func (c *GameController) AddTags() {
 }
 
 func (c *GameController) AddGood() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(err)
-		api.HandleApiError(c.Controller, err)
-	})
-	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-	_, err = security.ParseAuthHeader(c.Controller)
-	if err != nil {
-		panic(err)
-	}
-	var requestBodyStruct request.AddGoodRequestBody
-	err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyStruct)
-	if err != nil {
-		panic(err)
-	}
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		_, err = security.ParseAuthHeader(c.Controller)
+		if err != nil {
+			panic(err)
+		}
+		var requestBodyStruct request.AddGoodRequestBody
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyStruct)
+		if err != nil {
+			panic(err)
+		}
 
-	game := models.Game{Id: gameId}
-	err = game.QueryById()
-	if err != nil {
-		panic(err)
-	}
-	good := models.Good{
-		Name:  requestBodyStruct.Name,
-		Price: requestBodyStruct.Price,
-		Game:  &game,
-	}
-	err = game.AddGood(good)
-	if err != nil {
-		panic(err)
-	}
-	c.Data["json"] = game
-	c.ServeJSON()
+		game := models.Game{Id: gameId}
+		err = game.QueryById()
+		if err != nil {
+			panic(err)
+		}
+		good := models.Good{
+			Name:  requestBodyStruct.Name,
+			Price: requestBodyStruct.Price,
+			Game:  &game,
+		}
+		err = game.AddGood(good)
+		if err != nil {
+			panic(err)
+		}
+		c.Data["json"] = game
+		c.ServeJSON()
+	})
+
 }
 
 func (c *GameController) GetGame() {
@@ -236,25 +234,25 @@ func (c *GameController) GetGame() {
 		}
 		queryBuilder := service.GameQueryBuilder{}
 		queryBuilder.InId(gameId)
-		count,result,err := queryBuilder.Query()
+		count, result, err := queryBuilder.Query()
 		if err != nil {
 			panic(err)
 		}
-		if *count == 0{
+		if *count == 0 {
 			panic(api.ResourceNotFoundError)
 		}
 		game := result[0]
 
-		if err = game.ReadGameBand();err != nil {
+		if err = game.ReadGameBand(); err != nil {
 			panic(err)
 		}
-		if err = game.ReadGamePreviewImage();err != nil{
+		if err = game.ReadGamePreviewImage(); err != nil {
 			panic(err)
 		}
-		if err = game.ReadTags();err != nil {
+		if err = game.ReadTags(); err != nil {
 			panic(err)
 		}
-		if err = game.ReadGoods();err != nil {
+		if err = game.ReadGoods(); err != nil {
 			panic(err)
 		}
 		serializeData := serializer.Game{}
