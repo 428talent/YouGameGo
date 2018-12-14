@@ -31,7 +31,7 @@ func (u *User) TableName() string {
 	return "auth_user"
 }
 
-func CreateUserAccount(username string, password string) (*int64, error) {
+func CreateUserAccount(username string, password string) (*User, error) {
 	o := orm.NewOrm()
 	if o.QueryTable("auth_user").Filter("UserName", username).Exist() {
 		return nil, &AppError.APIError{
@@ -81,7 +81,7 @@ func CreateUserAccount(username string, password string) (*int64, error) {
 			return nil, err
 		}
 	}
-	return &userId, err
+	return &user, err
 }
 
 func GetUserById(userId int) (*User, error) {

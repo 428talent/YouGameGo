@@ -2,6 +2,7 @@ package serializer
 
 import (
 	"errors"
+	"fmt"
 	"yougame.com/yougame-server/models"
 )
 
@@ -26,7 +27,7 @@ func SerializeUserObject(data models.User, template interface{}) (interface{}, e
 		return SerializeUser{
 			Id:        data.Id,
 			LastLogin: data.LastLogin.Unix(),
-			Username:data.Username,
+			Username:  data.Username,
 			CreateAt:  data.Created.Unix(),
 			Profile: &SerializerUserProfile{
 				Nickname: data.Profile.Nickname,
@@ -62,5 +63,29 @@ func (p *UserLoginResponseBody) Serialize(sign string, user models.User) CommonA
 	return CommonApiResponseBody{
 		Success: true,
 		Payload: p,
+	}
+}
+
+type UserSerializerModel struct {
+	Id        int        `json:"id"`
+	Username  string     `json:"username"`
+	LastLogin int64      `json:"last_login"`
+	CreateAt  int64      `json:"create_at"`
+	Link      []*ApiLink `json:"link"`
+}
+
+func (s *UserSerializerModel) Serialize(model models.User, site string) *UserSerializerModel {
+	return &UserSerializerModel{
+		Id:        model.Id,
+		Username:  model.Username,
+		LastLogin: model.LastLogin.Unix(),
+		CreateAt:  model.Created.Unix(),
+		Link: []*ApiLink{
+			&ApiLink{
+				Rel:  "profile",
+				Href: fmt.Sprintf("%s/api/user/%d/profile", site, model.Id),
+				Type: "GET",
+			},
+		},
 	}
 }

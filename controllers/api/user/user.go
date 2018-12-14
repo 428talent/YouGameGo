@@ -57,18 +57,14 @@ func (c *ApiUserController) CreateUser() {
 	if err != nil {
 		panic(err)
 	}
-	userId, err := models.CreateUserAccount(requestBody.Username, requestBody.Password)
+	user, err := models.CreateUserAccount(requestBody.Username, requestBody.Password)
 	if err != nil {
 		panic(err)
 	}
-	c.Data["json"] = serializer.CommonApiResponseBody{
-		Success: true,
-		Payload: CreateUserResponsePayload{
-			Username: requestBody.Username,
-			Id:       *userId,
-		},
-	}
+	serializerModel := serializer.UserSerializerModel{}
 
+	c.Data["json"] = serializerModel.Serialize(*user, util.GetSiteAndPortUrl(c.Controller))
+	c.ServeJSON()
 }
 
 func (c *ApiUserController) UserLogin() {
@@ -337,15 +333,15 @@ func (c *ApiUserController) GetOrderList() {
 	if states := c.GetStrings("state"); len(states) > 0 {
 		builder.SetState(states)
 	}
-	count,orders,err := service.GetOrderList(builder)
+	count, orders, err := service.GetOrderList(builder)
 	if err != nil {
 		panic(err)
 	}
-	results := make([]interface{},0)
+	results := make([]interface{}, 0)
 	for _, item := range orders {
 		results = append(results, reflect.ValueOf(*item).Interface())
 	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{},results,util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{}, results, util.GetSiteAndPortUrl(c.Controller))
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiUserController) GetUserWishList() {
@@ -357,8 +353,8 @@ func (c *ApiUserController) GetUserWishList() {
 	queryBuilder := service.WishListQueryBuilder{}
 	page, pageSize := c.GetPage()
 	queryBuilder.WithPage(service.PageOption{
-		Page:page,
-		PageSize:pageSize,
+		Page:     page,
+		PageSize: pageSize,
 	})
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
@@ -366,7 +362,7 @@ func (c *ApiUserController) GetUserWishList() {
 	}
 	if userId > 0 {
 		queryBuilder.BelongToUser(userId)
-	}else{
+	} else {
 		panic(api.ParseJsonDataError)
 	}
 	count, wishlist, err := queryBuilder.GetWishList()
