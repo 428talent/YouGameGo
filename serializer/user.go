@@ -7,13 +7,13 @@ import (
 )
 
 type SerializeUser struct {
-	Id        int                    `json:"id"`
-	Username  string                 `json:"username"`
-	LastLogin int64                  `json:"last_login"`
-	CreateAt  int64                  `json:"create_at"`
-	Profile   *SerializerUserProfile `json:"profile"`
+	Id        int               `json:"id"`
+	Username  string            `json:"username"`
+	LastLogin int64             `json:"last_login"`
+	CreateAt  int64             `json:"create_at"`
+	Profile   *UserProfileModel `json:"profile"`
 }
-type SerializerUserProfile struct {
+type UserProfileModel struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Avatar   string `json:"avatar"`
@@ -29,7 +29,7 @@ func SerializeUserObject(data models.User, template interface{}) (interface{}, e
 			LastLogin: data.LastLogin.Unix(),
 			Username:  data.Username,
 			CreateAt:  data.Created.Unix(),
-			Profile: &SerializerUserProfile{
+			Profile: &UserProfileModel{
 				Nickname: data.Profile.Nickname,
 				Email:    data.Profile.Email,
 				Avatar:   data.Profile.Avatar,
@@ -87,5 +87,14 @@ func (s *UserSerializerModel) Serialize(model models.User, site string) *UserSer
 				Type: "GET",
 			},
 		},
+	}
+}
+
+func (p *UserProfileModel) Serialize(model models.Profile, site string) *UserProfileModel {
+	return &UserProfileModel{
+		Nickname: model.Nickname,
+		Email:    model.Nickname,
+		UpdateAt: model.Updated.Unix(),
+		Avatar:   model.Avatar,
 	}
 }

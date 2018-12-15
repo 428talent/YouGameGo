@@ -69,7 +69,7 @@ func CreateUserAccount(username string, password string) (*User, error) {
 			Id: int(profileId),
 		},
 	}
-	userId, err := o.Insert(&user)
+	_, err = o.Insert(&user)
 	if err != nil {
 		beego.Error(err)
 		err = o.Rollback()

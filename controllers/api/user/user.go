@@ -93,30 +93,6 @@ func (c *ApiUserController) UserLogin() {
 
 }
 
-//type GetUserResponseBody struct {
-//	Id        int    `json:"id"`
-//	Username  string `json:"username"`
-//	LastLogin *int64 `json:"last_login"`
-//	CreateAt  *int64 `json:"create_at"`
-//}
-//
-//func SerializerUser(user *models.User) *GetUserResponseBody {
-//	createAt := user.Created.Unix()
-//	lastLogin := user.LastLogin.Unix()
-//
-//	serializerData := &GetUserResponseBody{
-//		Id:        user.Id,
-//		Username:  user.Username,
-//		LastLogin: &lastLogin,
-//		CreateAt:  &createAt,
-//	}
-//
-//	if (user.LastLogin == time.Time{}) {
-//		serializerData.LastLogin = nil
-//	}
-//	return serializerData
-//}
-
 func (c *ApiUserController) GetUser() {
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
@@ -128,37 +104,11 @@ func (c *ApiUserController) GetUser() {
 		beego.Error(err)
 		return
 	}
-	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
-	if err != nil {
-		beego.Error(err)
-	}
-	c.Data["json"] = serializeData
+	serializerModel := serializer.UserSerializerModel{}
+	c.Data["json"] = serializerModel.Serialize(*user, util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 
-//
-//
-//func (c *ApiUserController) GetUserList() {
-//	page, pageSize := util.ReadPageParam(c.Controller)
-//	count, userList, err := models.GetAllUser(page, pageSize)
-//	if err != nil {
-//		beego.Error(err)
-//		return
-//	}
-//	var serializeData []interface{}
-//	for _, data := range userList {
-//		serializeData = append(serializeData, c.Serialize(*data))
-//	}
-//	c.Data["json"] = common.PageResponse{
-//		Count:    *count,
-//		PageSize: pageSize,
-//		Page:     page,
-//		Result:   serializeData,
-//	}
-//	c.ServeJSON()
-//}
-//
-//
 func (c *ApiUserController) UploadAvatar() {
 	var err error
 	defer api.CheckError(func(e error) {
@@ -194,6 +144,7 @@ func (c *ApiUserController) UploadAvatar() {
 	if err != nil {
 		beego.Error(err)
 	}
+
 	defer f.Close()
 	models.ReadProfile(user)
 	err = os.Remove(user.Profile.Avatar)
@@ -206,11 +157,8 @@ func (c *ApiUserController) UploadAvatar() {
 	if err != nil {
 		panic(err)
 	}
-	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
-	if err != nil {
-		beego.Error(err)
-	}
-	c.Data["json"] = serializeData
+	serializerModel := serializer.UserProfileModel{}
+	c.Data["json"] = serializerModel.Serialize(*user.Profile,util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 

@@ -95,3 +95,5 @@ func UpdateUserAvatar(uid int, path string) error {
 	_, err = o.Update(&profile)
 	return nil
 }
+
+
