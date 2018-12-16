@@ -96,4 +96,20 @@ func UpdateUserAvatar(uid int, path string) error {
 	return nil
 }
 
+func UpdateUserProfile(profile models.Profile, fields ...string) (*models.Profile, error) {
+	o := orm.NewOrm()
+	user := profile.User
+	user.ReadProfile()
+	profile.Id = user.Profile.Id
+	err  := profile.Update(o,fields...)
+	if err != nil {
+		return nil,err
+	}
+	userProfile,err := models.GetProfileByUser(int64(profile.User.Id))
+	if err != nil {
+		return nil,err
+	}
+	return userProfile,nil
 
+
+}

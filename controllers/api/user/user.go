@@ -158,7 +158,7 @@ func (c *ApiUserController) UploadAvatar() {
 		panic(err)
 	}
 	serializerModel := serializer.UserProfileModel{}
-	c.Data["json"] = serializerModel.Serialize(*user.Profile,util.GetSiteAndPortUrl(c.Controller))
+	c.Data["json"] = serializerModel.Serialize(*user.Profile, util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 
@@ -188,14 +188,13 @@ func (c *ApiUserController) ChangeUserProfile() {
 		panic(api.PermissionDeniedError)
 	}
 
-	if err = user.Profile.ChangeUserProfile("", requestData.Nickname); err != nil {
+	profile, err := service.UpdateUserProfile(models.Profile{User: user, Nickname: requestData.Nickname}, "nickname")
+	
+	if err != nil {
 		panic(err)
 	}
-	serializeData, err := serializer.SerializeUserObject(*user, serializer.SerializeUser{})
-	if err != nil {
-		beego.Error(err)
-	}
-	c.Data["json"] = serializeData
+	serializerModel := serializer.UserProfileModel{}
+	c.Data["json"] = serializerModel.Serialize(*profile,util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 func (c *ApiUserController) UploadJsonAvatar() {

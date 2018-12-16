@@ -93,7 +93,7 @@ func (s *UserSerializerModel) Serialize(model models.User, site string) *UserSer
 func (p *UserProfileModel) Serialize(model models.Profile, site string) *UserProfileModel {
 	return &UserProfileModel{
 		Nickname: model.Nickname,
-		Email:    model.Nickname,
+		Email:    model.Email,
 		UpdateAt: model.Updated.Unix(),
 		Avatar:   model.Avatar,
 	}

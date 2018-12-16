@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"time"
 )
@@ -15,18 +14,27 @@ type Profile struct {
 	Updated  time.Time `orm:"auto_now;type(datetime)"`
 }
 
-func ReadProfile(user *User)  {
+func ReadProfile(user *User) error {
 	o := orm.NewOrm()
-	beego.Debug(user.Profile)
 	if user.Profile != nil {
 		err := o.Read(user.Profile)
 		if err != nil {
-			beego.Error(err)
+			return err
 		}
-	}
 
+	}
+	return nil
 }
 
+func GetProfileByUser(userId int64) (*Profile,error) {
+	o := orm.NewOrm()
+	var profile Profile
+	err := o.QueryTable("profile").Filter("User__Id", userId).One(&profile)
+	if err != nil {
+		return nil,err
+	}
+	return &profile,nil
+}
 func (p *Profile) ChangeUserProfile(email string, nickname string) error {
 	o := orm.NewOrm()
 	fields := make([]string, 0)
@@ -48,5 +56,10 @@ func (p *Profile) SaveAvatar(path string) error {
 	o := orm.NewOrm()
 	p.Avatar = path
 	_, err := o.Update(p, "avatar")
+	return err
+}
+
+func (p *Profile) Update(o orm.Ormer, fields ...string) error {
+	_, err := o.Update(p, fields...)
 	return err
 }
