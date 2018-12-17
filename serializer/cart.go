@@ -84,3 +84,30 @@ func (c *CartModel) SerializeData(model interface{}, site string) interface{} {
 	return data
 
 }
+
+type CartTemplate struct {
+	Id      int        `json:"id" source:"Id" source_type:"int"`
+	GoodId  int        `json:"good_id" source:"Good.Id" source_type:"int"`
+	UserId  int        `json:"user_id" source:"User.Id" source_type:"int"`
+	Created int64      `json:"created" source:"Created.Unix()[0]" source_type:"int"`
+	Link    []*ApiLink `json:"link"`
+}
+
+func (t *CartTemplate) CustomSerialize(convertTag string, value interface{}) interface{} {
+	return value
+}
+
+func (t *CartTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	data := model.(*models.CartItem)
+	SerializeModelData(model, t)
+	site := context["site"].(string)
+	t.Link = []*ApiLink{{
+		Rel:  "good",
+		Href: fmt.Sprintf("%s/api/good/%d", site, data.Good.Id),
+		Type: "GET",
+	}, {
+		Rel:  "user",
+		Href: fmt.Sprintf("%s/api/user/%d", site, data.User.Id),
+		Type: "GET",
+	},}
+}

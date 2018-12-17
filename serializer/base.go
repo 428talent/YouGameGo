@@ -100,3 +100,15 @@ func SerializeModelData(data interface{}, template interface{}) interface{} {
 
 	return nil
 }
+
+func SerializeMultipleTemplate(items interface{},template Template,context map[string]interface{})interface{}{
+	result := make([]interface{},0)
+	itemListRef := reflect.ValueOf(items)
+	for itemIdx := 0; itemIdx < itemListRef.Len();itemIdx++  {
+		itemTemplate := reflect.New(reflect.TypeOf(template).Elem())
+		tmp := itemTemplate.Interface().(Template)
+		tmp.Serialize(itemListRef.Index(itemIdx).Interface(),context)
+		result = append(result, tmp)
+	}
+	return result
+}

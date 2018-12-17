@@ -1,7 +1,7 @@
 package cart
 
 import (
-	"reflect"
+	"github.com/astaxie/beego"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
@@ -18,6 +18,7 @@ type ApiCartController struct {
 func (c ApiCartController) GetCartList() {
 	var err error
 	defer api.CheckError(func(e error) {
+		beego.Debug(e)
 		api.HandleApiError(c.Controller, e)
 	})
 	claims, err := c.GetAuth()
@@ -57,12 +58,10 @@ func (c ApiCartController) GetCartList() {
 	if err != nil {
 		panic(err)
 	}
-	results := make([]interface{}, 0)
-	for _, item := range cartItems {
-		results = append(results, reflect.ValueOf(*item).Interface())
-	}
+	results:= serializer.SerializeMultipleTemplate(cartItems,&serializer.CartTemplate{},map[string]interface{}{
+		"site":util.GetSiteAndPortUrl(c.Controller),
+	})
 
-	serializerDataList := serializer.SerializeMultipleData(&serializer.CartModel{}, results, util.GetSiteAndPortUrl(c.Controller))
-	c.ServerPageResult(serializerDataList, count, page, pageSize)
+	c.ServerPageResult(results, count, page, pageSize)
 
 }

@@ -61,6 +61,7 @@ func (c ApiController) ServerPageResult(result interface{}, count int64,Page int
 	c.ServeJSON()
 }
 
+
 func (c ApiController)WithErrorContext(doSomething func()) {
 	defer CheckError(func(e error) {
 		HandleApiError(c.Controller, e)
