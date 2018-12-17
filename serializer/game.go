@@ -90,3 +90,36 @@ func (g *GoodModel) SerializeData(model interface{}, site string) interface{} {
 	}
 	return goodModel
 }
+
+type GoodSerializeTemplate struct {
+	Id     int        `json:"id" source:"Id" source_type:"int"`
+	GameId int        `json:"game_id" source:"Game.Id" source_type:"int"`
+	Name   string     `json:"name" source:"Name" source_type:"string"`
+	Price  float64    `json:"price" source:"Price" source_type:"float"`
+	Link   []*ApiLink `json:"link"`
+}
+
+func (t *GoodSerializeTemplate) CustomSerialize(convertTag string, value interface{}) interface{} {
+	return value
+}
+
+func (t *GoodSerializeTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	data := model.(*models.Good)
+	SerializeModelData(model, t)
+	site := context["site"].(string)
+	t.Link = []*ApiLink{
+		{
+			Rel:  "good",
+			Href: fmt.Sprintf("%s/api/game/%d", site, data.Game.Id),
+			Type: "GET",
+		},
+	}
+}
+
+type GameModel struct {
+	Id          int    `json:"id";serialize:"Id"`
+	Name        string `json:"name"`
+	ReleaseTime int64  `json:"release_time"`
+	Publisher   string `json:"publisher"`
+	Intro       string `json:"intro"`
+}

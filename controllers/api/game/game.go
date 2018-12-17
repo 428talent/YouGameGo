@@ -139,7 +139,7 @@ func (c *GameController) UploadGamePreviewImage() {
 func (c *GameController) GetGood() {
 	var err error
 	defer api.CheckError(func(e error) {
-		logrus.Error(err)
+		logrus.Error(e)
 		api.HandleApiError(c.Controller, err)
 	})
 	goodId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
@@ -150,8 +150,12 @@ func (c *GameController) GetGood() {
 	if err != nil {
 		panic(err)
 	}
-	goodModel := serializer.GoodModel{}
-	c.Data["json"] = goodModel.SerializeData(good, util.GetSiteAndPortUrl(c.Controller))
+
+	serializeTemplate := serializer.GoodSerializeTemplate{}
+	serializeTemplate.Serialize(good, map[string]interface{}{
+		"site":util.GetSiteAndPortUrl(c.Controller),
+	})
+	c.Data["json"] = serializeTemplate
 	c.ServeJSON()
 }
 
