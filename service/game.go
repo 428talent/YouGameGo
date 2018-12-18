@@ -48,6 +48,18 @@ func GetGameBand(gameId int) (*models.Image, error) {
 	}
 	return imageList[0], nil
 }
+
+func GetGamePreview(gameId int,page int64,pageSize int64) (*int64,[]*models.Image, error) {
+	game := models.Game{Id: gameId}
+	err := game.QueryById()
+	if err != nil {
+		return nil,nil, err
+	}
+	imageQueryBuilder := ImageQueryBuilder{}
+	imageQueryBuilder.SetPage(page,pageSize)
+	imageQueryBuilder.WithName(fmt.Sprint("Preview:", game.Id))
+	return imageQueryBuilder.Query()
+}
 func CreateNewGame(name string, price float32, intro string, publisher string, releaseTime time.Time) (game *models.Game, err error) {
 	game = &models.Game{
 		Name:        name,

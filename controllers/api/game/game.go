@@ -287,3 +287,38 @@ func (c *GameController) GetGameBand() {
 		c.ServeJSON()
 	})
 }
+
+func (c *GameController) GetGamePreview() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		page, pageSize := c.GetPage()
+		count, image, err := service.GetGamePreview(gameId, page, pageSize)
+		if err != nil {
+			panic(err)
+		}
+		template := serializer.ImageTemplate{}
+		c.ServerPageResult(serializer.SerializeMultipleTemplate(image, &template, map[string]interface{}{}), *count, page, pageSize)
+	})
+}
+
+func (c *GameController) GetTags() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		page, pageSize := c.GetPage()
+		tagQueryBuilder := service.TagQueryBuilder{}
+		tagQueryBuilder.SetPage(page, pageSize)
+		tagQueryBuilder.WithGame(gameId)
+		count, tags, err :=tagQueryBuilder.Query()
+		if err != nil {
+			panic(err)
+		}
+		template := serializer.TagTemplate{}
+		c.ServerPageResult(serializer.SerializeMultipleTemplate(tags, &template, map[string]interface{}{}), *count, page, pageSize)
+	})
+}
