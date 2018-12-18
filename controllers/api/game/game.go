@@ -20,7 +20,6 @@ type GameController struct {
 	api.ApiController
 }
 
-
 func (c *GameController) CreateGame() {
 	var err error
 	defer api.CheckError(func(e error) {
@@ -268,6 +267,23 @@ func (c *GameController) GetGame() {
 		serializeData := serializer.Game{}
 		serializeData.Serialize(*game)
 		c.Data["json"] = serializeData
+		c.ServeJSON()
+	})
+}
+
+func (c *GameController) GetGameBand() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		image, err := service.GetGameBand(gameId)
+		if err != nil {
+			panic(err)
+		}
+		template := serializer.ImageTemplate{}
+		template.Serialize(image, map[string]interface{}{})
+		c.Data["json"] = template
 		c.ServeJSON()
 	})
 }

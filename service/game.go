@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"time"
 	"yougame.com/yougame-server/models"
@@ -30,7 +31,23 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 		return o.SetCond(condition).Limit(b.pageOption.Page).Offset(b.pageOption.Offset())
 	})
 }
-
+func GetGameBand(gameId int) (*models.Image, error) {
+	game := models.Game{Id: gameId}
+	err := game.QueryById()
+	if err != nil {
+		return nil, err
+	}
+	imageQueryBuilder := ImageQueryBuilder{}
+	imageQueryBuilder.WithName(fmt.Sprint("Band:", game.Id))
+	count, imageList, err := imageQueryBuilder.Query()
+	if err != nil {
+		panic(err)
+	}
+	if *count == 0 {
+		panic(NotFound)
+	}
+	return imageList[0], nil
+}
 func CreateNewGame(name string, price float32, intro string, publisher string, releaseTime time.Time) (game *models.Game, err error) {
 	game = &models.Game{
 		Name:        name,
