@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/astaxie/beego/orm"
+	"time"
 	"yougame.com/yougame-server/models"
 )
 
@@ -28,4 +29,19 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
 		return o.SetCond(condition).Limit(b.pageOption.Page).Offset(b.pageOption.Offset())
 	})
+}
+
+func CreateNewGame(name string, price float32, intro string, publisher string, releaseTime time.Time) (game *models.Game, err error) {
+	game = &models.Game{
+		Name:        name,
+		Price:       price,
+		Intro:       intro,
+		Publisher:   publisher,
+		ReleaseTime: releaseTime,
+	}
+	err = game.Save()
+	if err != nil {
+		return nil, err
+	}
+	return game, nil
 }

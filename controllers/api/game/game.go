@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"time"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -19,14 +20,11 @@ type GameController struct {
 	api.ApiController
 }
 
-//func (c *GameController) Get(){
-//	gameId := c.GetInt("id")
-//
-//}
-func (c *GameController) Post() {
+
+func (c *GameController) CreateGame() {
 	var err error
 	defer api.CheckError(func(e error) {
-		logrus.Error(err)
+		logrus.Error(e)
 		api.HandleApiError(c.Controller, err)
 	})
 	// read authentic
@@ -51,19 +49,27 @@ func (c *GameController) Post() {
 	if err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody); err != nil {
 		panic(api.ParseJsonDataError)
 	}
-
-	//handle
-	newGame := models.Game{
-		Name:      requestBodyStruct.Name,
-		Price:     requestBodyStruct.Price,
-		Intro:     requestBodyStruct.Intro,
-		Publisher: requestBodyStruct.Publisher,
+	releaseTime, err := time.Parse("2006/1/2", requestBodyStruct.ReleaseTime)
+	if err != nil {
+		panic(api.ParseJsonDataError)
 	}
-	err = newGame.Save()
+	//handle
+	game, err := service.CreateNewGame(
+		requestBodyStruct.Name,
+		requestBodyStruct.Price,
+		requestBodyStruct.Intro,
+		requestBodyStruct.Publisher,
+		releaseTime,
+	)
 	if err != nil {
 		panic(err)
 	}
-	c.Data["json"] = newGame
+
+	template := serializer.GameTemplate{}
+	template.Serialize(game, map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(c.Controller),
+	})
+	c.Data["json"] = template
 	c.ServeJSON()
 
 }
@@ -153,7 +159,7 @@ func (c *GameController) GetGood() {
 
 	serializeTemplate := serializer.GoodSerializeTemplate{}
 	serializeTemplate.Serialize(good, map[string]interface{}{
-		"site":util.GetSiteAndPortUrl(c.Controller),
+		"site": util.GetSiteAndPortUrl(c.Controller),
 	})
 	c.Data["json"] = serializeTemplate
 	c.ServeJSON()

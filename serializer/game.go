@@ -116,10 +116,44 @@ func (t *GoodSerializeTemplate) Serialize(model interface{}, context map[string]
 	}
 }
 
-type GameModel struct {
-	Id          int    `json:"id";serialize:"Id"`
-	Name        string `json:"name"`
-	ReleaseTime int64  `json:"release_time"`
-	Publisher   string `json:"publisher"`
-	Intro       string `json:"intro"`
+type GameTemplate struct {
+	Id          int    `json:"id"  source_type:"int"`
+	Name        string `json:"name" source_type:"string"`
+	ReleaseTime int64  `json:"release_time" source:"ReleaseTime.Unix()[0]" source_type:"int"`
+	Publisher   string `json:"publisher" source_type:"string"`
+	Intro       string `json:"intro" source_type:"string"`
+	Link        []*ApiLink
 }
+
+func (t *GameTemplate) CustomSerialize(convertTag string, value interface{}) interface{} {
+	return value
+}
+
+func (t *GameTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	data := model.(*models.Game)
+	SerializeModelData(model,t)
+	site := context["site"].(string)
+	t.Link = []*ApiLink{
+		{
+			Rel:  "goods",
+			Href: fmt.Sprintf("%s/api/game/%d/goods", site, data.Id),
+			Type: "GET",
+		},
+		{
+			Rel:  "band",
+			Href: fmt.Sprintf("%s/api/game/%d/band", site, data.Id),
+			Type: "GET",
+		},
+		{
+			Rel:  "tags",
+			Href: fmt.Sprintf("%s/api/game/%d/tags", site, data.Id),
+			Type: "GET",
+		},
+		{
+			Rel:  "preview_images",
+			Href: fmt.Sprintf("%s/api/game/%d/preview", site, data.Id),
+			Type: "GET",
+		},
+	}
+}
+

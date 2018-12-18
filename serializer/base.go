@@ -46,9 +46,6 @@ type Template interface {
 	Serialize(model interface{},context map[string]interface{})
 }
 
-type BaseSerializeTemplate struct {
-	SerializeContext map[string]interface{}
-}
 
 
 
@@ -57,6 +54,9 @@ func SerializeModelData(data interface{}, template interface{}) interface{} {
 	templateRef := reflect.ValueOf(template).Elem()
 	for fieldIdx := 0; fieldIdx < templateRef.NumField(); fieldIdx++ {
 		sourceName := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("source")
+		if len(sourceName) == 0 {
+			sourceName = reflect.TypeOf(template).Elem().Field(fieldIdx).Name
+		}
 		sourceType := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("source_type")
 		dataFieldValue := dataRef
 		for _, fieldString := range strings.Split(sourceName, ".") {
