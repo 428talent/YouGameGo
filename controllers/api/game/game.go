@@ -186,16 +186,12 @@ func (c *GameController) AddTags() {
 
 	}
 
-	game := models.Game{Id: gameId}
-	err = game.QueryById()
+	tags,err := service.AddGameTags(gameId,requestBodyStruct.Tags...)
 	if err != nil {
 		panic(err)
 	}
-	err = game.SaveTags(requestBodyStruct.Tags)
-	if err != nil {
-		panic(err)
-	}
-	c.Data["json"] = game
+	tagTemplate := serializer.TagTemplate{}
+	c.Data["json"] =serializer.SerializeMultipleTemplate(tags,&tagTemplate, map[string]interface{}{})
 	c.ServeJSON()
 }
 

@@ -49,14 +49,14 @@ func GetGameBand(gameId int) (*models.Image, error) {
 	return imageList[0], nil
 }
 
-func GetGamePreview(gameId int,page int64,pageSize int64) (*int64,[]*models.Image, error) {
+func GetGamePreview(gameId int, page int64, pageSize int64) (*int64, []*models.Image, error) {
 	game := models.Game{Id: gameId}
 	err := game.QueryById()
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 	imageQueryBuilder := ImageQueryBuilder{}
-	imageQueryBuilder.SetPage(page,pageSize)
+	imageQueryBuilder.SetPage(page, pageSize)
 	imageQueryBuilder.WithName(fmt.Sprint("Preview:", game.Id))
 	return imageQueryBuilder.Query()
 }
@@ -73,4 +73,24 @@ func CreateNewGame(name string, price float32, intro string, publisher string, r
 		return nil, err
 	}
 	return game, nil
+}
+
+func AddGameTags(gameId int, names ...string) ([]*models.Tag,error) {
+	o := orm.NewOrm()
+	var tags []*models.Tag
+	for _, tagName := range names {
+		tag := models.Tag{
+			Name: tagName,
+		}
+		tagId, err := o.Insert(&tag)
+		if err != nil {
+			return nil,err
+		}
+		tag.Id = int(tagId)
+		tags = append(tags, &tag)
+	}
+
+	m2m := o.QueryM2M(&models.Game{Id: gameId}, "Tags")
+	_, err := m2m.Add(tags)
+	return tags,err
 }
