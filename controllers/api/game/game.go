@@ -186,12 +186,12 @@ func (c *GameController) AddTags() {
 
 	}
 
-	tags,err := service.AddGameTags(gameId,requestBodyStruct.Tags...)
+	tags, err := service.AddGameTags(gameId, requestBodyStruct.Tags...)
 	if err != nil {
 		panic(err)
 	}
 	tagTemplate := serializer.TagTemplate{}
-	c.Data["json"] =serializer.SerializeMultipleTemplate(tags,&tagTemplate, map[string]interface{}{})
+	c.Data["json"] = serializer.SerializeMultipleTemplate(tags, &tagTemplate, map[string]interface{}{})
 	c.ServeJSON()
 }
 
@@ -221,11 +221,15 @@ func (c *GameController) AddGood() {
 			Price: requestBodyStruct.Price,
 			Game:  &game,
 		}
-		err = game.AddGood(good)
+		err = game.AddGood(&good)
 		if err != nil {
 			panic(err)
 		}
-		c.Data["json"] = game
+		goodTemplate := serializer.GoodSerializeTemplate{}
+		goodTemplate.Serialize(&good, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.Data["json"] = goodTemplate
 		c.ServeJSON()
 	})
 
@@ -310,7 +314,7 @@ func (c *GameController) GetTags() {
 		tagQueryBuilder := service.TagQueryBuilder{}
 		tagQueryBuilder.SetPage(page, pageSize)
 		tagQueryBuilder.WithGame(gameId)
-		count, tags, err :=tagQueryBuilder.Query()
+		count, tags, err := tagQueryBuilder.Query()
 		if err != nil {
 			panic(err)
 		}

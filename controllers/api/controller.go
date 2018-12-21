@@ -64,6 +64,7 @@ func (c ApiController) ServerPageResult(result interface{}, count int64,Page int
 
 func (c ApiController)WithErrorContext(doSomething func()) {
 	defer CheckError(func(e error) {
+		beego.Debug(e)
 		HandleApiError(c.Controller, e)
 	})
 	doSomething()

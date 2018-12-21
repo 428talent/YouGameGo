@@ -136,9 +136,10 @@ func (g *Game) ReadTags() error {
 	return err
 }
 
-func (g *Game) AddGood(good Good) error {
+func (g *Game) AddGood(good *Good) error {
 	o := orm.NewOrm()
-	_, err := o.Insert(&good)
+	id, err := o.Insert(good)
+	good.Id = int(id)
 	return err
 }
 
