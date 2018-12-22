@@ -99,9 +99,10 @@ func (c *GameController) UploadGameBand() {
 	if err != nil {
 		beego.Error(err)
 	}
-	err = game.SaveGameBangImage(path)
-	beego.Error(err)
-	c.Data["json"] = game
+	image, err := game.SaveGameBangImage(path)
+	imageTemplate := serializer.ImageTemplate{}
+	imageTemplate.Serialize(image, map[string]interface{}{})
+	c.Data["json"] = imageTemplate
 	c.ServeJSON()
 }
 

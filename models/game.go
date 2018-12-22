@@ -37,7 +37,7 @@ func (g *Game) QueryById() error {
 
 }
 
-func (g *Game) SaveGameBangImage(path string) error {
+func (g *Game) SaveGameBangImage(path string) (*Image,error) {
 	o := orm.NewOrm()
 
 	if g.Band == nil {
@@ -48,26 +48,26 @@ func (g *Game) SaveGameBangImage(path string) error {
 		}
 		_, err := o.Insert(&image)
 		if err != nil {
-			return err
+			return nil,err
 		}
 		g.Band = &image
 		_, err = o.Update(g, "Band")
 		if err != nil {
-			return err
+			return nil,err
 		}
-		return err
+		return nil,err
 	}
 	err := o.Read(g.Band)
 	if err != nil {
-		return err
+		return nil,err
 	}
 	err = os.Remove(g.Band.Path)
 	if err != nil {
-		return err
+		return nil,err
 	}
 	g.Band.Path = path
 	_, err = o.Update(g.Band)
-	return err
+	return g.Band,err
 }
 
 func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game, error) {

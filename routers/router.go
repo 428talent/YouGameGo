@@ -40,7 +40,7 @@ func init() {
 		beego.NSNamespace("/game",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &game.GameController{}, "get:GetGame"),
-				beego.NSRouter("/band", &game.GameController{}, "get:GetGameBand"),
+				beego.NSRouter("/band", &game.GameController{}, "get:GetGameBand;put:UploadGameBand"),
 				beego.NSRouter("/preview", &game.GameController{}, "get:GetGamePreview"),
 				beego.NSRouter("/tags", &game.GameController{}, "get:GetTags;post:AddTags"),
 				beego.NSRouter("/goods", &game.GameController{}, "post:AddGood"),
