@@ -202,9 +202,9 @@ func (c *GameController) AddGood() {
 		if err != nil {
 			panic(err)
 		}
-		_, err = security.ParseAuthHeader(c.Controller)
+		_, err = c.GetAuth()
 		if err != nil {
-			panic(err)
+			panic(api.ClaimsNoFoundError)
 		}
 		var requestBodyStruct request.AddGoodRequestBody
 		err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyStruct)

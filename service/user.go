@@ -57,6 +57,16 @@ func CreateUserAccount(username string, password string) (*int64, error) {
 	return &userId, err
 }
 
+func GetUserById(userId int) *models.User {
+	o := orm.NewOrm()
+	user := models.User{Id: userId}
+	err := o.Read(&user)
+	if err != nil {
+		return nil
+	}
+	return &user
+}
+
 // 用户登录
 func UserLogin(username string, password string) (string, *models.User, error) {
 	o := orm.NewOrm()
@@ -101,15 +111,14 @@ func UpdateUserProfile(profile models.Profile, fields ...string) (*models.Profil
 	user := profile.User
 	user.ReadProfile()
 	profile.Id = user.Profile.Id
-	err  := profile.Update(o,fields...)
+	err := profile.Update(o, fields...)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	userProfile,err := models.GetProfileByUser(int64(profile.User.Id))
+	userProfile, err := models.GetProfileByUser(int64(profile.User.Id))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return userProfile,nil
-
+	return userProfile, nil
 
 }
