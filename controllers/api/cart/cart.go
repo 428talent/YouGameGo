@@ -48,18 +48,19 @@ func (c ApiCartController) GetCartList() {
 	}
 	queryBuilder := service.CartQueryBuilder{}
 	page, pageSize := c.GetPage()
-	queryBuilder.SetPage(page,pageSize)
+	queryBuilder.SetPage(page, pageSize)
 	user, err := models.GetUserById(claims.UserId)
 	if err != nil {
 		panic(security.ReadAuthorizationFailed)
 	}
 	queryBuilder.InUser(user.Id)
-	count,cartItems,err := queryBuilder.Query()
+	count, cartItems, err := queryBuilder.Query()
 	if err != nil {
 		panic(err)
 	}
-	results:= serializer.SerializeMultipleTemplate(cartItems,&serializer.CartTemplate{},map[string]interface{}{
-		"site":util.GetSiteAndPortUrl(c.Controller),
+
+	results := serializer.SerializeMultipleTemplate(cartItems, serializer.NewCartTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(c.Controller),
 	})
 
 	c.ServerPageResult(results, count, page, pageSize)

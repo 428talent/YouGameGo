@@ -157,7 +157,7 @@ func (c *GameController) GetGood() {
 		panic(err)
 	}
 
-	serializeTemplate := serializer.GoodSerializeTemplate{}
+	serializeTemplate := serializer.NewGameTemplate(serializer.DefaultGameTemplateType)
 	serializeTemplate.Serialize(good, map[string]interface{}{
 		"site": util.GetSiteAndPortUrl(c.Controller),
 	})

@@ -5,34 +5,25 @@ import (
 	"yougame.com/yougame-server/models"
 )
 
-type OrderModel struct {
-	Id      int        `json:"id"`
-	State   string     `json:"state"`
-	UserId  int        `json:"user_id"`
-	Created int64      `json:"created"`
-	Updated int64      `json:"updated"`
+const (
+	// default order template
+	DefaultOrderTemplateType = "DefaultOrderTemplateType"
+)
+
+type OrderTemplate struct {
+	Id      int        `json:"id" source:"Id" source_type:"int"`
+	State   string     `json:"state" source:"State" source_type:"string"`
+	UserId  int        `json:"user_id" source:"User.Id" source_type:"int"`
+	Created string     `json:"created" source:"Created" source_type:"string" converter:"time"`
+	Updated string     `json:"updated" source:"Updated" source_type:"string" converter:"time"`
 	Link    []*ApiLink `json:"link"`
 }
-type OrderItemSerializer struct {
-	Id       int     `json:"id"`
-	GoodName string  `json:"good_name"`
-	Name     string  `json:"name"`
-	GameId   int     `json:"game_id"`
-	Price    float64 `json:"price"`
-	BandPic  string  `json:"band_pic"`
-	Created  int64   `json:"created"`
-}
 
-func (o *OrderModel) SerializeData(model interface{}, site string) interface{} {
-	order := model.(models.Order)
-	serializeData := OrderModel{
-		Id:      order.Id,
-		State:   string(order.State),
-		UserId:  order.User.Id,
-		Created: order.Created.Unix(),
-		Updated: order.Updated.Unix(),
-	}
-	serializeData.Link = append(serializeData.Link, &ApiLink{
+func (t *OrderTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	order := model.(*models.Order)
+	SerializeModelData(order, t)
+	site := context["site"].(string)
+	t.Link = append(t.Link, &ApiLink{
 		Rel:  "goods",
 		Href: fmt.Sprintf("%s/api/order/%d/goods", site, order.Id),
 		Type: "GET",
@@ -41,33 +32,38 @@ func (o *OrderModel) SerializeData(model interface{}, site string) interface{} {
 		Href: fmt.Sprintf("%s/api/user/%d", site, order.User.Id),
 		Type: "GET",
 	})
-	return serializeData
 }
 
-type OrderGoodModel struct {
-	Id       int     `json:"id"`
-	Price    float64 `json:"price"`
-	Name     string  `json:"name"`
-	OrderId  int     `json:"order_id"`
-	GoodId   int     `json:"good_id"`
-	CreateAt int64   `json:"create_at"`
+func NewOrderTemplate(templateType string) Template {
+	return &OrderTemplate{}
+}
+
+const (
+	DefaultOrderGoodTemplateType = "DefaultOrderGoodTemplateType"
+)
+
+func NewOrderGoodTemplate(templateType string) Template {
+	return &OrderItemTemplate{}
+}
+
+type OrderItemTemplate struct {
+	Id       int        `json:"id" source:"Id" source_type:"int"`
+	GoodName string     `json:"good_name" source:"GoodName" source_type:"string"`
+	Name     string     `json:"name" source:"Name" source_type:"string"`
+	GameId   int        `json:"game_id"source:"Game.Id" source_type:"int"`
+	Price    float64    `json:"price" source:"Price" source_type:"float"`
+	BandPic  string     `json:"band_pic" source:"BandPic" source_type:"string"`
+	Created  int64      `json:"created" source:"Created" source_type:"string" converter:"time"`
 	Link     []*ApiLink `json:"link"`
 }
 
-func (o *OrderGoodModel) SerializeData(model interface{}, site string) interface{} {
-	orderGood := model.(models.OrderGood)
-	serializeData := OrderGoodModel{
-		Id:       orderGood.Id,
-		OrderId:  orderGood.Order.Id,
-		GoodId:   orderGood.Good.Id,
-		CreateAt: orderGood.Created.Unix(),
-		Price:    orderGood.Price,
-		Name:     orderGood.Name,
-	}
-	serializeData.Link = append(serializeData.Link, &ApiLink{
+func (t *OrderItemTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	orderGood := model.(*models.OrderGood)
+	SerializeModelData(orderGood, t)
+	site := context["site"].(string)
+	t.Link = append(t.Link, &ApiLink{
 		Rel:  "order",
 		Href: fmt.Sprintf("%s/api/order/%d", site, orderGood.Order.Id),
 		Type: "GET",
 	})
-	return serializeData
 }

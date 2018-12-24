@@ -98,11 +98,13 @@ func (c *ApiOrderController) GetOrderList() {
 	if err != nil {
 		panic(err)
 	}
-	results := make([]interface{}, 0)
-	for _, item := range orders {
-		results = append(results, reflect.ValueOf(*item).Interface())
-	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(
+		orders,
+		serializer.NewOrderTemplate(serializer.DefaultOrderTemplateType),
+		map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		},
+	)
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiOrderController) GetOrderGoodsWithOrder() {
@@ -152,11 +154,13 @@ func (c *ApiOrderController) GetOrderGoodsWithOrder() {
 	if err != nil {
 		panic(err)
 	}
-	results := make([]interface{}, 0)
-	for _, item := range orderGoods {
-		results = append(results, reflect.ValueOf(*item).Interface())
-	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderGoodModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(
+		orderGoods,
+		serializer.NewOrderGoodTemplate(serializer.DefaultOrderTemplateType),
+		map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		},
+	)
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiOrderController) GetOrderGoods() {
@@ -210,7 +214,13 @@ func (c *ApiOrderController) GetOrderGoods() {
 	for _, item := range orderGoods {
 		results = append(results, reflect.ValueOf(*item).Interface())
 	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderGoodModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(
+		orderGoods,
+		serializer.NewOrderGoodTemplate(serializer.DefaultOrderTemplateType),
+		map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		},
+	)
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiOrderController) PayOrder() {

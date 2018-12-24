@@ -71,7 +71,7 @@ type Template interface {
 	Serialize(model interface{}, context map[string]interface{})
 }
 
-func SerializeModelData(data interface{}, template interface{}) interface{} {
+func SerializeModelData(data interface{}, template Template) interface{} {
 	dataRef := reflect.ValueOf(data).Elem()
 	templateRef := reflect.ValueOf(template).Elem()
 	for fieldIdx := 0; fieldIdx < templateRef.NumField(); fieldIdx++ {

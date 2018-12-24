@@ -2,7 +2,6 @@ package wishlist
 
 import (
 	"encoding/json"
-	"reflect"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
@@ -36,12 +35,9 @@ func (c *ApiWishListController) GetWishList() {
 	if err != nil {
 		panic(err)
 	}
-
-	results := make([]interface{}, 0)
-	for _, item := range wishlist {
-		results = append(results, reflect.ValueOf(*item).Interface())
-	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.WishListModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(wishlist, serializer.NewWishlistTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(c.Controller),
+	})
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 

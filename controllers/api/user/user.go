@@ -288,12 +288,19 @@ func (c *ApiUserController) GetOrderList() {
 	for _, item := range orders {
 		results = append(results, reflect.ValueOf(*item).Interface())
 	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.OrderModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(
+		orders,
+		serializer.NewOrderTemplate(serializer.DefaultOrderTemplateType),
+		map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		},
+	)
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiUserController) GetUserWishList() {
 	var err error
 	defer api.CheckError(func(e error) {
+		beego.Error(e)
 		api.HandleApiError(c.Controller, e)
 	})
 
@@ -317,10 +324,8 @@ func (c *ApiUserController) GetUserWishList() {
 		panic(err)
 	}
 
-	results := make([]interface{}, 0)
-	for _, item := range wishlist {
-		results = append(results, reflect.ValueOf(*item).Interface())
-	}
-	serializerDataList := serializer.SerializeMultipleData(&serializer.WishListModel{}, results, util.GetSiteAndPortUrl(c.Controller))
+	serializerDataList := serializer.SerializeMultipleTemplate(wishlist, serializer.NewWishlistTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(c.Controller),
+	})
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
