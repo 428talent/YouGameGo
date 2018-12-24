@@ -253,21 +253,11 @@ func (c *GameController) GetGame() {
 		}
 		game := result[0]
 
-		if err = game.ReadGameBand(); err != nil {
-			panic(err)
-		}
-		if err = game.ReadGamePreviewImage(); err != nil {
-			panic(err)
-		}
-		if err = game.ReadTags(); err != nil {
-			panic(err)
-		}
-		if err = game.ReadGoods(); err != nil {
-			panic(err)
-		}
-		serializeData := serializer.Game{}
-		serializeData.Serialize(*game)
-		c.Data["json"] = serializeData
+		gameTemplate := serializer.NewGameTemplate(serializer.DefaultGameTemplateType)
+		gameTemplate.Serialize(game, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.Data["json"] = gameTemplate
 		c.ServeJSON()
 	})
 }

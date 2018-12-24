@@ -1,5 +1,6 @@
 package serializer
 
+
 type ImageTemplate struct {
 	Path string `json:"path" source_type:"string"`
 	Link []*ApiLink

@@ -12,6 +12,32 @@ const (
 	RelGame = "game"
 )
 
+var customConverter map[string]func(value interface{}) interface{}
+//var customModelTemplateMapper map[interface{}]func(template Template, model interface{}, context map[string]interface{})
+
+func init() {
+	customConverter = make(map[string]func(value interface{}) interface{}, 0)
+	//customModelTemplateMapper = make(map[interface{}]func(template Template, model interface{}, context map[string]interface{}))
+}
+
+// add custom serialize type
+func AddCustomConverter(name string, converter func(value interface{}) interface{}) {
+	customConverter[name] = converter
+}
+
+// serialize with register model to template mapper
+//func AutoSerailize(t *Template, model interface{}, context map[string]interface{}) {
+//	for modelType, handler := range customModelTemplateMapper {
+//		if reflect.TypeOf(model) == reflect.TypeOf(modelType) {
+//			handler(t, modelType, context)
+//		}
+//	}
+//}
+//
+//func AddModelTemplateMapper(model interface{}, handler func(template Template, model interface{}, context map[string]interface{})) {
+//	customModelTemplateMapper[model] = handler
+//}
+
 type Model interface {
 	SerializeData(model interface{}, site string) interface{}
 }
@@ -42,12 +68,8 @@ func SerializeMultipleData(template Model, models []interface{}, site string) []
 }
 
 type Template interface {
-	CustomSerialize(convertTag string, value interface{}) interface{}
-	Serialize(model interface{},context map[string]interface{})
+	Serialize(model interface{}, context map[string]interface{})
 }
-
-
-
 
 func SerializeModelData(data interface{}, template interface{}) interface{} {
 	dataRef := reflect.ValueOf(data).Elem()
@@ -83,8 +105,7 @@ func SerializeModelData(data interface{}, template interface{}) interface{} {
 		}
 		converter := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("converter")
 		if len(converter) > 0 {
-			customTemplate := template.(Template)
-			result := customTemplate.CustomSerialize(converter, dataFieldValue.Interface())
+			result := customConverter[converter](dataFieldValue.Interface())
 			dataFieldValue = reflect.ValueOf(result)
 		}
 		switch sourceType {
@@ -94,6 +115,8 @@ func SerializeModelData(data interface{}, template interface{}) interface{} {
 			templateRef.Field(fieldIdx).SetString(dataFieldValue.String())
 		case "float":
 			templateRef.Field(fieldIdx).SetFloat(dataFieldValue.Float())
+		case "bool":
+			templateRef.Field(fieldIdx).SetBool(dataFieldValue.Bool())
 		}
 
 	}
@@ -101,13 +124,13 @@ func SerializeModelData(data interface{}, template interface{}) interface{} {
 	return nil
 }
 
-func SerializeMultipleTemplate(items interface{},template Template,context map[string]interface{})interface{}{
-	result := make([]interface{},0)
+func SerializeMultipleTemplate(items interface{}, template Template, context map[string]interface{}) interface{} {
+	result := make([]interface{}, 0)
 	itemListRef := reflect.ValueOf(items)
-	for itemIdx := 0; itemIdx < itemListRef.Len();itemIdx++  {
+	for itemIdx := 0; itemIdx < itemListRef.Len(); itemIdx++ {
 		itemTemplate := reflect.New(reflect.TypeOf(template).Elem())
 		tmp := itemTemplate.Interface().(Template)
-		tmp.Serialize(itemListRef.Index(itemIdx).Interface(),context)
+		tmp.Serialize(itemListRef.Index(itemIdx).Interface(), context)
 		result = append(result, tmp)
 	}
 	return result
