@@ -98,3 +98,51 @@ func (p *UserProfileModel) Serialize(model models.Profile, site string) *UserPro
 		Avatar:   model.Avatar,
 	}
 }
+
+const (
+	DefaultUserTemplateType = "DefaultUserTemplateType"
+)
+
+func NewUserTemplate(templateType string) Template {
+	return &UserTemplate{}
+}
+
+type UserTemplate struct {
+	Id        int        `json:"id" source:"Id" source_type:"int"`
+	Username  string     `json:"username" source:"Username" source_type:"string"`
+	LastLogin string     `json:"last_login" source:"LastLogin" source_type:"string" converter:"time"`
+	CreateAt  string     `json:"create_at" source:"Created" source_type:"string" converter:"time"`
+	Link      []*ApiLink `json:"link"`
+}
+
+func (t *UserTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	data := model.(*models.User)
+	SerializeModelData(data, t)
+	site := context["site"].(string)
+	t.Link = []*ApiLink{
+		&ApiLink{
+			Rel:  "profile",
+			Href: fmt.Sprintf("%s/api/user/%d/profile", site, data.Profile.Id),
+			Type: "GET",
+		},
+	}
+}
+
+const (
+	DefaultProfileTemplateType = "DefaultProfileTemplateType"
+)
+
+func NewProfileTemplate(templateType string) Template {
+	return &UserProfileTemplate{}
+}
+
+type UserProfileTemplate struct {
+	Nickname string `json:"nickname" source:"Nickname" source_type:"string"`
+	Email    string `json:"email" source:"Email" source_type:"string"`
+	Avatar   string `json:"avatar" source:"Avatar" source_type:"string" `
+	UpdateAt int64  `json:"update_at" source:"Updated" source_type:"string" converter:"time"`
+}
+
+func (t *UserProfileTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	SerializeModelData(model, t)
+}

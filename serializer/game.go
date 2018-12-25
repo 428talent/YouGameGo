@@ -18,9 +18,12 @@ func init() {
 		timeValue, _ := value.(time.Time)
 		return util.FormatApiTime(timeValue)
 	})
+	AddCustomConverter("date", func(value interface{}) interface{} {
+		timeValue, _ := value.(time.Time)
+		return util.FormatDate(timeValue)
+	})
 
 }
-
 
 type GoodModel struct {
 	Id     int        `json:"id"`
@@ -54,7 +57,6 @@ type GoodSerializeTemplate struct {
 	Link   []*ApiLink `json:"link"`
 }
 
-
 func (t *GoodSerializeTemplate) Serialize(model interface{}, context map[string]interface{}) {
 	data := model.(*models.Good)
 	SerializeModelData(model, t)
@@ -67,10 +69,11 @@ func (t *GoodSerializeTemplate) Serialize(model interface{}, context map[string]
 		},
 	}
 }
+
 type GameTemplate struct {
 	Id          int        `json:"id"  source_type:"int"`
 	Name        string     `json:"name" source_type:"string"`
-	ReleaseTime int64      `json:"release_time" source:"ReleaseTime.Unix()[0]" source_type:"int"`
+	ReleaseTime string     `json:"release_time" source:"ReleaseTime" source_type:"string" converter:"date"`
 	Publisher   string     `json:"publisher" source_type:"string"`
 	Intro       string     `json:"intro" source_type:"string"`
 	Link        []*ApiLink `json:"link"`
@@ -106,8 +109,9 @@ func (t *GameTemplate) Serialize(model interface{}, context map[string]interface
 
 type AdminGameTemplate struct {
 	Id          int        `json:"id"  source_type:"int"`
+	Band        string     `json:"band" source:"Band.Path" source_type:"string"`
 	Name        string     `json:"name" source_type:"string"`
-	ReleaseTime int64      `json:"release_time" source:"ReleaseTime.Unix()[0]" source_type:"int"`
+	ReleaseTime string      `json:"release_time" source:"ReleaseTime" source_type:"string" converter:"date"`
 	Publisher   string     `json:"publisher" source_type:"string"`
 	Intro       string     `json:"intro" source_type:"string"`
 	Created     string     `json:"created" source:"Created" source_type:"string" converter:"time"`

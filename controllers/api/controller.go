@@ -13,6 +13,7 @@ import (
 type ApiController struct {
 	beego.Controller
 	User *models.User
+	Role string
 }
 
 func (c *ApiController) GetAuth() (*security.UserClaims, error) {

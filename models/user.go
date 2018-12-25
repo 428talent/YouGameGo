@@ -145,4 +145,8 @@ func (u *User) ReadOrders(offset int64, limit int64, order string) error {
 	return err
 }
 
-
+func (u *User) ReadUserGroup() error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(u, "UserGroups")
+	return err
+}

@@ -104,8 +104,11 @@ func (c *ApiUserController) GetUser() {
 		beego.Error(err)
 		return
 	}
-	serializerModel := serializer.UserSerializerModel{}
-	c.Data["json"] = serializerModel.Serialize(*user, util.GetSiteAndPortUrl(c.Controller))
+	template := serializer.NewUserTemplate(serializer.DefaultUserTemplateType)
+	template.Serialize(user, map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(c.Controller),
+	})
+	c.Data["json"] = template
 	c.ServeJSON()
 }
 
@@ -189,12 +192,12 @@ func (c *ApiUserController) ChangeUserProfile() {
 	}
 
 	profile, err := service.UpdateUserProfile(models.Profile{User: user, Nickname: requestData.Nickname}, "nickname")
-	
+
 	if err != nil {
 		panic(err)
 	}
 	serializerModel := serializer.UserProfileModel{}
-	c.Data["json"] = serializerModel.Serialize(*profile,util.GetSiteAndPortUrl(c.Controller))
+	c.Data["json"] = serializerModel.Serialize(*profile, util.GetSiteAndPortUrl(c.Controller))
 	c.ServeJSON()
 }
 func (c *ApiUserController) UploadJsonAvatar() {

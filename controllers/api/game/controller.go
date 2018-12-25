@@ -238,26 +238,35 @@ func (c *GameController) AddGood() {
 
 func (c *GameController) GetGame() {
 	c.WithErrorContext(func() {
-		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-		if err != nil {
-			panic(err)
-		}
-		queryBuilder := service.GameQueryBuilder{}
-		queryBuilder.InId(gameId)
-		count, result, err := queryBuilder.Query()
-		if err != nil {
-			panic(err)
-		}
-		if *count == 0 {
-			panic(api.ResourceNotFoundError)
-		}
-		game := result[0]
 
-		gameTemplate := serializer.NewGameTemplate(serializer.DefaultGameTemplateType)
-		gameTemplate.Serialize(game, map[string]interface{}{
-			"site": util.GetSiteAndPortUrl(c.Controller),
-		})
-		c.Data["json"] = gameTemplate
+		claims, err := c.GetAuth()
+		if claims != nil && err == nil {
+			// login user
+			_ = c.User.ReadUserGroup()
+			for _, group := range c.User.UserGroups {
+				if group.Name == security.UserGroupAdmin {
+					c.Role = security.UserGroupAdmin
+
+				}
+			}
+		} else {
+			c.Role = security.Anonymous
+		}
+		var renderResult interface{}
+		switch c.Role {
+		case security.UserGroupAdmin:
+			view := AdminGetGameView{
+				Controller: c,
+			}
+			renderResult = view.Render()
+		case security.Anonymous:
+			view := DefaultGetGameView{
+				Controller: c,
+			}
+			renderResult = view.Render()
+		}
+
+		c.Data["json"] = renderResult
 		c.ServeJSON()
 	})
 }

@@ -122,3 +122,4 @@ func UpdateUserProfile(profile models.Profile, fields ...string) (*models.Profil
 	return userProfile, nil
 
 }
+
