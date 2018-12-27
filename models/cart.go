@@ -8,8 +8,8 @@ import (
 type CartItem struct {
 	Id      int
 	Good    *Good `orm:"rel(fk)"`
-	Enable bool
-	User *User `orm:"rel(fk)"`
+	Enable  bool
+	User    *User     `orm:"rel(fk)"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
@@ -25,13 +25,13 @@ func (c *CartItem) ReadGood() error {
 	return err
 }
 
-func GetCartList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64,[]*CartItem, error) {
+func GetCartList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*CartItem, error) {
 	o := orm.NewOrm()
 	var cartList []*CartItem
 	seter := o.QueryTable("cart_item")
 	_, err := filter(seter).All(&cartList)
 	count, err := filter(seter).Count()
-	return count,cartList, err
+	return count, cartList, err
 }
 
 func (c *CartItem) Save() error {

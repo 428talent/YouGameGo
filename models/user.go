@@ -4,7 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"time"
-	AppError "yougame.com/yougame-server/error"
+	AppError "yougame.com/yougame-server/application"
 	"yougame.com/yougame-server/util"
 )
 
@@ -105,7 +105,7 @@ func GetAllUser(page int64, pageSize int64) (*int64, []*User, error) {
 	}
 	return &count, userList, nil
 }
-func CheckUserValidate(loginUser *User) (bool) {
+func CheckUserValidate(loginUser *User) bool {
 	encryptPassword, err := util.EncryptSha1WithSalt(loginUser.Password)
 	if err != nil {
 		beego.Error(err)

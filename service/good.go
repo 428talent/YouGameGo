@@ -13,22 +13,22 @@ func GetGoodById(goodId int) (*models.Good, error) {
 
 }
 
-func CreateGoodComment(user models.User, content string, goodId int, evaluation string) (*models.Good,*models.Comment,error) {
+func CreateGoodComment(user models.User, content string, goodId int, evaluation string) (*models.Good, *models.Comment, error) {
 	err := security.CheckUserPermission(user, "CreateComment")
 	if err != nil {
-		return nil,nil,PermissionNotAccess
+		return nil, nil, PermissionNotAccess
 	}
 	good := models.Good{Id: goodId}
 	err = good.QueryById()
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 	if !good.Enable {
-		return nil,nil,ResourceNotEnable
+		return nil, nil, ResourceNotEnable
 	}
 	err = good.ReadGame()
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
 	//检查用户是否购买该商品
@@ -37,10 +37,10 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 		return o
 	})
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 	if len(userBuyGoodOfGame) == 0 {
-		return nil,nil,UserNotBoughtGood
+		return nil, nil, UserNotBoughtGood
 	}
 
 	comment := models.Comment{
@@ -49,15 +49,14 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 		Enable:     true,
 		Evaluation: evaluation,
 		Content:    content,
-
 	}
 	//存储商品评论
 	o := orm.NewOrm()
 	err = comment.Save(o)
 	if err != nil {
-		return nil,nil,err
+		return nil, nil, err
 	}
 
-	return &good,&comment,nil
+	return &good, &comment, nil
 
 }

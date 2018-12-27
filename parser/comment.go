@@ -7,6 +7,6 @@ type CreateCommentModel struct {
 	Evaluation string `json:"evaluation"`
 }
 
-func (c *CreateCommentModel)Validate() error  {
+func (c *CreateCommentModel) Validate() error {
 	return validate.ValidateData(*c)
 }

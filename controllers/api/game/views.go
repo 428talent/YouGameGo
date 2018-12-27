@@ -3,6 +3,7 @@ package game
 import (
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
@@ -28,10 +29,17 @@ func (v *AdminGetGameView) Render() interface{} {
 		panic(api.ResourceNotFoundError)
 	}
 	gameModel := result[0]
-	err = gameModel.ReadGameBand()
-	if err != nil {
-		panic(err)
+	if gameModel.Band != nil{
+		err = gameModel.ReadGameBand()
+		if err != nil {
+			panic(err)
+		}
+	}else{
+		gameModel.Band = &models.Image{
+			Path:"",
+		}
 	}
+
 	template.Serialize(gameModel, map[string]interface{}{
 		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
 	})

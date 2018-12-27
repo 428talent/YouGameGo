@@ -49,21 +49,21 @@ func PayOrder(order models.Order) error {
 		panic(err)
 	}
 	order.State = models.OrderStateDone
-	err = order.Update(o,"State")
+	err = order.Update(o, "State")
 	if err != nil {
 		panic(err)
 	}
 	user.Wallet.Balance += transaction.Amount
-	err = user.Wallet.Update(o,"Balance")
+	err = user.Wallet.Update(o, "Balance")
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
 		reco := recover()
-		if reco != nil{
+		if reco != nil {
 			err = reco.(error)
 			err = o.Rollback()
-		}else{
+		} else {
 			err = o.Commit()
 		}
 	}()

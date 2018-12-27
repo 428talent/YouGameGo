@@ -6,9 +6,9 @@ import (
 )
 
 type WishListQueryBuilder struct {
-	ids        []interface{}
-	userIds    []interface{}
-	pageOption PageOption
+	ids          []interface{}
+	userIds      []interface{}
+	pageOption   PageOption
 	isOnlyEnable bool
 }
 

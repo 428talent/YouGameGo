@@ -13,6 +13,7 @@ const (
 )
 
 var customConverter map[string]func(value interface{}) interface{}
+
 //var customModelTemplateMapper map[interface{}]func(template Template, model interface{}, context map[string]interface{})
 
 func init() {
@@ -75,11 +76,17 @@ func SerializeModelData(data interface{}, template Template) interface{} {
 	dataRef := reflect.ValueOf(data).Elem()
 	templateRef := reflect.ValueOf(template).Elem()
 	for fieldIdx := 0; fieldIdx < templateRef.NumField(); fieldIdx++ {
+
+		// get source name
 		sourceName := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("source")
 		if len(sourceName) == 0 {
 			sourceName = reflect.TypeOf(template).Elem().Field(fieldIdx).Name
 		}
+
+		// get source type
 		sourceType := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("source_type")
+
+		//get ref of source
 		dataFieldValue := dataRef
 		for _, fieldString := range strings.Split(sourceName, ".") {
 			matchMethodRegex, _ := regexp.Compile(`(.*?)\(\)\[(\d+)\]$`)
@@ -97,17 +104,19 @@ func SerializeModelData(data interface{}, template Template) interface{} {
 				if dataFieldValue.Kind() == reflect.Ptr {
 					dataFieldValue = dataFieldValue.Elem()
 				}
+
 				dataFieldValue = dataFieldValue.FieldByName(fieldString)
 			}
-
-			//check it method call
-
 		}
+
+		// use extra convert
 		converter := reflect.TypeOf(template).Elem().Field(fieldIdx).Tag.Get("converter")
 		if len(converter) > 0 {
 			result := customConverter[converter](dataFieldValue.Interface())
 			dataFieldValue = reflect.ValueOf(result)
 		}
+
+		// apply value
 		switch sourceType {
 		case "int":
 			templateRef.Field(fieldIdx).SetInt(dataFieldValue.Int())

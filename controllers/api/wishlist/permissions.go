@@ -14,10 +14,10 @@ func (p DeleteWishlistPermission) DeleteWishlistPermission(context map[string]in
 	beego.Debug(ids)
 	queryBuilder := service.WishListQueryBuilder{}
 	queryBuilder.BelongToUser(claims.UserId)
-	for _,id := range ids {
+	for _, id := range ids {
 		queryBuilder.InId(id)
 	}
-	count,_,err := queryBuilder.GetWishList()
+	count, _, err := queryBuilder.GetWishList()
 	if err != nil {
 		return false
 	}

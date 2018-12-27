@@ -26,14 +26,14 @@ func ReadProfile(user *User) error {
 	return nil
 }
 
-func GetProfileByUser(userId int64) (*Profile,error) {
+func GetProfileByUser(userId int64) (*Profile, error) {
 	o := orm.NewOrm()
 	var profile Profile
 	err := o.QueryTable("profile").Filter("User__Id", userId).One(&profile)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return &profile,nil
+	return &profile, nil
 }
 func (p *Profile) ChangeUserProfile(email string, nickname string) error {
 	o := orm.NewOrm()

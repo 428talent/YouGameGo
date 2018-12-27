@@ -2,7 +2,7 @@ package user
 
 import (
 	"net/http"
-	ApiError "yougame.com/yougame-server/error"
+	ApiError "yougame.com/yougame-server/application"
 )
 
 var (

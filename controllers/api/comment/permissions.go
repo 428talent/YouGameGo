@@ -19,5 +19,3 @@ func (p CreateCommentPermission) CheckPermission(context map[string]interface{})
 	}
 
 }
-
-

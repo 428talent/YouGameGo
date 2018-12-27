@@ -2,7 +2,7 @@ package order
 
 import (
 	"net/http"
-	ApiError "yougame.com/yougame-server/error"
+	ApiError "yougame.com/yougame-server/application"
 )
 
 var (
@@ -18,4 +18,3 @@ var (
 		Code:   "000005",
 	}, http.StatusBadRequest)
 )
-

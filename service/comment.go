@@ -9,11 +9,12 @@ import (
 var (
 	CommentExistError = errors.New("comment already exist")
 )
+
 func CreateComment(content string, evaluate string, user *models.User, good *models.Good) (*models.Comment, error) {
 	o := orm.NewOrm()
 
-	if o.QueryTable("comment").Filter("user_id",user.Id).Filter("good_id",good.Id).Exist() {
-		return nil,CommentExistError
+	if o.QueryTable("comment").Filter("user_id", user.Id).Filter("good_id", good.Id).Exist() {
+		return nil, CommentExistError
 	}
 	comment := models.Comment{
 		Content:    content,
@@ -33,7 +34,7 @@ type CommentQueryBuilder struct {
 	gameId int64
 	userId int64
 	goodId int64
-	page PageOption
+	page   PageOption
 }
 
 func (builder *CommentQueryBuilder) build() *orm.Condition {
@@ -45,13 +46,13 @@ func (builder *CommentQueryBuilder) build() *orm.Condition {
 		builder.page.PageSize = 10
 	}
 	if builder.gameId != 0 {
-		cond = cond.And("good__game__id",builder.gameId)
+		cond = cond.And("good__game__id", builder.gameId)
 	}
 	if builder.goodId != 0 {
-		cond = cond.And("good_id",builder.gameId)
+		cond = cond.And("good_id", builder.gameId)
 	}
 	if builder.userId != 0 {
-		cond = cond.And("user_id",builder.userId)
+		cond = cond.And("user_id", builder.userId)
 	}
 	return cond
 }
@@ -79,14 +80,13 @@ func (builder *CommentQueryBuilder) SetGood(goodId int64) *CommentQueryBuilder {
 }
 
 func (builder *CommentQueryBuilder) Query(md interface{}) (int64, error) {
-	modelStruct :=  models.Comment{}
-	count, err :=modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
+	modelStruct := models.Comment{}
+	count, err := modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
 		cond := builder.build()
 		return o.SetCond(cond).Limit(builder.page.PageSize).Offset((builder.page.Page - 1) * builder.page.PageSize)
 	}, md)
 	return count, err
 }
-
 
 func GetGameCommentStatistics(gameId int) (count int64, positive int64, negative int64, err error) {
 	if count, err = models.GetGameCommentCount(gameId); err != nil {

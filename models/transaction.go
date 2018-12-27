@@ -10,7 +10,7 @@ type Transaction struct {
 	Type    string
 	Balance float64
 	Amount  float64
-	Enable bool
+	Enable  bool
 
 	Order   *Order    `orm:"null;rel(one);on_delete(set_null)"`
 	User    *User     `orm:"rel(fk)"`

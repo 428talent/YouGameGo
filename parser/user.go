@@ -29,11 +29,11 @@ func (r *GetTokenRequestStruct) ParseGetTokenRequestBody(body []byte) (*GetToken
 }
 
 type UploadUserAvatarRequestStruct struct {
-	Avatar string `json:"avatar"`
+	Avatar    string `json:"avatar"`
 	ImageType string `json:"image_type"`
 }
 
-func (r *UploadUserAvatarRequestStruct ) Parse(body []byte) error {
+func (r *UploadUserAvatarRequestStruct) Parse(body []byte) error {
 	err := json.Unmarshal(body, r)
 	if err != nil {
 		return err
@@ -43,4 +43,11 @@ func (r *UploadUserAvatarRequestStruct ) Parse(body []byte) error {
 
 type ChangeProfileRequestStruct struct {
 	Nickname string `json:"nickname"`
+}
+func (r *ChangeProfileRequestStruct) Parse(body []byte) error {
+	err := json.Unmarshal(body, r)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -2,5 +2,5 @@ package security
 
 const (
 	UserGroupAdmin = "Admin"
-	Anonymous = "Anonymous"
+	Anonymous      = "Anonymous"
 )

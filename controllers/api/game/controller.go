@@ -157,7 +157,7 @@ func (c *GameController) GetGood() {
 		panic(err)
 	}
 
-	serializeTemplate := serializer.NewGameTemplate(serializer.DefaultGameTemplateType)
+	serializeTemplate := serializer.GoodSerializeTemplate{}
 	serializeTemplate.Serialize(good, map[string]interface{}{
 		"site": util.GetSiteAndPortUrl(c.Controller),
 	})
@@ -236,6 +236,64 @@ func (c *GameController) AddGood() {
 
 }
 
+func (c *GameController) PutGame() {
+	c.WithErrorContext(func() {
+		claims, err := c.GetAuth()
+		if err != nil {
+			panic(api.ClaimsNoFoundError)
+		}
+
+		// check permission
+		err = c.CheckPermission([]api.ApiPermissionInterface{
+			&UpdateGamePermission{},
+		}, map[string]interface{}{
+			"claims": *claims,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := parser.ModifyGameRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+
+		// parse time
+
+		game, err := requestBody.ApplyToGame(int64(gameId))
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.UpdateGame(game, "name", "publisher", "intro", "release_time", "price")
+		if err != nil {
+			panic(err)
+		}
+		//parse json
+
+		if game.Band != nil{
+			err = game.ReadGameBand()
+			if err != nil {
+				panic(err)
+			}
+		}else{
+			game.Band = &models.Image{
+				Path:"",
+			}
+		}
+
+		serializeTemplate := serializer.NewGameTemplate(serializer.AdminGameTemplateType)
+		serializeTemplate.Serialize(game, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.Data["json"] = serializeTemplate
+		c.ServeJSON()
+	})
+}
 func (c *GameController) GetGame() {
 	c.WithErrorContext(func() {
 

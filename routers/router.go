@@ -39,17 +39,16 @@ func init() {
 		),
 		beego.NSNamespace("/game",
 			beego.NSNamespace("/:id",
-				beego.NSRouter("/", &game.GameController{}, "get:GetGame"),
+				beego.NSRouter("/", &game.GameController{}, "get:GetGame;put:PutGame"),
 				beego.NSRouter("/band", &game.GameController{}, "get:GetGameBand;put:UploadGameBand"),
 				beego.NSRouter("/preview", &game.GameController{}, "get:GetGamePreview"),
 				beego.NSRouter("/tags", &game.GameController{}, "get:GetTags;post:AddTags"),
-				beego.NSRouter("/goods", &game.GameController{}, "post:AddGood"),
+				beego.NSRouter("/goods", &game.GameController{}, "post:AddGood;get:GetGood"),
 			),
 		),
 		beego.NSNamespace("/games",
 
 			beego.NSRouter("/", &game.GameController{}, "post:CreateGame"),
-
 		),
 		beego.NSNamespace("wishlist",
 			beego.NSRouter("/", &wishlist.ApiWishListController{}, "get:GetWishList;delete:DeleteWishListItems"),
@@ -69,6 +68,5 @@ func init() {
 		),
 		beego.NSRouter("/ordergood", &order.ApiOrderController{}, "get:GetOrderGoods"),
 		beego.NSRouter("/comments", &comment.ApiCommentController{}, "get:GetCommentList"),
-
 	))
 }

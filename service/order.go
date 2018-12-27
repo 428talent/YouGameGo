@@ -58,7 +58,7 @@ func GetOrderList(builder GetOrderListBuilder) (int64, []*models.Order, error) {
 }
 
 func GetOrderById(id int) (*models.Order, error) {
-	order := models.Order{Id: id,}
+	order := models.Order{Id: id}
 	err := order.QueryById()
 	return &order, err
 }
@@ -90,8 +90,8 @@ func (option *GetOrderGoodListOption) build() *orm.Condition {
 	return cond
 }
 func (option *GetOrderGoodListOption) Query(md interface{}) (int64, error) {
-	modelStruct :=  models.OrderGood{}
-	count, err :=modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
+	modelStruct := models.OrderGood{}
+	count, err := modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
 		cond := option.build()
 		return o.SetCond(cond).Limit(option.page.PageSize).Offset((option.page.Page - 1) * option.page.PageSize)
 	}, md)

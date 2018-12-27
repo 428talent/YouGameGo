@@ -33,7 +33,7 @@ func (t *CartTemplate) Serialize(model interface{}, context map[string]interface
 		Rel:  "user",
 		Href: fmt.Sprintf("%s/api/user/%d", site, data.User.Id),
 		Type: "GET",
-	},}
+	}}
 }
 
 func NewCartTemplate(templateType string) Template {

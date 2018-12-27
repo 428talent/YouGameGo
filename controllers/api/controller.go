@@ -17,7 +17,7 @@ type ApiController struct {
 }
 
 func (c *ApiController) GetAuth() (*security.UserClaims, error) {
-	claims, err := security.ParseAuthHeader(c.Controller);
+	claims, err := security.ParseAuthHeader(c.Controller)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	beego.SetStaticPath("/static","static")
+	beego.SetStaticPath("/static", "static")
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

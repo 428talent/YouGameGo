@@ -75,7 +75,7 @@ func CreateNewGame(name string, price float32, intro string, publisher string, r
 	return game, nil
 }
 
-func AddGameTags(gameId int, names ...string) ([]*models.Tag,error) {
+func AddGameTags(gameId int, names ...string) ([]*models.Tag, error) {
 	o := orm.NewOrm()
 	var tags []*models.Tag
 	for _, tagName := range names {
@@ -84,7 +84,7 @@ func AddGameTags(gameId int, names ...string) ([]*models.Tag,error) {
 		}
 		tagId, err := o.Insert(&tag)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		tag.Id = int(tagId)
 		tags = append(tags, &tag)
@@ -92,5 +92,10 @@ func AddGameTags(gameId int, names ...string) ([]*models.Tag,error) {
 
 	m2m := o.QueryM2M(&models.Game{Id: gameId}, "Tags")
 	_, err := m2m.Add(tags)
-	return tags,err
+	return tags, err
+}
+
+func UpdateGame(game *models.Game, fields ...string) error {
+	o := orm.NewOrm()
+	return game.UpdateGame(o, fields...)
 }

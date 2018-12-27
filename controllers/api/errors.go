@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
-	ApiError "yougame.com/yougame-server/error"
+	ApiError "yougame.com/yougame-server/application"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/validate"

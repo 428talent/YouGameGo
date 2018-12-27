@@ -37,7 +37,7 @@ func (g *Game) QueryById() error {
 
 }
 
-func (g *Game) SaveGameBangImage(path string) (*Image,error) {
+func (g *Game) SaveGameBangImage(path string) (*Image, error) {
 	o := orm.NewOrm()
 
 	if g.Band == nil {
@@ -48,26 +48,26 @@ func (g *Game) SaveGameBangImage(path string) (*Image,error) {
 		}
 		_, err := o.Insert(&image)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		g.Band = &image
 		_, err = o.Update(g, "Band")
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
-		return nil,err
+		return nil, err
 	}
 	err := o.Read(g.Band)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = os.Remove(g.Band.Path)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	g.Band.Path = path
 	_, err = o.Update(g.Band)
-	return g.Band,err
+	return g.Band, err
 }
 
 func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game, error) {
@@ -85,7 +85,7 @@ func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game,
 func (g *Game) ReadGameBand() (err error) {
 	o := orm.NewOrm()
 	err = o.Read(g.Band)
-	return
+	return err
 }
 
 func (g *Game) SavePreviewImage(path string) error {
@@ -154,4 +154,9 @@ func SearchGame(key string) ([]*Game, error) {
 	var gameList []*Game
 	_, err := o.QueryTable("game").Filter("name__icontains", key).All(&gameList)
 	return gameList, err
+}
+
+func (g *Game) UpdateGame(o orm.Ormer, fields ...string) error {
+	_, err := o.Update(g, fields...)
+	return err
 }

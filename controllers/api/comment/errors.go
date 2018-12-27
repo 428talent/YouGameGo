@@ -1,8 +1,8 @@
 package comment
 
-import(
+import (
 	"net/http"
-	ApiError "yougame.com/yougame-server/error"
+	ApiError "yougame.com/yougame-server/application"
 )
 
 var (
@@ -11,5 +11,4 @@ var (
 		Detail: "comment already exist !",
 		Code:   "110001",
 	}, http.StatusBadRequest)
-
 )

@@ -4,10 +4,12 @@ import (
 	"github.com/astaxie/beego/orm"
 	"time"
 )
-const(
+
+const (
 	EvaluationNegative = "Negative"
 	EvaluationPositive = "Positive"
 )
+
 type Comment struct {
 	Id         int
 	Good       *Good `orm:"rel(fk)"`

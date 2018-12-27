@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego/validation"
 	"net/http"
 	"strings"
-	AppError "yougame.com/yougame-server/error"
+	AppError "yougame.com/yougame-server/application"
 )
 
 type ValidateError struct {
@@ -23,11 +23,11 @@ func (e ValidateError) Error() string {
 
 func (e *ValidateError) BuildResponse() *AppError.APIErrorResponse {
 	return &AppError.APIErrorResponse{
-		Success: false,
-		Err:     "Validate error",
-		Detail:  e.Error(),
-		Code:    AppError.ValidateError,
-		StatusCode:http.StatusBadRequest,
+		Success:    false,
+		Err:        "Validate error",
+		Detail:     e.Error(),
+		Code:       AppError.ValidateError,
+		StatusCode: http.StatusBadRequest,
 	}
 }
 func ValidateData(r interface{}) error {

@@ -14,8 +14,8 @@ type UserClaims struct {
 func ParseAuthHeader(c beego.Controller) (*UserClaims, error) {
 	jwtToken := c.Ctx.Request.Header.Get("Authorization")
 	beego.Debug(jwtToken)
-	if len(jwtToken) == 0{
-		return nil,ReadAuthorizationFailed
+	if len(jwtToken) == 0 {
+		return nil, ReadAuthorizationFailed
 	}
 	var claims UserClaims
 	token, err := jwt.ParseWithClaims(jwtToken, &claims, func(token *jwt.Token) (interface{}, error) {

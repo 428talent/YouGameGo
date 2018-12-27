@@ -22,9 +22,7 @@ type PageResponse struct {
 	Count    int64       `json:"count"`
 	Page     int64       `json:"page"`
 	PageSize int64       `json:"page_size"`
-	NextPage *string      `json:"next_page"`
-	PrevPage *string      `json:"prev_page"`
+	NextPage *string     `json:"next_page"`
+	PrevPage *string     `json:"prev_page"`
 	Result   interface{} `json:"result"`
 }
-
-

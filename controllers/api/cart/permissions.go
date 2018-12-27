@@ -5,7 +5,6 @@ import (
 )
 
 type GetOtherCartPermission struct {
-
 }
 
 func (p GetOtherCartPermission) CheckPermission(context map[string]interface{}) bool {
@@ -15,10 +14,10 @@ func (p GetOtherCartPermission) CheckPermission(context map[string]interface{}) 
 		return false
 	}
 	return true
+
 }
 
 type GetSelfCartPermission struct {
-
 }
 
 func (p GetSelfCartPermission) CheckPermission(context map[string]interface{}) bool {
