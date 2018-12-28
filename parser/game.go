@@ -45,25 +45,28 @@ func (r *CreateGameRequestBody) Validate() error {
 }
 
 type ModifyGameRequestBody struct {
-	Name        string  `json:"name"`
-	Price       float32 `json:"price"`
-	ReleaseTime string  `json:"release_time"`
-	Publisher   string  `json:"publisher"`
-	Intro       string  `json:"intro"`
+	Name        string  `json:"name" field:"name"`
+	Price       float32 `json:"price" field:"price"`
+	ReleaseTime string  `json:"release_time" field:"release_time"`
+	Publisher   string  `json:"publisher"  field:"publisher"`
+	Intro       string  `json:"intro" field:"intro"`
 }
 
 func (r *ModifyGameRequestBody) ApplyToGame(gameId int64) (*models.Game, error) {
-	releaseTime, err := util.ParseDate(r.ReleaseTime)
-	if err != nil {
-		return nil, err
-	}
 	game := &models.Game{
-		Id:          int(gameId),
-		Price:       r.Price,
-		Name:        r.Name,
-		Publisher:   r.Publisher,
-		Intro:       r.Intro,
-		ReleaseTime: releaseTime,
+		Id:        int(gameId),
+		Price:     r.Price,
+		Name:      r.Name,
+		Publisher: r.Publisher,
+		Intro:     r.Intro,
 	}
+	if len(r.ReleaseTime) != 0 {
+		releaseTime, err := util.ParseDate(r.ReleaseTime)
+		if err != nil {
+			return nil, err
+		}
+		game.ReleaseTime = releaseTime
+	}
+
 	return game, nil
 }

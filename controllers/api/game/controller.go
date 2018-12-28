@@ -264,7 +264,6 @@ func (c *GameController) PutGame() {
 		}
 
 		// parse time
-
 		game, err := requestBody.ApplyToGame(int64(gameId))
 		if err != nil {
 			panic(api.ParseJsonDataError)
@@ -275,14 +274,74 @@ func (c *GameController) PutGame() {
 		}
 		//parse json
 
-		if game.Band != nil{
+		if game.Band != nil {
 			err = game.ReadGameBand()
 			if err != nil {
 				panic(err)
 			}
-		}else{
+		} else {
 			game.Band = &models.Image{
-				Path:"",
+				Path: "",
+			}
+		}
+
+		serializeTemplate := serializer.NewGameTemplate(serializer.AdminGameTemplateType)
+		serializeTemplate.Serialize(game, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.Data["json"] = serializeTemplate
+		c.ServeJSON()
+	})
+}
+
+func (c *GameController) PatchGame() {
+	c.WithErrorContext(func() {
+		claims, err := c.GetAuth()
+		if err != nil {
+			panic(api.ClaimsNoFoundError)
+		}
+
+		// check permission
+		err = c.CheckPermission([]api.ApiPermissionInterface{
+			&UpdateGamePermission{},
+		}, map[string]interface{}{
+			"claims": *claims,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := parser.ModifyGameRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+
+		// parse time
+		updateFields := util.GetUpdateModelField(&requestBody)
+		game, err := requestBody.ApplyToGame(int64(gameId))
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		beego.Debug(updateFields)
+		err = service.UpdateGame(game, updateFields...)
+		if err != nil {
+			panic(err)
+		}
+
+		//parse json
+		if game.Band != nil {
+			err = game.ReadGameBand()
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			game.Band = &models.Image{
+				Path: "",
 			}
 		}
 

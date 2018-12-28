@@ -97,5 +97,11 @@ func AddGameTags(gameId int, names ...string) ([]*models.Tag, error) {
 
 func UpdateGame(game *models.Game, fields ...string) error {
 	o := orm.NewOrm()
-	return game.UpdateGame(o, fields...)
+	err := game.UpdateGame(o, fields...)
+	if err != nil {
+		return err
+	}
+	err = o.Read(game)
+
+	return err
 }

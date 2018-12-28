@@ -43,3 +43,30 @@ func Replace(a, b interface{}) error {
 	}
 	return nil
 }
+
+//get all of field name which is not zero
+func GetUpdateModelField(updateModel interface{}) []string {
+	updateFields := make([]string, 0)
+	modelRef := reflect.ValueOf(updateModel).Elem()
+	modelType := modelRef.Type()
+	for fieldIndex := 0; fieldIndex < modelType.NumField(); fieldIndex++ {
+		field := modelType.Field(fieldIndex)
+		fieldName := field.Tag.Get("field")
+		if len(fieldName) == 0 {
+			continue
+		}
+
+		//check is valid
+		if !IsZeroValue(modelRef.FieldByName(field.Name).Interface()) {
+			updateFields = append(updateFields, fieldName)
+
+		}
+
+	}
+	return updateFields
+
+}
+
+func IsZeroValue(x interface{}) bool {
+	return x == reflect.Zero(reflect.TypeOf(x)).Interface()
+}
