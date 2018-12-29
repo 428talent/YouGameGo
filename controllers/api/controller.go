@@ -36,7 +36,7 @@ func (c ApiController) GetPage() (page int64, pageSize int64) {
 	return
 }
 
-func (c ApiController) CheckPermission(permissions []ApiPermissionInterface, context map[string]interface{}) error {
+func (c ApiController) CheckPermission(permissions []PermissionInterface, context map[string]interface{}) error {
 	for _, permission := range permissions {
 		if hasPermission := permission.CheckPermission(context); !hasPermission {
 			return PermissionDeniedError

@@ -270,7 +270,7 @@ func (c *ApiUserController) GetOrderList() {
 		"claims":      *claims,
 		"orderUserId": orderUserId,
 	}
-	permissions := []api.ApiPermissionInterface{
+	permissions := []api.PermissionInterface{
 		order.GetOwnOrderPermission{},
 	}
 	err = c.CheckPermission(permissions, permissionContext)

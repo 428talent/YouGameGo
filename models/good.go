@@ -38,3 +38,8 @@ func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Good, error) 
 	}
 	return goodList, nil
 }
+
+func (g *Good) Update(o orm.Ormer, fields ...string) error {
+	_, err := o.Update(g, fields...)
+	return err
+}

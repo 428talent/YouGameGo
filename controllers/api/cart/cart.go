@@ -38,7 +38,7 @@ func (c ApiCartController) GetCartList() {
 		"claims":     *claims,
 		"cartUserId": cartUserId,
 	}
-	permissions := []api.ApiPermissionInterface{
+	permissions := []api.PermissionInterface{
 		GetOtherCartPermission{},
 		GetSelfCartPermission{},
 	}

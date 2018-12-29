@@ -35,3 +35,5 @@ func (p *UpdateGamePermission) CheckPermission(context map[string]interface{}) b
 		return true
 	}
 }
+
+

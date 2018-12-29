@@ -36,7 +36,7 @@ func (c *GameController) CreateGame() {
 	permissionContext := map[string]interface{}{
 		"claims": *claims,
 	}
-	permission := []api.ApiPermissionInterface{
+	permission := []api.PermissionInterface{
 		CreateGamePermission{},
 	}
 	err = c.CheckPermission(permission, permissionContext)
@@ -236,6 +236,7 @@ func (c *GameController) AddGood() {
 
 }
 
+
 func (c *GameController) PutGame() {
 	c.WithErrorContext(func() {
 		claims, err := c.GetAuth()
@@ -244,7 +245,7 @@ func (c *GameController) PutGame() {
 		}
 
 		// check permission
-		err = c.CheckPermission([]api.ApiPermissionInterface{
+		err = c.CheckPermission([]api.PermissionInterface{
 			&UpdateGamePermission{},
 		}, map[string]interface{}{
 			"claims": *claims,
@@ -302,7 +303,7 @@ func (c *GameController) PatchGame() {
 		}
 
 		// check permission
-		err = c.CheckPermission([]api.ApiPermissionInterface{
+		err = c.CheckPermission([]api.PermissionInterface{
 			&UpdateGamePermission{},
 		}, map[string]interface{}{
 			"claims": *claims,

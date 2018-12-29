@@ -13,6 +13,15 @@ func GetGoodById(goodId int) (*models.Good, error) {
 
 }
 
+func UpdateGood(good *models.Good, fields ...string) error {
+	o := orm.NewOrm()
+	err := good.Update(o, fields...)
+	if err != nil {
+		return err
+	}
+	err = good.QueryById()
+	return err
+}
 func CreateGoodComment(user models.User, content string, goodId int, evaluation string) (*models.Good, *models.Comment, error) {
 	err := security.CheckUserPermission(user, "CreateComment")
 	if err != nil {

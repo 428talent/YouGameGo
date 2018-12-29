@@ -67,7 +67,7 @@ func (c *ApiCommentController) CreateComment() {
 		panic(err)
 	}
 
-	err = c.CheckPermission([]api.ApiPermissionInterface{
+	err = c.CheckPermission([]api.PermissionInterface{
 		CreateCommentPermission{},
 	}, map[string]interface{}{
 		"claims": *claims,
