@@ -73,6 +73,11 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 type GoodQueryBuilder struct {
 	pageOption *PageOption
 	ids []interface{}
+	gameIds []interface{}
+}
+
+func (q *GoodQueryBuilder) ApiQuery() (*int64,interface{},error) {
+	return q.Query()
 }
 
 func (q *GoodQueryBuilder) SetPage(page int64, pageSize int64) {
@@ -86,10 +91,16 @@ func (q *GoodQueryBuilder) InId(id ...interface{}) {
 	q.ids = append(q.ids, id)
 }
 
+func (q *GoodQueryBuilder)InGameId(gameId ...interface{}){
+	q.gameIds = append(q.gameIds, gameId...)
+}
 func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 	condition := orm.NewCondition()
 	if len(q.ids) > 0 {
 		condition = condition.And("id__in", q.ids...)
+	}
+	if len(q.gameIds) > 0 {
+		condition = condition.And("game_id__in", q.gameIds...)
 	}
 	if q.pageOption == nil {
 		q.pageOption = &PageOption{

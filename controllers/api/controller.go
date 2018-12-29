@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
@@ -74,4 +75,41 @@ func (c ApiController) WithErrorContext(doSomething func()) {
 		HandleApiError(c.Controller, e)
 	})
 	doSomething()
+}
+
+type ListView struct {
+	Controller    *ApiController
+	QueryBuilder  service.ApiQueryBuilder
+	ModelTemplate serializer.Template
+	GetTemplate   func() serializer.Template
+	GetPage       func() (page int64, pageSize int64)
+	SetFilter     func(builder service.ApiQueryBuilder)
+}
+
+func (v *ListView) GetModelTemplate() serializer.Template {
+	return v.ModelTemplate
+}
+
+func (v *ListView) Exec() error {
+	page, pageSize := v.Controller.GetPage()
+
+	serializeTemplate := v.ModelTemplate
+	if v.GetTemplate != nil {
+		serializeTemplate = v.GetTemplate()
+	}
+	if v.GetPage != nil {
+		v.QueryBuilder.SetPage(v.GetPage())
+	}
+	if v.SetFilter != nil {
+		v.SetFilter(v.QueryBuilder)
+	}
+	count, modelList, err := v.QueryBuilder.ApiQuery()
+	if err != nil {
+		return err
+	}
+	result := serializer.SerializeMultipleTemplate(modelList, serializeTemplate, map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
+	})
+	v.Controller.ServerPageResult(result, *count, page, pageSize)
+	return nil
 }

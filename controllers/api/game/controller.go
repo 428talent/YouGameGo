@@ -143,26 +143,25 @@ func (c *GameController) UploadGamePreviewImage() {
 	c.ServeJSON()
 }
 func (c *GameController) GetGood() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(e)
-		api.HandleApiError(c.Controller, err)
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType),
+			QueryBuilder:  &service.GoodQueryBuilder{},
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				goodQueryBuilder, _ := builder.(*service.GoodQueryBuilder)
+				goodQueryBuilder.InGameId(gameId)
+			},
+		}
+		err = listView.Exec()
+		if err != nil {
+			panic(err)
+		}
 	})
-	goodId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-	good, err := service.GetGoodById(goodId)
-	if err != nil {
-		panic(err)
-	}
-
-	serializeTemplate := serializer.GoodSerializeTemplate{}
-	serializeTemplate.Serialize(good, map[string]interface{}{
-		"site": util.GetSiteAndPortUrl(c.Controller),
-	})
-	c.Data["json"] = serializeTemplate
-	c.ServeJSON()
 }
 
 func (c *GameController) AddTags() {
@@ -235,7 +234,6 @@ func (c *GameController) AddGood() {
 	})
 
 }
-
 
 func (c *GameController) PutGame() {
 	c.WithErrorContext(func() {
