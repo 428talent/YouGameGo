@@ -41,7 +41,7 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 	}
 
 	//检查用户是否购买该商品
-	userBuyGoodOfGame, err := models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
+	_,userBuyGoodOfGame, err := models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		o.Filter("Users__User__Id", user.Id).Filter("game__id", good.Game).Filter("Id", good.Id)
 		return o
 	})
@@ -68,4 +68,36 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 
 	return &good, &comment, nil
 
+}
+
+type GoodQueryBuilder struct {
+	pageOption *PageOption
+	ids []interface{}
+}
+
+func (q *GoodQueryBuilder) SetPage(page int64, pageSize int64) {
+	q.pageOption = &PageOption{
+		Page:     page,
+		PageSize: pageSize,
+	}
+}
+
+func (q *GoodQueryBuilder) InId(id ...interface{}) {
+	q.ids = append(q.ids, id)
+}
+
+func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
+	condition := orm.NewCondition()
+	if len(q.ids) > 0 {
+		condition = condition.And("id__in", q.ids...)
+	}
+	if q.pageOption == nil {
+		q.pageOption = &PageOption{
+			Page:     1,
+			PageSize: 10,
+		}
+	}
+	return models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())
+	})
 }

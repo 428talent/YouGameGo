@@ -29,14 +29,16 @@ func (g *Good) ReadGame() error {
 	return err
 }
 
-func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Good, error) {
+func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64,[]*Good, error) {
 	o := orm.NewOrm()
 	var goodList []*Good
-	_, err := filter(o.QueryTable("good")).All(&goodList)
+	setter := filter(o.QueryTable("good"))
+	_, err := setter.All(&goodList)
 	if err != nil {
-		return nil, err
+		return nil,nil, err
 	}
-	return goodList, nil
+	count, err := setter.Count()
+	return &count,goodList, nil
 }
 
 func (g *Good) Update(o orm.Ormer, fields ...string) error {

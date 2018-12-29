@@ -7,6 +7,7 @@ import (
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
@@ -63,5 +64,30 @@ func (c *Controller) UpdateGood() {
 		c.Data["json"] = goodTemplate
 		c.ServeJSON()
 
+	})
+}
+
+func (c *Controller) GetGoods() {
+	c.WithErrorContext(func() {
+		c.GetAuth()
+		c.Role = security.Anonymous
+		isAdmin := security.CheckUserGroup(c.User, security.UserGroupAdmin)
+
+		page, pageSize := c.GetPage()
+		goodQueryBuilder := service.GoodQueryBuilder{}
+		goodQueryBuilder.SetPage(page, pageSize)
+		count, goodList, err := goodQueryBuilder.Query()
+		if err != nil {
+			panic(err)
+		}
+		goodTemplate := serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType)
+
+		if isAdmin {
+			goodTemplate = serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType)
+		}
+		result := serializer.SerializeMultipleTemplate(goodList, goodTemplate, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.ServerPageResult(result, *count, page, pageSize)
 	})
 }
