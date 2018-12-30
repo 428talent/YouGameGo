@@ -1,8 +1,10 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
+	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
@@ -86,10 +88,6 @@ type ListView struct {
 	SetFilter     func(builder service.ApiQueryBuilder)
 }
 
-func (v *ListView) GetModelTemplate() serializer.Template {
-	return v.ModelTemplate
-}
-
 func (v *ListView) Exec() error {
 	page, pageSize := v.Controller.GetPage()
 
@@ -111,5 +109,59 @@ func (v *ListView) Exec() error {
 		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
 	})
 	v.Controller.ServerPageResult(result, *count, page, pageSize)
+	return nil
+}
+
+type ObjectView struct {
+	Controller          *ApiController
+	QueryBuilder        service.ApiQueryBuilder
+	ModelTemplate       serializer.Template
+	LookUpField         string
+	SerializeContext    map[string]interface{}
+	GetTemplate         func() serializer.Template
+	SetFilter           func(builder service.ApiQueryBuilder)
+	SetSerializeContext func(context map[string]interface{})
+}
+
+func (v *ObjectView) Exec() error {
+	lookup := ":id"
+	if len(v.LookUpField) > 0 {
+		lookup = v.LookUpField
+	}
+	lookUpParam := v.Controller.Ctx.Input.Param(lookup)
+	id, err := strconv.Atoi(lookUpParam)
+	if err != nil {
+		return err
+	}
+
+	v.QueryBuilder.InId(id)
+	if v.SetFilter != nil {
+		v.SetFilter(v.QueryBuilder)
+	}
+
+	count, resultSet, err := v.QueryBuilder.ApiQuery()
+	if err != nil {
+		return err
+	}
+	if *count == 0 {
+		return ResourceNotFoundError
+	}
+	//beego.Debug(reflect.ValueOf(resultSet).Index(0).Interface())
+	//data := reflect.ValueOf(resultSet).Index(0).Elem().Interface()
+	v.SerializeContext = map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
+	}
+	if v.SetSerializeContext != nil {
+		v.SetSerializeContext(v.SerializeContext)
+	}
+	if v.ModelTemplate == nil && v.GetTemplate == nil {
+		return errors.New("not set serialize template")
+	}
+	if v.GetTemplate != nil {
+		v.ModelTemplate = v.GetTemplate()
+	}
+	v.ModelTemplate.Serialize(reflect.ValueOf(resultSet).Index(0).Interface(), v.SerializeContext)
+	v.Controller.Data["json"] = v.ModelTemplate
+	v.Controller.ServeJSON()
 	return nil
 }

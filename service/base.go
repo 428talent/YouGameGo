@@ -22,5 +22,6 @@ type QueryBuilder interface {
 
 type ApiQueryBuilder interface {
 	ApiQuery() (*int64,interface{},error)
+	InId(id ...interface{})
 	SetPage(page int64, pageSize int64)
 }

@@ -7,6 +7,7 @@ import (
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
@@ -65,7 +66,35 @@ func (c *Controller) UpdateGood() {
 
 	})
 }
+func (c *Controller) GetGood() {
+	c.WithErrorContext(func() {
+		objectView := api.ObjectView{
+			Controller:   &c.ApiController,
+			QueryBuilder: &service.GoodQueryBuilder{},
+			GetTemplate: func() serializer.Template {
+				c.Role = security.Anonymous
+				c.GetAuth()
+				if c.User != nil {
+					if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+						c.Role = security.UserGroupAdmin
+					}
+				}
 
+				switch c.Role {
+				case security.UserGroupAdmin:
+					return serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType)
+				default:
+					return serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType)
+				}
+
+			},
+		}
+		err := objectView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
 func (c *Controller) GetGoods() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{

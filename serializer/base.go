@@ -72,7 +72,7 @@ type Template interface {
 	Serialize(model interface{}, context map[string]interface{})
 }
 
-func SerializeModelData(data interface{}, template Template) interface{} {
+func SerializeModelData(data interface{}, template Template){
 	dataRef := reflect.ValueOf(data).Elem()
 	templateRef := reflect.ValueOf(template).Elem()
 	for fieldIdx := 0; fieldIdx < templateRef.NumField(); fieldIdx++ {
@@ -130,7 +130,6 @@ func SerializeModelData(data interface{}, template Template) interface{} {
 
 	}
 
-	return nil
 }
 
 func SerializeMultipleTemplate(items interface{}, template Template, context map[string]interface{}) interface{} {
