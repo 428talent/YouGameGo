@@ -438,3 +438,17 @@ func (c *GameController) GetTags() {
 		c.ServerPageResult(serializer.SerializeMultipleTemplate(tags, &template, map[string]interface{}{}), *count, page, pageSize)
 	})
 }
+
+func (c *GameController) GetGameList() {
+	c.WithErrorContext(func() {
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.GameQueryBuilder{},
+			ModelTemplate: serializer.NewGameTemplate(serializer.DefaultGameTemplateType),
+		}
+		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}

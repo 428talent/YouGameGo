@@ -12,8 +12,19 @@ type GameQueryBuilder struct {
 	pageOption *PageOption
 }
 
-func (b *GameQueryBuilder) InId(ids ...int) {
-	b.ids = append(b.ids, ids)
+func (b *GameQueryBuilder) InId(id ...interface{}) {
+	b.ids = append(b.ids, id)
+}
+
+func (b *GameQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return b.Query()
+}
+
+func (b *GameQueryBuilder) SetPage(page int64, pageSize int64) {
+	b.pageOption = &PageOption{
+		Page:     page,
+		PageSize: pageSize,
+	}
 }
 
 func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
@@ -28,9 +39,10 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 		}
 	}
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.SetCond(condition).Limit(b.pageOption.Page).Offset(b.pageOption.Offset())
+		return o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
 	})
 }
+
 func GetGameBand(gameId int) (*models.Image, error) {
 	game := models.Game{Id: gameId}
 	err := game.QueryById()
