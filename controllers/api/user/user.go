@@ -332,3 +332,17 @@ func (c *ApiUserController) GetUserWishList() {
 	})
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
+
+func (c *ApiUserController) GetUserProfile() {
+	c.WithErrorContext(func() {
+		objectView := api.ObjectView{
+			Controller:&c.ApiController,
+			QueryBuilder:  &service.UserProfileQueryBuilder{},
+			ModelTemplate: serializer.NewProfileTemplate(serializer.DefaultProfileTemplateType),
+		}
+		err := objectView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}

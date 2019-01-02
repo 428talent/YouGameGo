@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -14,30 +15,18 @@ const (
 
 var customConverter map[string]func(value interface{}) interface{}
 
-//var customModelTemplateMapper map[interface{}]func(template Template, model interface{}, context map[string]interface{})
-
 func init() {
 	customConverter = make(map[string]func(value interface{}) interface{}, 0)
-	//customModelTemplateMapper = make(map[interface{}]func(template Template, model interface{}, context map[string]interface{}))
+	AddCustomConverter("money", func(value interface{}) interface{} {
+		price := value.(float32)
+		return fmt.Sprintf("%.2f", price)
+	})
 }
 
 // add custom serialize type
 func AddCustomConverter(name string, converter func(value interface{}) interface{}) {
 	customConverter[name] = converter
 }
-
-// serialize with register model to template mapper
-//func AutoSerailize(t *Template, model interface{}, context map[string]interface{}) {
-//	for modelType, handler := range customModelTemplateMapper {
-//		if reflect.TypeOf(model) == reflect.TypeOf(modelType) {
-//			handler(t, modelType, context)
-//		}
-//	}
-//}
-//
-//func AddModelTemplateMapper(model interface{}, handler func(template Template, model interface{}, context map[string]interface{})) {
-//	customModelTemplateMapper[model] = handler
-//}
 
 type Model interface {
 	SerializeData(model interface{}, site string) interface{}
@@ -72,7 +61,7 @@ type Template interface {
 	Serialize(model interface{}, context map[string]interface{})
 }
 
-func SerializeModelData(data interface{}, template Template){
+func SerializeModelData(data interface{}, template Template) {
 	dataRef := reflect.ValueOf(data).Elem()
 	templateRef := reflect.ValueOf(template).Elem()
 	for fieldIdx := 0; fieldIdx < templateRef.NumField(); fieldIdx++ {
@@ -142,4 +131,12 @@ func SerializeMultipleTemplate(items interface{}, template Template, context map
 		result = append(result, tmp)
 	}
 	return result
+}
+
+
+type Number float64
+
+func (n Number) MarshalJSON() ([]byte, error) {
+	// There are probably better ways to do it. It is just an example
+	return []byte(fmt.Sprintf("%f", n)), nil
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
+	"reflect"
 	"strconv"
 	"time"
 	"yougame.com/yougame-server/controllers/api"
@@ -445,6 +446,39 @@ func (c *GameController) GetGameList() {
 			Controller:    &c.ApiController,
 			QueryBuilder:  &service.GameQueryBuilder{},
 			ModelTemplate: serializer.NewGameTemplate(serializer.DefaultGameTemplateType),
+			OnGetResult: func(gameList interface{}) {
+				if c.Role != security.UserGroupAdmin {
+					return
+				}
+				ref := reflect.ValueOf(gameList)
+				for idx := 0; idx < ref.Len(); idx++ {
+					game := ref.Index(idx).Interface().(*models.Game)
+					if game.Band == nil{
+						game.Band = &models.Image{
+							Path:"",
+						}
+					}else{
+						err := game.ReadGameBand()
+						if err != nil {
+							beego.Debug(err)
+						}
+					}
+
+				}
+			},
+			GetTemplate: func() serializer.Template {
+				if c.Role == security.UserGroupAdmin {
+					return serializer.NewGameTemplate(serializer.AdminGameTemplateType)
+				}
+				return serializer.NewGameTemplate(serializer.DefaultGameTemplateType)
+			},
+			Init: func() {
+				c.GetAuth()
+				c.Role = security.Anonymous
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					c.Role = security.UserGroupAdmin
+				}
+			},
 		}
 		err := listView.Exec()
 		if err != nil {

@@ -140,9 +140,11 @@ type UserProfileTemplate struct {
 	Nickname string `json:"nickname" source:"Nickname" source_type:"string"`
 	Email    string `json:"email" source:"Email" source_type:"string"`
 	Avatar   string `json:"avatar" source:"Avatar" source_type:"string" `
-	UpdateAt int64  `json:"update_at" source:"Updated" source_type:"string" converter:"time"`
+	UpdateAt string  `json:"update_at" source:"Updated" source_type:"string" converter:"time"`
 }
 
 func (t *UserProfileTemplate) Serialize(model interface{}, context map[string]interface{}) {
 	SerializeModelData(model, t)
 }
+
+

@@ -49,11 +49,10 @@ func (g *GoodModel) SerializeData(model interface{}, site string) interface{} {
 	return goodModel
 }
 
-
-
 type GameTemplate struct {
 	Id          int        `json:"id"  source_type:"int"`
 	Name        string     `json:"name" source_type:"string"`
+	Price       float64    `json:"price" source_type:"float"`
 	ReleaseTime string     `json:"release_time" source:"ReleaseTime" source_type:"string" converter:"date"`
 	Publisher   string     `json:"publisher" source_type:"string"`
 	Intro       string     `json:"intro" source_type:"string"`
@@ -95,6 +94,7 @@ type AdminGameTemplate struct {
 	ReleaseTime string     `json:"release_time" source:"ReleaseTime" source_type:"string" converter:"date"`
 	Publisher   string     `json:"publisher" source_type:"string"`
 	Intro       string     `json:"intro" source_type:"string"`
+	Price       Number    `json:"price" source_type:"float"`
 	Created     string     `json:"created" source:"Created" source_type:"string" converter:"time"`
 	Updated     string     `json:"updated" source:"Updated" source_type:"string" converter:"time"`
 	Enable      bool       `json:"enable" source:"Enable" source_type:"bool"`

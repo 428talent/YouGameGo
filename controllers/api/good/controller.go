@@ -88,6 +88,10 @@ func (c *Controller) GetGood() {
 				}
 
 			},
+			OnGetResult: func(model interface{}) {
+				data := model.(*models.Good)
+				beego.Debug(data)
+			},
 		}
 		err := objectView.Exec()
 		if err != nil {

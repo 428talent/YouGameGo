@@ -18,6 +18,7 @@ func init() {
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &user.ApiUserController{}, "get:GetUser"),
 				beego.NSRouter("/orders", &order.ApiOrderController{}, "get:GetOrderList"),
+				beego.NSRouter("/profile", &user.ApiUserController{}, "get:GetUserProfile"),
 
 				beego.NSNamespace("/avatar",
 					beego.NSRouter("/upload", &user.ApiUserController{}, "post:UploadAvatar"),
