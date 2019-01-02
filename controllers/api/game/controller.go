@@ -453,11 +453,11 @@ func (c *GameController) GetGameList() {
 				ref := reflect.ValueOf(gameList)
 				for idx := 0; idx < ref.Len(); idx++ {
 					game := ref.Index(idx).Interface().(*models.Game)
-					if game.Band == nil{
+					if game.Band == nil {
 						game.Band = &models.Image{
-							Path:"",
+							Path: "",
 						}
-					}else{
+					} else {
 						err := game.ReadGameBand()
 						if err != nil {
 							beego.Debug(err)
@@ -477,6 +477,13 @@ func (c *GameController) GetGameList() {
 				c.Role = security.Anonymous
 				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
 					c.Role = security.UserGroupAdmin
+				}
+			},
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				gameQueryBuilder := builder.(*service.GameQueryBuilder)
+				orders := c.GetStrings("order")
+				if len(orders) > 0 {
+					gameQueryBuilder.ByOrder(orders...)
 				}
 			},
 		}

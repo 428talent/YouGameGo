@@ -10,6 +10,7 @@ import (
 type GameQueryBuilder struct {
 	ids        []interface{}
 	pageOption *PageOption
+	orders     []string
 }
 
 func (b *GameQueryBuilder) InId(id ...interface{}) {
@@ -26,6 +27,9 @@ func (b *GameQueryBuilder) SetPage(page int64, pageSize int64) {
 		PageSize: pageSize,
 	}
 }
+func (b *GameQueryBuilder) ByOrder(orders ...string) {
+	b.orders = append(b.orders, orders...)
+}
 
 func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	condition := orm.NewCondition()
@@ -38,8 +42,13 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 			PageSize: 10,
 		}
 	}
+
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		querySetter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		if len(b.orders) > 0 {
+			querySetter = querySetter.OrderBy(b.orders...)
+		}
+		return querySetter
 	})
 }
 
