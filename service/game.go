@@ -11,6 +11,7 @@ type GameQueryBuilder struct {
 	ids        []interface{}
 	pageOption *PageOption
 	orders     []string
+	enable     string
 }
 
 func (b *GameQueryBuilder) InId(id ...interface{}) {
@@ -31,6 +32,9 @@ func (b *GameQueryBuilder) ByOrder(orders ...string) {
 	b.orders = append(b.orders, orders...)
 }
 
+func (b *GameQueryBuilder) WithEnable(visibility string) {
+	b.enable = visibility
+}
 func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	condition := orm.NewCondition()
 	if len(b.ids) > 0 {
@@ -41,6 +45,16 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 			Page:     1,
 			PageSize: 10,
 		}
+	}
+
+	if len(b.enable) > 0 {
+		switch b.enable {
+		case "visit":
+			condition = condition.And("enable", true)
+		case "remove":
+			condition = condition.And("enable", false)
+		}
+
 	}
 
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {

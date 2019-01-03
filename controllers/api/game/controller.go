@@ -485,6 +485,13 @@ func (c *GameController) GetGameList() {
 				if len(orders) > 0 {
 					gameQueryBuilder.ByOrder(orders...)
 				}
+
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					enable := c.GetString("enable", "visit")
+					if enable != "all" {
+						gameQueryBuilder.WithEnable(enable)
+					}
+				}
 			},
 		}
 		err := listView.Exec()
