@@ -135,6 +135,11 @@ func (c *Controller) GetGoods() {
 					goodQueryBuilder.InGameId(gameId)
 				}
 
+				orders := c.GetStrings("order")
+				if len(orders) > 0 {
+					goodQueryBuilder.ByOrder(orders...)
+				}
+
 			},
 		}
 		err := listView.Exec()

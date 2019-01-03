@@ -41,7 +41,7 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 	}
 
 	//检查用户是否购买该商品
-	_,userBuyGoodOfGame, err := models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
+	_, userBuyGoodOfGame, err := models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		o.Filter("Users__User__Id", user.Id).Filter("game__id", good.Game).Filter("Id", good.Id)
 		return o
 	})
@@ -72,11 +72,12 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 
 type GoodQueryBuilder struct {
 	pageOption *PageOption
-	ids []interface{}
-	gameIds []interface{}
+	ids        []interface{}
+	gameIds    []interface{}
+	orders     []string
 }
 
-func (q *GoodQueryBuilder) ApiQuery() (*int64,interface{},error) {
+func (q *GoodQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return q.Query()
 }
 
@@ -91,8 +92,12 @@ func (q *GoodQueryBuilder) InId(id ...interface{}) {
 	q.ids = append(q.ids, id)
 }
 
-func (q *GoodQueryBuilder)InGameId(gameId ...interface{}){
+func (q *GoodQueryBuilder) InGameId(gameId ...interface{}) {
 	q.gameIds = append(q.gameIds, gameId...)
+}
+
+func (q *GoodQueryBuilder) ByOrder(orders ...string) {
+	q.orders = append(q.orders, orders...)
 }
 func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 	condition := orm.NewCondition()
@@ -109,6 +114,10 @@ func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 		}
 	}
 	return models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())
+		setter := o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())
+		if len(q.orders) > 0 {
+			setter = setter.OrderBy(q.orders...)
+		}
+		return setter
 	})
 }
