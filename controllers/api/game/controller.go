@@ -492,6 +492,11 @@ func (c *GameController) GetGameList() {
 						gameQueryBuilder.WithEnable(enable)
 					}
 				}
+
+				if name := c.GetString("name"); len(name) > 0 {
+					gameQueryBuilder.SearchWithName(name)
+				}
+
 			},
 		}
 		err := listView.Exec()

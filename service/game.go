@@ -12,6 +12,7 @@ type GameQueryBuilder struct {
 	pageOption *PageOption
 	orders     []string
 	enable     string
+	searchName string
 }
 
 func (b *GameQueryBuilder) InId(id ...interface{}) {
@@ -27,6 +28,10 @@ func (b *GameQueryBuilder) SetPage(page int64, pageSize int64) {
 		Page:     page,
 		PageSize: pageSize,
 	}
+}
+
+func (b *GameQueryBuilder) SearchWithName(key string) {
+	b.searchName = key
 }
 func (b *GameQueryBuilder) ByOrder(orders ...string) {
 	b.orders = append(b.orders, orders...)
@@ -55,6 +60,10 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 			condition = condition.And("enable", false)
 		}
 
+	}
+
+	if len(b.searchName) > 0 {
+		condition = condition.And("name__icontains", b.searchName)
 	}
 
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
