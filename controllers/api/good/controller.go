@@ -104,8 +104,14 @@ func (c *Controller) GetGoods() {
 		listView := api.ListView{
 			Controller:    &c.ApiController,
 			QueryBuilder:  &service.GoodQueryBuilder{},
-			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType),
+			Init: func() {
+				c.GetAuth()
+			},
+			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType),
 			GetTemplate: func() serializer.Template {
+				if c.User != nil && security.CheckUserGroup(c.User,security.UserGroupAdmin){
+					return serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType)
+				}
 				return serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType)
 			},
 			SetFilter: func(builder service.ApiQueryBuilder) {

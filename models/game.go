@@ -61,10 +61,13 @@ func (g *Game) SaveGameBangImage(path string) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = os.Remove(g.Band.Path)
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(g.Band.Path); os.IsExist(err) {
+		err = os.Remove(g.Band.Path)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	g.Band.Path = path
 	_, err = o.Update(g.Band)
 	return g.Band, err
