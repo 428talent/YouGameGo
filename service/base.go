@@ -33,3 +33,7 @@ func DeleteData(model models.DataModel) error {
 	o := orm.NewOrm()
 	return model.Delete(o)
 }
+func UpdateData(id int64, model models.DataModel, fields ...string) error {
+	o := orm.NewOrm()
+	return model.Update(id, o, fields...)
+}

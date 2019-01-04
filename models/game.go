@@ -23,6 +23,12 @@ type Game struct {
 	Updated       time.Time `orm:"auto_now;type(datetime)"`
 }
 
+func (g *Game) Update(id int64, o orm.Ormer, fields ...string) error {
+	g.Id = int(id)
+	_, err := o.Update(g, fields...)
+	return err
+}
+
 func (g *Game) Delete(o orm.Ormer) error {
 	g.Enable = false
 	_, err := o.Update(g, "enable")

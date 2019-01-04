@@ -1,7 +1,9 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/jinzhu/copier"
 	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/models"
@@ -162,5 +164,82 @@ func (v *DeleteView) Exec() error {
 	}
 
 	v.Controller.ResponseWithSuccess()
+	return nil
+}
+
+type UpdateView struct {
+	Controller           *ApiController
+	Init                 func()
+	Parser               interface{}
+	Model                models.DataModel
+	Permissions          []PermissionInterface
+	ModelTemplate        serializer.Template
+	GetTemplate          func() serializer.Template
+	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+}
+
+func (v *UpdateView) Exec() error {
+	claims, err := v.Controller.GetAuth()
+	if err != nil {
+		return ClaimsNoFoundError
+	}
+	if claims == nil {
+		return ClaimsNoFoundError
+	}
+	permissionContext := map[string]interface{}{
+		"claims": *claims,
+	}
+	if v.GetPermissionContext != nil {
+		v.GetPermissionContext(&permissionContext)
+	}
+	err = v.Controller.CheckPermission(v.Permissions, permissionContext)
+	if err != nil {
+		return PermissionDeniedError
+	}
+
+	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody, v.Parser)
+	if err != nil {
+		return ParseJsonDataError
+	}
+
+	jsonObjectMap := map[string]interface{}{}
+	err = json.Unmarshal([]byte(v.Controller.Ctx.Input.RequestBody), &jsonObjectMap)
+	if err != nil {
+		return ParseJsonDataError
+	}
+	modelId, err := strconv.Atoi(v.Controller.Ctx.Input.Param(":id"))
+	if err != nil {
+		return err
+	}
+
+	updateFields := make([]string, 0)
+	for field := range jsonObjectMap {
+		updateFields = append(updateFields, field)
+	}
+
+	err = copier.Copy(v.Model, v.Parser)
+	if err != nil {
+		return err
+	}
+	err = service.UpdateData(int64(modelId), v.Model, updateFields...)
+	if err != nil {
+		return err
+	}
+
+	err = v.Model.Query(int64(modelId))
+	if err != nil {
+		return err
+	}
+
+	if v.GetTemplate != nil {
+		v.ModelTemplate = v.GetTemplate()
+	}
+
+	v.ModelTemplate.Serialize(v.Model, map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
+	})
+
+	v.Controller.Data["json"] = v.ModelTemplate
+	v.Controller.ServeJSON()
 	return nil
 }

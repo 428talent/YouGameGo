@@ -8,5 +8,6 @@ type Model interface {
 
 type DataModel interface {
 	Query(id int64) error
-	Delete(orm orm.Ormer) error
+	Delete(o orm.Ormer) error
+	Update (id int64,o orm.Ormer,fields ...string) error
 }

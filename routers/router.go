@@ -41,7 +41,7 @@ func init() {
 		),
 		beego.NSNamespace("/game",
 			beego.NSNamespace("/:id",
-				beego.NSRouter("/", &game.GameController{}, "get:GetGame;put:PutGame;patch:PatchGame;delete:DeleteGame"),
+				beego.NSRouter("/", &game.GameController{}, "get:GetGame;put:UpdateGame;patch:UpdateGame;delete:DeleteGame"),
 				beego.NSRouter("/band", &game.GameController{}, "get:GetGameBand;put:UploadGameBand;post:UploadGameBand"),
 				beego.NSRouter("/preview", &game.GameController{}, "get:GetGamePreview"),
 				beego.NSRouter("/tags", &game.GameController{}, "get:GetTags;post:AddTags"),

@@ -342,7 +342,6 @@ func (c *GameController) PatchGame() {
 		if err != nil {
 			panic(api.ParseJsonDataError)
 		}
-		beego.Debug(updateFields)
 		err = service.UpdateGame(game, updateFields...)
 		if err != nil {
 			panic(err)
@@ -366,6 +365,23 @@ func (c *GameController) PatchGame() {
 		})
 		c.Data["json"] = serializeTemplate
 		c.ServeJSON()
+	})
+}
+func (c *GameController) UpdateGame() {
+	c.WithErrorContext(func() {
+		updateView := api.UpdateView{
+			Controller: &c.ApiController,
+			Parser:     &parser.ModifyGameRequestBody{},
+			Model:      &models.Game{},
+			Permissions: []api.PermissionInterface{
+				&UpdateGamePermission{},
+			},
+			ModelTemplate: serializer.NewGameTemplate(serializer.AdminGameTemplateType),
+		}
+		err := updateView.Exec()
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 func (c *GameController) GetGame() {
