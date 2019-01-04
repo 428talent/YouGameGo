@@ -8,6 +8,7 @@ import (
 const (
 	CreateGamePermissionName = "CreateGame"
 	UpdateGamePermissionName = "UpdateGame"
+	DeleteGamePermissionName = "DeleteGame"
 )
 
 type CreateGamePermission struct{}
@@ -36,4 +37,15 @@ func (p *UpdateGamePermission) CheckPermission(context map[string]interface{}) b
 	}
 }
 
+type DeleteGamePermission struct {
+}
 
+func (p *DeleteGamePermission) CheckPermission(context map[string]interface{}) bool {
+	claims := context["claims"].(security.UserClaims)
+	if err := security.CheckClaimsPermission(claims, DeleteGamePermissionName); err != nil {
+		logrus.Error(err)
+		return false
+	} else {
+		return true
+	}
+}

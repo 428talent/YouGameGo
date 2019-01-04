@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
@@ -112,5 +113,54 @@ func (v *ObjectView) Exec() error {
 	v.ModelTemplate.Serialize(reflect.ValueOf(resultSet).Index(0).Interface(), v.SerializeContext)
 	v.Controller.Data["json"] = v.ModelTemplate
 	v.Controller.ServeJSON()
+	return nil
+}
+
+type DeleteView struct {
+	Controller           *ApiController
+	Init                 func()
+	Model                models.DataModel
+	Permissions          []PermissionInterface
+	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+}
+
+func (v *DeleteView) Exec() error {
+	claims, err := v.Controller.GetAuth()
+	if err != nil {
+		return ClaimsNoFoundError
+	}
+	if claims == nil {
+		return ClaimsNoFoundError
+	}
+	permissionContext := map[string]interface{}{
+		"claims": *claims,
+	}
+	if v.GetPermissionContext != nil {
+		v.GetPermissionContext(&permissionContext)
+	}
+	err = v.Controller.CheckPermission(v.Permissions, permissionContext)
+	if err != nil {
+		return PermissionDeniedError
+	}
+	idParam := v.Controller.Ctx.Input.Param(":id")
+	if len(idParam) == 0 {
+		return ResourceNotFoundError
+	}
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		panic(err)
+	}
+
+	err = v.Model.Query(int64(id))
+	if err != nil {
+		return err
+	}
+
+	err = service.DeleteData(v.Model)
+	if err != nil {
+		panic(err)
+	}
+
+	v.Controller.ResponseWithSuccess()
 	return nil
 }

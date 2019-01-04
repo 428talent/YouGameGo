@@ -1,6 +1,9 @@
 package service
 
-import "github.com/astaxie/beego/orm"
+import (
+	"github.com/astaxie/beego/orm"
+	"yougame.com/yougame-server/models"
+)
 
 type PageOption struct {
 	Page     int64
@@ -21,7 +24,12 @@ type QueryBuilder interface {
 }
 
 type ApiQueryBuilder interface {
-	ApiQuery() (*int64,interface{},error)
+	ApiQuery() (*int64, interface{}, error)
 	InId(id ...interface{})
 	SetPage(page int64, pageSize int64)
+}
+
+func DeleteData(model models.DataModel) error {
+	o := orm.NewOrm()
+	return model.Delete(o)
 }

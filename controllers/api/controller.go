@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
+	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
@@ -68,3 +69,11 @@ func (c ApiController) WithErrorContext(doSomething func()) {
 	doSomething()
 }
 
+func (c *ApiController) ResponseWithSuccess() {
+	data := serializer.CommonApiResponseBody{
+		Success: true,
+		Payload: nil,
+	}
+	c.Data["json"] = data
+	c.ServeJSON()
+}

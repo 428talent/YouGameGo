@@ -294,6 +294,21 @@ func (c *GameController) PutGame() {
 	})
 }
 
+func (c *GameController) DeleteGame() {
+	c.WithErrorContext(func() {
+		deleteView := api.DeleteView{
+			Controller: &c.ApiController,
+			Model:      &models.Game{},
+			Permissions: []api.PermissionInterface{
+				&DeleteGamePermission{},
+			},
+		}
+		err := deleteView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
 func (c *GameController) PatchGame() {
 	c.WithErrorContext(func() {
 		claims, err := c.GetAuth()
