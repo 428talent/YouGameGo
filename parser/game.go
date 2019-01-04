@@ -50,6 +50,7 @@ type ModifyGameRequestBody struct {
 	ReleaseTime string  `json:"release_time" field:"release_time"`
 	Publisher   string  `json:"publisher"  field:"publisher"`
 	Intro       string  `json:"intro" field:"intro"`
+	Enable      bool    `json:"enable" field:"enable"`
 }
 
 func (r *ModifyGameRequestBody) ApplyToGame(gameId int64) (*models.Game, error) {
@@ -59,6 +60,7 @@ func (r *ModifyGameRequestBody) ApplyToGame(gameId int64) (*models.Game, error) 
 		Name:      r.Name,
 		Publisher: r.Publisher,
 		Intro:     r.Intro,
+		Enable:    r.Enable,
 	}
 	if len(r.ReleaseTime) != 0 {
 		releaseTime, err := util.ParseDate(r.ReleaseTime)
