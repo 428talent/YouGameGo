@@ -75,6 +75,8 @@ type GoodQueryBuilder struct {
 	ids        []interface{}
 	gameIds    []interface{}
 	orders     []string
+	enable     string
+
 }
 
 func (q *GoodQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -99,6 +101,9 @@ func (q *GoodQueryBuilder) InGameId(gameId ...interface{}) {
 func (q *GoodQueryBuilder) ByOrder(orders ...string) {
 	q.orders = append(q.orders, orders...)
 }
+func (q *GoodQueryBuilder) WithEnable(visibility string) {
+	q.enable = visibility
+}
 func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 	condition := orm.NewCondition()
 	if len(q.ids) > 0 {
@@ -112,6 +117,16 @@ func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 			Page:     1,
 			PageSize: 10,
 		}
+	}
+
+	if len(q.enable) > 0 {
+		switch q.enable {
+		case "visit":
+			condition = condition.And("enable", true)
+		case "remove":
+			condition = condition.And("enable", false)
+		}
+
 	}
 	return models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		setter := o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())

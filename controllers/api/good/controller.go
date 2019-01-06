@@ -106,6 +106,10 @@ func (c *Controller) GetGoods() {
 			QueryBuilder: &service.GoodQueryBuilder{},
 			Init: func() {
 				c.GetAuth()
+				c.Role = security.Anonymous
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					c.Role = security.UserGroupAdmin
+				}
 			},
 			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType),
 			GetTemplate: func() serializer.Template {
@@ -138,6 +142,13 @@ func (c *Controller) GetGoods() {
 				orders := c.GetStrings("order")
 				if len(orders) > 0 {
 					goodQueryBuilder.ByOrder(orders...)
+				}
+
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					enable := c.GetString("enable", "visit")
+					if enable != "all" {
+						goodQueryBuilder.WithEnable(enable)
+					}
 				}
 
 			},
