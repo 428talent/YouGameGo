@@ -17,6 +17,29 @@ type Good struct {
 	Updated  time.Time  `orm:"auto_now;type(datetime)"`
 }
 
+func (g *Good) Query(id int64) error {
+	o := orm.NewOrm()
+	err := o.Read(g)
+	return err
+}
+
+func (g *Good) Save(o orm.Ormer) error {
+	_, err := o.Insert(g)
+	return err
+}
+
+func (g *Good) Delete(o orm.Ormer) error {
+	g.Enable = false
+	_, err := o.Update(g, "enable")
+	return err
+}
+
+func (g *Good) Update(id int64, o orm.Ormer, fields ...string) error {
+	g.Id = int(id)
+	_, err := o.Update(g, fields...)
+	return err
+}
+
 func (g *Good) QueryById() error {
 	o := orm.NewOrm()
 	err := o.Read(g)
@@ -29,19 +52,19 @@ func (g *Good) ReadGame() error {
 	return err
 }
 
-func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64,[]*Good, error) {
+func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Good, error) {
 	o := orm.NewOrm()
 	var goodList []*Good
 	setter := filter(o.QueryTable("good"))
 	_, err := setter.All(&goodList)
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 	count, err := setter.Count()
-	return &count,goodList, nil
+	return &count, goodList, nil
 }
 
-func (g *Good) Update(o orm.Ormer, fields ...string) error {
-	_, err := o.Update(g, fields...)
-	return err
-}
+//func (g *Good) Update(o orm.Ormer, fields ...string) error {
+//	_, err := o.Update(g, fields...)
+//	return err
+//}

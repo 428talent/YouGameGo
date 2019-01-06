@@ -68,7 +68,7 @@ func init() {
 			),
 		),
 		beego.NSNamespace("goods",
-			beego.NSRouter("/", &good.Controller{}, "get:GetGoods"),
+			beego.NSRouter("/", &good.Controller{}, "get:GetGoods;post:CreateGood"),
 		),
 		beego.NSNamespace("/good",
 			beego.NSNamespace("/:id",

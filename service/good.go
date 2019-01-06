@@ -15,7 +15,7 @@ func GetGoodById(goodId int) (*models.Good, error) {
 
 func UpdateGood(good *models.Good, fields ...string) error {
 	o := orm.NewOrm()
-	err := good.Update(o, fields...)
+	err := good.Update(int64(good.Id),o, fields...)
 	if err != nil {
 		return err
 	}

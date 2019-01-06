@@ -37,3 +37,8 @@ func UpdateData(id int64, model models.DataModel, fields ...string) error {
 	o := orm.NewOrm()
 	return model.Update(id, o, fields...)
 }
+
+func SaveData(model models.DataModel) error {
+	o := orm.NewOrm()
+	return model.Save(o)
+}

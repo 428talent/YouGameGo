@@ -7,6 +7,7 @@ import (
 
 const (
 	UpdateGoodPermissionName = "UpdateGood"
+	CreateGoodPermissionName = "CreateGood"
 )
 
 type UpdateGoodPermission struct {
@@ -15,6 +16,20 @@ type UpdateGoodPermission struct {
 func (p *UpdateGoodPermission) CheckPermission(context map[string]interface{}) bool {
 	claims := context["claims"].(*security.UserClaims)
 	if err := security.CheckClaimsPermission(*claims, UpdateGoodPermissionName); err != nil {
+		logrus.Error(err)
+		return false
+	} else {
+		return true
+	}
+}
+
+type CreateGoodPermission struct {
+
+}
+
+func (p *CreateGoodPermission) CheckPermission(context map[string]interface{}) bool {
+	claims := context["claims"].(*security.UserClaims)
+	if err := security.CheckClaimsPermission(*claims, CreateGoodPermissionName); err != nil {
 		logrus.Error(err)
 		return false
 	} else {

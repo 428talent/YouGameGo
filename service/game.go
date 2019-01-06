@@ -112,7 +112,8 @@ func CreateNewGame(name string, price float32, intro string, publisher string, r
 		Publisher:   publisher,
 		ReleaseTime: releaseTime,
 	}
-	err = game.Save()
+	o := orm.NewOrm()
+	err = game.Save(o)
 	if err != nil {
 		return nil, err
 	}

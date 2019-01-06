@@ -243,3 +243,66 @@ func (v *UpdateView) Exec() error {
 	v.Controller.ServeJSON()
 	return nil
 }
+
+type CreateView struct {
+	Controller           *ApiController
+	Parser               interface{}
+	Model                models.DataModel
+	Permissions          []PermissionInterface
+	ModelTemplate        serializer.Template
+	GetTemplate          func() serializer.Template
+	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+	OnPrepareSave func(c *CreateView)
+}
+
+func (v *CreateView) Exec() error {
+	claims, err := v.Controller.GetAuth()
+	if err != nil {
+		return ClaimsNoFoundError
+	}
+	if claims == nil {
+		return ClaimsNoFoundError
+	}
+	permissionContext := map[string]interface{}{
+		"claims": claims,
+	}
+	if v.GetPermissionContext != nil {
+		v.GetPermissionContext(&permissionContext)
+	}
+	err = v.Controller.CheckPermission(v.Permissions, permissionContext)
+	if err != nil {
+		return PermissionDeniedError
+	}
+
+	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody, v.Parser)
+	if err != nil {
+		return ParseJsonDataError
+	}
+
+	err = copier.Copy(v.Model, v.Parser)
+	if err != nil {
+		return err
+	}
+
+	if v.OnPrepareSave != nil {
+		v.OnPrepareSave(v)
+	}
+
+	err = service.SaveData(v.Model)
+	if err != nil {
+		panic(err)
+	}
+
+	if v.GetTemplate != nil {
+		v.ModelTemplate = v.GetTemplate()
+	}
+
+	v.ModelTemplate.Serialize(v.Model, map[string]interface{}{
+		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
+	})
+
+	v.Controller.Data["json"] = v.ModelTemplate
+	v.Controller.ServeJSON()
+	return nil
+
+}

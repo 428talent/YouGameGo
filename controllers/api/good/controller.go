@@ -102,14 +102,14 @@ func (c *Controller) GetGood() {
 func (c *Controller) GetGoods() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{
-			Controller:    &c.ApiController,
-			QueryBuilder:  &service.GoodQueryBuilder{},
+			Controller:   &c.ApiController,
+			QueryBuilder: &service.GoodQueryBuilder{},
 			Init: func() {
 				c.GetAuth()
 			},
 			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType),
 			GetTemplate: func() serializer.Template {
-				if c.User != nil && security.CheckUserGroup(c.User,security.UserGroupAdmin){
+				if c.User != nil && security.CheckUserGroup(c.User, security.UserGroupAdmin) {
 					return serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType)
 				}
 				return serializer.NewGoodSerializeTemplate(serializer.DefaultGoodTemplateType)
@@ -143,6 +143,30 @@ func (c *Controller) GetGoods() {
 			},
 		}
 		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+func (c *Controller) CreateGood() {
+	c.WithErrorContext(func() {
+		createView := api.CreateView{
+			Controller: &c.ApiController,
+			Parser:     &parser.CreateGoodRequestBody{},
+			Permissions: []api.PermissionInterface{
+				&CreateGoodPermission{},
+			},
+			Model:&models.Good{},
+			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType),
+			OnPrepareSave: func(c *api.CreateView) {
+				model := c.Model.(*models.Good)
+				requestParser := c.Parser.(*parser.CreateGoodRequestBody)
+				model.Game = &models.Game{
+					Id:int(requestParser.GameId),
+				}
+			},
+		}
+		err := createView.Exec()
 		if err != nil {
 			panic(err)
 		}

@@ -23,6 +23,11 @@ type Game struct {
 	Updated       time.Time `orm:"auto_now;type(datetime)"`
 }
 
+func (g *Game) Save(o orm.Ormer) error {
+	_, err := o.Insert(g)
+	return err
+}
+
 func (g *Game) Update(id int64, o orm.Ormer, fields ...string) error {
 	g.Id = int(id)
 	_, err := o.Update(g, fields...)
@@ -35,12 +40,7 @@ func (g *Game) Delete(o orm.Ormer) error {
 	return err
 }
 
-//保存游戏信息
-func (g *Game) Save() error {
-	o := orm.NewOrm()
-	_, err := o.Insert(g)
-	return err
-}
+
 
 func (g *Game) Query(id int64) error {
 	g.Id = int(id)
