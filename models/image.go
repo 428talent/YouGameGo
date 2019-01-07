@@ -35,7 +35,9 @@ func (i *Image) Delete(o orm.Ormer) error {
 }
 
 func (i *Image) Update(id int64, o orm.Ormer, fields ...string) error {
-	return nil
+	i.Id = int(id)
+	_, err := o.Update(i, "enable")
+	return err
 }
 
 func GetImageList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Image, error) {

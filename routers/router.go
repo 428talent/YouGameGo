@@ -6,6 +6,7 @@ import (
 	"yougame.com/yougame-server/controllers/api/comment"
 	"yougame.com/yougame-server/controllers/api/game"
 	"yougame.com/yougame-server/controllers/api/good"
+	"yougame.com/yougame-server/controllers/api/image"
 	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/controllers/api/user"
 	"yougame.com/yougame-server/controllers/api/wishlist"
@@ -65,16 +66,16 @@ func init() {
 		beego.NSNamespace("good",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &good.Controller{}, "put:UpdateGood;patch:UpdateGood;get:GetGood;delete:DeleteGood"),
+				beego.NSRouter("/comments", &comment.ApiCommentController{}, "post:CreateComment"),
+			),
+		),
+		beego.NSNamespace("image",
+			beego.NSNamespace("/:id",
+				beego.NSRouter("/", &image.Controller{}, "put:UpdateImage;patch:UpdateImage;delete:DeleteImage"),
 			),
 		),
 		beego.NSNamespace("goods",
 			beego.NSRouter("/", &good.Controller{}, "get:GetGoods;post:CreateGood"),
-		),
-		beego.NSNamespace("/good",
-			beego.NSNamespace("/:id",
-				beego.NSRouter("/comments", &comment.ApiCommentController{}, "post:CreateComment"),
-				beego.NSRouter("/", &game.GameController{}, "get:GetGood"),
-			),
 		),
 		beego.NSRouter("/ordergood", &order.ApiOrderController{}, "get:GetOrderGoods"),
 		beego.NSRouter("/comments", &comment.ApiCommentController{}, "get:GetCommentList"),
