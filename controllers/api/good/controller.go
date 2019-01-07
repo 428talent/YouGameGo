@@ -111,12 +111,12 @@ func (c *Controller) GetGoods() {
 					goodQueryBuilder.ByOrder(orders...)
 				}
 
+				enable := "visit"
 				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
-					enable := c.GetString("enable", "visit")
-					if enable != "all" {
-						goodQueryBuilder.WithEnable(enable)
-					}
+					enable = c.GetString("enable", "visit")
+
 				}
+				goodQueryBuilder.WithEnable(enable)
 
 			},
 		}
