@@ -135,7 +135,7 @@ func (v *DeleteView) Exec() error {
 		return ClaimsNoFoundError
 	}
 	permissionContext := map[string]interface{}{
-		"claims": *claims,
+		"claims": claims,
 	}
 	if v.GetPermissionContext != nil {
 		v.GetPermissionContext(&permissionContext)
@@ -187,7 +187,7 @@ func (v *UpdateView) Exec() error {
 		return ClaimsNoFoundError
 	}
 	permissionContext := map[string]interface{}{
-		"claims": *claims,
+		"claims": claims,
 	}
 	if v.GetPermissionContext != nil {
 		v.GetPermissionContext(&permissionContext)

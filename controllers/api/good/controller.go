@@ -1,7 +1,6 @@
 package good
 
 import (
-	"encoding/json"
 	"github.com/astaxie/beego"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
@@ -10,7 +9,6 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
-	"yougame.com/yougame-server/util"
 )
 
 type Controller struct {
@@ -19,50 +17,19 @@ type Controller struct {
 
 func (c *Controller) UpdateGood() {
 	c.WithErrorContext(func() {
-		goodId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		updateView := api.UpdateView{
+			Controller: &c.ApiController,
+			Parser:     &parser.UpdateGoodRequestBody{},
+			Model:      &models.Good{},
+			Permissions: []api.PermissionInterface{
+				&UpdateGoodPermission{},
+			},
+			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType),
+		}
+		err := updateView.Exec()
 		if err != nil {
 			panic(err)
 		}
-
-		claims, err := c.GetAuth()
-		if err != nil {
-			panic(api.ClaimsNoFoundError)
-		}
-		if claims == nil {
-			panic(api.ClaimsNoFoundError)
-		}
-
-		err = c.CheckPermission([]api.PermissionInterface{
-			&UpdateGoodPermission{},
-		}, map[string]interface{}{
-			"claims": claims,
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		requestBody := &parser.UpdateGoodRequestBody{}
-		err = json.Unmarshal(c.Ctx.Input.RequestBody, requestBody)
-
-		good := &models.Good{
-			Id:    goodId,
-			Name:  requestBody.Name,
-			Price: requestBody.Price,
-		}
-
-		updateFields := util.GetUpdateModelField(requestBody)
-		beego.Debug(updateFields)
-		err = service.UpdateGood(good, updateFields...)
-		if err != nil {
-			panic(err)
-		}
-
-		goodTemplate := serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType)
-		goodTemplate.Serialize(good, map[string]interface{}{
-			"site": util.GetSiteAndPortUrl(c.Controller),
-		})
-		c.Data["json"] = goodTemplate
-		c.ServeJSON()
 
 	})
 }
@@ -167,17 +134,32 @@ func (c *Controller) CreateGood() {
 			Permissions: []api.PermissionInterface{
 				&CreateGoodPermission{},
 			},
-			Model:&models.Good{},
+			Model:         &models.Good{},
 			ModelTemplate: serializer.NewGoodSerializeTemplate(serializer.AdminGoodTemplateType),
 			OnPrepareSave: func(c *api.CreateView) {
 				model := c.Model.(*models.Good)
 				requestParser := c.Parser.(*parser.CreateGoodRequestBody)
 				model.Game = &models.Game{
-					Id:int(requestParser.GameId),
+					Id: int(requestParser.GameId),
 				}
 			},
 		}
 		err := createView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+func (c *Controller) DeleteGood() {
+	c.WithErrorContext(func() {
+		deleteView := api.DeleteView{
+			Controller: &c.ApiController,
+			Model:      &models.Good{},
+			Permissions: []api.PermissionInterface{
+				&DeleteGoodPermission{},
+			},
+		}
+		err := deleteView.Exec()
 		if err != nil {
 			panic(err)
 		}

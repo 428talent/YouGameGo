@@ -19,6 +19,7 @@ type Good struct {
 
 func (g *Good) Query(id int64) error {
 	o := orm.NewOrm()
+	g.Id = int(id)
 	err := o.Read(g)
 	return err
 }
