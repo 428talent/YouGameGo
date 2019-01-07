@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"reflect"
@@ -438,17 +439,34 @@ func (c *GameController) GetGameBand() {
 
 func (c *GameController) GetGamePreview() {
 	c.WithErrorContext(func() {
-		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.ImageQueryBuilder{},
+			ModelTemplate: &serializer.ImageTemplate{},
+			Init: func() {
+				c.GetAuth()
+			},
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				imageQueryBuilder := builder.(*service.ImageQueryBuilder)
+				gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+				if err != nil {
+					panic(err)
+				}
+				imageQueryBuilder.WithName(fmt.Sprintf("Preview:%d", gameId))
+				enable := "visit"
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					enable = c.GetString("enable", "visit")
+					if enable != "all" {
+						imageQueryBuilder.WithEnable(enable)
+					}
+				}
+
+			},
+		}
+		err := listView.Exec()
 		if err != nil {
 			panic(err)
 		}
-		page, pageSize := c.GetPage()
-		count, image, err := service.GetGamePreview(gameId, page, pageSize)
-		if err != nil {
-			panic(err)
-		}
-		template := serializer.ImageTemplate{}
-		c.ServerPageResult(serializer.SerializeMultipleTemplate(image, &template, map[string]interface{}{}), *count, page, pageSize)
 	})
 }
 

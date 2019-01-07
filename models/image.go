@@ -16,6 +16,28 @@ type Image struct {
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
+func (i *Image) Query(id int64) error {
+	o := orm.NewOrm()
+	i.Id = int(id)
+	err := o.Read(i)
+	return err
+}
+
+func (i *Image) Save(o orm.Ormer) error {
+	_, err := o.Insert(i)
+	return err
+}
+
+func (i *Image) Delete(o orm.Ormer) error {
+	i.Enable = false
+	_, err := o.Update(i, "enable")
+	return err
+}
+
+func (i *Image) Update(id int64, o orm.Ormer, fields ...string) error {
+	return nil
+}
+
 func GetImageList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Image, error) {
 	o := orm.NewOrm()
 	var imageList []*Image

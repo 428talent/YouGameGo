@@ -9,6 +9,11 @@ type ImageQueryBuilder struct {
 	pageOption *PageOption
 	ids        []interface{}
 	names      []interface{}
+	enable     string
+}
+
+func (q *ImageQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return q.Query()
 }
 
 func (q *ImageQueryBuilder) SetPage(page int64, pageSize int64) {
@@ -22,11 +27,26 @@ func (q *ImageQueryBuilder) InId(id ...interface{}) {
 func (q *ImageQueryBuilder) WithName(name ...interface{}) {
 	q.names = append(q.names, name...)
 }
-
+func (b *ImageQueryBuilder) WithEnable(visibility string) {
+	b.enable = visibility
+}
 func (q *ImageQueryBuilder) Query() (*int64, []*models.Image, error) {
 	condition := orm.NewCondition()
 	if len(q.ids) > 0 {
-		condition.And("id__in", q.ids...)
+		condition = condition.And("id__in", q.ids...)
+	}
+
+	if len(q.names) > 0 {
+		condition = condition.And("name__in", q.names...)
+	}
+	if len(q.enable) > 0 {
+		switch q.enable {
+		case "visit":
+			condition = condition.And("enable", true)
+		case "remove":
+			condition = condition.And("enable", false)
+		}
+
 	}
 	if q.pageOption == nil {
 		q.pageOption = &PageOption{
