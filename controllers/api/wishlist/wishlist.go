@@ -3,6 +3,7 @@ package wishlist
 import (
 	"encoding/json"
 	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
@@ -40,7 +41,27 @@ func (c *ApiWishListController) GetWishList() {
 	})
 	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
+func (c *ApiWishListController) Create() {
+	createView := api.CreateView{
+		Controller: &c.ApiController,
+		Parser:     &parser.CreateWishlistRequestBody{},
+		Model:      &models.WishList{},
+		ModelTemplate:serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
+		OnPrepareSave: func(c *api.CreateView) {
+			model := c.Model.(*models.WishList)
+			parserModel := c.Parser.(*parser.CreateWishlistRequestBody)
+			model.Game = &models.Game{
+				Id: int(parserModel.GameId),
+			}
+			model.UserId = c.Controller.User.Id
+		},
+	}
+	err := createView.Exec()
+	if err != nil {
+		panic(err)
+	}
 
+}
 func (c *ApiWishListController) DeleteWishListItems() {
 	var err error
 	defer api.CheckError(func(e error) {

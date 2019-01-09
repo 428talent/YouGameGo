@@ -27,3 +27,5 @@ func (p DeleteWishlistPermission) DeleteWishlistPermission(context map[string]in
 	}
 	return true
 }
+
+

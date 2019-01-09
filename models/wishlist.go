@@ -13,6 +13,29 @@ type WishList struct {
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
+func (w *WishList) Query(id int64) error {
+	o := orm.NewOrm()
+	w.Id = int(id)
+	err := o.Read(w)
+	return err
+}
+
+func (w *WishList) Save(o orm.Ormer) error {
+	_, err := o.Insert(w)
+	return err
+}
+
+func (w *WishList) Delete(o orm.Ormer) error {
+	_, err := o.Delete(w)
+	return err
+}
+
+func (w *WishList) Update(id int64, o orm.Ormer, fields ...string) error {
+	w.Id = int(id)
+	_, err := o.Update(w, fields...)
+	return err
+}
+
 func SaveWishList(wishList *WishList) error {
 	o := orm.NewOrm()
 	id, err := o.Insert(wishList)

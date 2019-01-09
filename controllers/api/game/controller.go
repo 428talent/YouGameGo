@@ -413,6 +413,11 @@ func (c *GameController) GetGame() {
 				Controller: c,
 			}
 			renderResult = view.Render()
+		default:
+			view := DefaultGetGameView{
+				Controller: c,
+			}
+			renderResult = view.Render()
 		}
 
 		c.Data["json"] = renderResult
