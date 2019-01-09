@@ -16,76 +16,94 @@ type ApiWishListController struct {
 }
 
 func (c *ApiWishListController) GetWishList() {
-	//var err error
-	//defer api.CheckError(func(e error) {
-	//	api.HandleApiError(c.Controller, e)
-	//})
-	//queryBuilder := service.WishListQueryBuilder{}
-	//page, pageSize := c.GetPage()
-	//queryBuilder.WithPage(service.PageOption{
-	//	Page:     page,
-	//	PageSize: pageSize,
-	//})
-	//
-	//userId, _ := c.GetInt64("user", 0)
-	//if userId != 0 {
-	//	queryBuilder.BelongToUser(userId)
-	//}
-	//queryBuilder.OnlyEnable(true)
-	//count, wishlist, err := queryBuilder.GetWishList()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//serializerDataList := serializer.SerializeMultipleTemplate(wishlist, serializer.NewWishlistTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
-	//	"site": util.GetSiteAndPortUrl(c.Controller),
-	//})
-	//c.ServerPageResult(serializerDataList, count, page, pageSize)
-	listView := api.ListView{
-		Controller: &c.ApiController,
-		Init: func() {
-			c.GetAuth()
-		},
-		QueryBuilder:  &service.WishListQueryBuilder{},
-		ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
-		SetFilter: func(builder service.ApiQueryBuilder) {
-			wishlistItemQueryBuilder := builder.(*service.WishListQueryBuilder)
-			wishlistItemQueryBuilder.BelongToUser(c.User.Id)
-			wishlistItemQueryBuilder.WithEnable("visit")
-			gameParamList := c.GetStrings("game")
-			for _, gameParam := range gameParamList {
-				gameId, err := strconv.Atoi(gameParam)
+	c.WithErrorContext(func() {
+		listView := api.ListView{
+			Controller: &c.ApiController,
+			Init: func() {
+				c.GetAuth()
+			},
+			QueryBuilder:  &service.WishListQueryBuilder{},
+			ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				wishlistItemQueryBuilder := builder.(*service.WishListQueryBuilder)
+				wishlistItemQueryBuilder.BelongToUser(c.User.Id)
+				wishlistItemQueryBuilder.WithEnable("visit")
+				gameParamList := c.GetStrings("game")
+				for _, gameParam := range gameParamList {
+					gameId, err := strconv.Atoi(gameParam)
+					if err != nil {
+						panic(err)
+					}
+					wishlistItemQueryBuilder.WithGame(gameId)
+				}
+			},
+		}
+		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+
+}
+func (c *ApiWishListController) Create() {
+	c.WithErrorContext(func() {
+		createView := api.CreateView{
+			Controller:    &c.ApiController,
+			Parser:        &parser.CreateWishlistRequestBody{},
+			Model:         &models.WishList{},
+			ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
+			OnPrepareSave: func(c *api.CreateView) {
+				model := c.Model.(*models.WishList)
+				parserModel := c.Parser.(*parser.CreateWishlistRequestBody)
+				model.Game = &models.Game{
+					Id: int(parserModel.GameId),
+				}
+				model.UserId = c.Controller.User.Id
+				model.Enable = true
+
+				queryBuilder := service.WishListQueryBuilder{}
+				queryBuilder.BelongToUser(c.Controller.User.Id)
+				queryBuilder.WithGame(parserModel.GameId)
+				queryBuilder.WithEnable("visit")
+				count, _, err := queryBuilder.GetWishList()
 				if err != nil {
 					panic(err)
 				}
-				wishlistItemQueryBuilder.WithGame(gameId)
-			}
-		},
-	}
-	err := listView.Exec()
-	if err != nil {
-		panic(err)
-	}
-}
-func (c *ApiWishListController) Create() {
-	createView := api.CreateView{
-		Controller:    &c.ApiController,
-		Parser:        &parser.CreateWishlistRequestBody{},
-		Model:         &models.WishList{},
-		ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
-		OnPrepareSave: func(c *api.CreateView) {
-			model := c.Model.(*models.WishList)
-			parserModel := c.Parser.(*parser.CreateWishlistRequestBody)
-			model.Game = &models.Game{
-				Id: int(parserModel.GameId),
-			}
-			model.UserId = c.Controller.User.Id
-		},
-	}
-	err := createView.Exec()
-	if err != nil {
-		panic(err)
-	}
+				if count > 0 {
+					panic(api.DuplicateResourceError)
+				}
+			},
+		}
+		err := createView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
 
+}
+
+func (c *ApiWishListController) DeleteItem() {
+	c.WithErrorContext(func() {
+		deleteView := api.DeleteView{
+			Controller:  &c.ApiController,
+			Model:       &models.WishList{},
+			Permissions: []api.PermissionInterface{},
+			GetPermissionContext: func(permissionContext *map[string]interface{}) *map[string]interface{} {
+				idParam := c.Ctx.Input.Param(":id")
+				id, err := strconv.Atoi(idParam)
+				if err != nil {
+					panic(err)
+				}
+				(*permissionContext)["id"] = id
+				return permissionContext
+			},
+		}
+		err := deleteView.Exec()
+		if err != nil {
+			panic(err)
+		}
+
+	})
 }
 func (c *ApiWishListController) DeleteWishListItems() {
 	var err error

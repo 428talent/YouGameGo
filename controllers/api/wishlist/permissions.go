@@ -28,4 +28,18 @@ func (p DeleteWishlistPermission) DeleteWishlistPermission(context map[string]in
 	return true
 }
 
+type DeleteWishlistItemPermission struct {
+}
 
+func (p *DeleteWishlistItemPermission) CheckPermission(context map[string]interface{}) bool {
+	claims := context["claims"].(*security.UserClaims)
+	id := context["id"].(int)
+	queryBuilder := service.WishListQueryBuilder{}
+	queryBuilder.BelongToUser(claims.UserId)
+	queryBuilder.InId(id)
+	count, _, _ := queryBuilder.GetWishList()
+	if count == 0 {
+		return false
+	}
+	return true
+}

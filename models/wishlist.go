@@ -26,7 +26,8 @@ func (w *WishList) Save(o orm.Ormer) error {
 }
 
 func (w *WishList) Delete(o orm.Ormer) error {
-	_, err := o.Delete(w)
+	w.Enable = false
+	_, err := o.Update(w, "enable")
 	return err
 }
 

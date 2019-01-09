@@ -42,11 +42,18 @@ var (
 		Detail: "permission denied",
 		Code:   "100002",
 	}, http.StatusForbidden)
+
+	DuplicateResourceApiError = ApiError.NewApiError(ApiError.APIError{
+		Err:    "DuplicateResourceApiError",
+		Detail: "resource already exist",
+		Code:   "100005",
+	}, http.StatusConflict)
 )
 var (
-	ParseJsonDataError    = errors.New("cannot parse json request")
-	ClaimsNoFoundError    = errors.New("claims not found")
-	ResourceNotFoundError = errors.New("resource not found")
+	ParseJsonDataError     = errors.New("cannot parse json request")
+	ClaimsNoFoundError     = errors.New("claims not found")
+	ResourceNotFoundError  = errors.New("resource not found")
+	DuplicateResourceError = errors.New("resource already exist")
 )
 
 func HandleApiError(controller beego.Controller, err error) {
@@ -69,6 +76,9 @@ func HandleApiError(controller beego.Controller, err error) {
 		return
 	case ResourceNotFoundError:
 		ResourceNoFoundError.ServerError(controller)
+		return
+	case DuplicateResourceError:
+		DuplicateResourceApiError.ServerError(controller)
 		return
 	}
 
