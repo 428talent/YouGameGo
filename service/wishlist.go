@@ -9,12 +9,23 @@ type WishListQueryBuilder struct {
 	ids          []interface{}
 	userIds      []interface{}
 	pageOption   PageOption
-	isOnlyEnable bool
+	enable string
 }
 
-func (builder *WishListQueryBuilder) InId(ids ...interface{}) *WishListQueryBuilder {
-	builder.ids = append(builder.ids, ids...)
-	return builder
+func (builder *WishListQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	count, result, err := builder.GetWishList()
+	return &count, result, err
+}
+
+func (builder *WishListQueryBuilder) InId(id ...interface{}) {
+	builder.ids = append(builder.ids, id...)
+}
+
+func (builder *WishListQueryBuilder) SetPage(page int64, pageSize int64) {
+	builder.pageOption = PageOption{
+		Page:     page,
+		PageSize: pageSize,
+	}
 }
 
 func (builder *WishListQueryBuilder) BelongToUser(userId ...interface{}) *WishListQueryBuilder {
@@ -22,13 +33,8 @@ func (builder *WishListQueryBuilder) BelongToUser(userId ...interface{}) *WishLi
 	return builder
 }
 
-func (builder *WishListQueryBuilder) WithPage(option PageOption) *WishListQueryBuilder {
-	builder.pageOption = option
-	return builder
-}
-func (builder *WishListQueryBuilder) OnlyEnable(isOnlyEnable bool) *WishListQueryBuilder {
-	builder.isOnlyEnable = isOnlyEnable
-	return builder
+func (builder *WishListQueryBuilder) WithEnable(visibility string) {
+	builder.enable = visibility
 }
 func (builder *WishListQueryBuilder) GetWishList() (int64, []*models.WishList, error) {
 	cond := orm.NewCondition()
@@ -38,8 +44,14 @@ func (builder *WishListQueryBuilder) GetWishList() (int64, []*models.WishList, e
 	if len(builder.ids) > 0 {
 		cond = cond.And("id__in", builder.ids...)
 	}
-	if builder.isOnlyEnable {
-		cond = cond.And("enable", true)
+	if len(builder.enable) > 0 {
+		switch builder.enable {
+		case "visit":
+			cond = cond.And("enable", true)
+		case "remove":
+			cond = cond.And("enable", false)
+		}
+
 	}
 	count, wishlist, err := models.GetWishList(func(o orm.QuerySeter) orm.QuerySeter {
 		return o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset((builder.pageOption.Page - 1) * builder.pageOption.PageSize)

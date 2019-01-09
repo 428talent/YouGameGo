@@ -309,10 +309,7 @@ func (c *ApiUserController) GetUserWishList() {
 
 	queryBuilder := service.WishListQueryBuilder{}
 	page, pageSize := c.GetPage()
-	queryBuilder.WithPage(service.PageOption{
-		Page:     page,
-		PageSize: pageSize,
-	})
+	queryBuilder.SetPage(page,pageSize)
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		panic(err)

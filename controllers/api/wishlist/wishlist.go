@@ -8,7 +8,6 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
-	"yougame.com/yougame-server/util"
 )
 
 type ApiWishListController struct {
@@ -16,37 +15,54 @@ type ApiWishListController struct {
 }
 
 func (c *ApiWishListController) GetWishList() {
-	var err error
-	defer api.CheckError(func(e error) {
-		api.HandleApiError(c.Controller, e)
-	})
-	queryBuilder := service.WishListQueryBuilder{}
-	page, pageSize := c.GetPage()
-	queryBuilder.WithPage(service.PageOption{
-		Page:     page,
-		PageSize: pageSize,
-	})
-
-	userId, _ := c.GetInt64("user", 0)
-	if userId != 0 {
-		queryBuilder.BelongToUser(userId)
+	//var err error
+	//defer api.CheckError(func(e error) {
+	//	api.HandleApiError(c.Controller, e)
+	//})
+	//queryBuilder := service.WishListQueryBuilder{}
+	//page, pageSize := c.GetPage()
+	//queryBuilder.WithPage(service.PageOption{
+	//	Page:     page,
+	//	PageSize: pageSize,
+	//})
+	//
+	//userId, _ := c.GetInt64("user", 0)
+	//if userId != 0 {
+	//	queryBuilder.BelongToUser(userId)
+	//}
+	//queryBuilder.OnlyEnable(true)
+	//count, wishlist, err := queryBuilder.GetWishList()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//serializerDataList := serializer.SerializeMultipleTemplate(wishlist, serializer.NewWishlistTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
+	//	"site": util.GetSiteAndPortUrl(c.Controller),
+	//})
+	//c.ServerPageResult(serializerDataList, count, page, pageSize)
+	listView := api.ListView{
+		Controller: &c.ApiController,
+		Init: func() {
+			c.GetAuth()
+		},
+		QueryBuilder:  &service.WishListQueryBuilder{},
+		ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
+		SetFilter: func(builder service.ApiQueryBuilder) {
+			wishlistItemQueryBuilder := builder.(*service.WishListQueryBuilder)
+			wishlistItemQueryBuilder.BelongToUser(c.User.Id)
+			wishlistItemQueryBuilder.WithEnable("visit")
+		},
 	}
-	queryBuilder.OnlyEnable(true)
-	count, wishlist, err := queryBuilder.GetWishList()
+	err := listView.Exec()
 	if err != nil {
 		panic(err)
 	}
-	serializerDataList := serializer.SerializeMultipleTemplate(wishlist, serializer.NewWishlistTemplate(serializer.DefaultCartTemplateType), map[string]interface{}{
-		"site": util.GetSiteAndPortUrl(c.Controller),
-	})
-	c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiWishListController) Create() {
 	createView := api.CreateView{
-		Controller: &c.ApiController,
-		Parser:     &parser.CreateWishlistRequestBody{},
-		Model:      &models.WishList{},
-		ModelTemplate:serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
+		Controller:    &c.ApiController,
+		Parser:        &parser.CreateWishlistRequestBody{},
+		Model:         &models.WishList{},
+		ModelTemplate: serializer.NewWishlistTemplate(serializer.DefaultWishListTemplateType),
 		OnPrepareSave: func(c *api.CreateView) {
 			model := c.Model.(*models.WishList)
 			parserModel := c.Parser.(*parser.CreateWishlistRequestBody)
