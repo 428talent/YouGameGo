@@ -2,6 +2,7 @@ package wishlist
 
 import (
 	"encoding/json"
+	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -50,6 +51,14 @@ func (c *ApiWishListController) GetWishList() {
 			wishlistItemQueryBuilder := builder.(*service.WishListQueryBuilder)
 			wishlistItemQueryBuilder.BelongToUser(c.User.Id)
 			wishlistItemQueryBuilder.WithEnable("visit")
+			gameParamList := c.GetStrings("game")
+			for _, gameParam := range gameParamList {
+				gameId, err := strconv.Atoi(gameParam)
+				if err != nil {
+					panic(err)
+				}
+				wishlistItemQueryBuilder.WithGame(gameId)
+			}
 		},
 	}
 	err := listView.Exec()

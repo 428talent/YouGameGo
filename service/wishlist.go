@@ -6,10 +6,11 @@ import (
 )
 
 type WishListQueryBuilder struct {
-	ids          []interface{}
-	userIds      []interface{}
-	pageOption   PageOption
-	enable string
+	ids        []interface{}
+	userIds    []interface{}
+	gameIds    []interface{}
+	pageOption PageOption
+	enable     string
 }
 
 func (builder *WishListQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -26,6 +27,10 @@ func (builder *WishListQueryBuilder) SetPage(page int64, pageSize int64) {
 		Page:     page,
 		PageSize: pageSize,
 	}
+}
+
+func (builder *WishListQueryBuilder) WithGame(gameId ...interface{}) {
+	builder.gameIds = append(builder.gameIds, gameId...)
 }
 
 func (builder *WishListQueryBuilder) BelongToUser(userId ...interface{}) *WishListQueryBuilder {
@@ -52,6 +57,9 @@ func (builder *WishListQueryBuilder) GetWishList() (int64, []*models.WishList, e
 			cond = cond.And("enable", false)
 		}
 
+	}
+	if len(builder.gameIds) > 0 {
+		cond = cond.And("game_id__in", builder.gameIds...)
 	}
 	count, wishlist, err := models.GetWishList(func(o orm.QuerySeter) orm.QuerySeter {
 		return o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset((builder.pageOption.Page - 1) * builder.pageOption.PageSize)
