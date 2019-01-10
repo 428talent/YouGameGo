@@ -48,12 +48,18 @@ var (
 		Detail: "resource already exist",
 		Code:   "100005",
 	}, http.StatusConflict)
+	InvalidateApiError = ApiError.NewApiError(ApiError.APIError{
+		Err:    "InvalidateApiError",
+		Detail: "invalidate request data",
+		Code:   "100006",
+	}, http.StatusBadRequest)
 )
 var (
 	ParseJsonDataError     = errors.New("cannot parse json request")
 	ClaimsNoFoundError     = errors.New("claims not found")
 	ResourceNotFoundError  = errors.New("resource not found")
 	DuplicateResourceError = errors.New("resource already exist")
+	InvalidateError        = errors.New("invalidate request data")
 )
 
 func HandleApiError(controller beego.Controller, err error) {
@@ -79,6 +85,9 @@ func HandleApiError(controller beego.Controller, err error) {
 		return
 	case DuplicateResourceError:
 		DuplicateResourceApiError.ServerError(controller)
+		return
+	case InvalidateError:
+		InvalidateApiError.ServerError(controller)
 		return
 	}
 

@@ -38,7 +38,7 @@ func (t *CartTemplate) Serialize(model interface{}, context map[string]interface
 
 func NewCartTemplate(templateType string) Template {
 	switch templateType {
-	case DefaultGameTemplateType:
+	case DefaultCartTemplateType:
 		return &CartTemplate{}
 	}
 	return &CartTemplate{}

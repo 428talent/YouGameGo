@@ -253,6 +253,7 @@ type CreateView struct {
 	GetTemplate          func() serializer.Template
 	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
 	OnPrepareSave func(c *CreateView)
+	Validate      func(v *CreateView)
 }
 
 func (v *CreateView) Exec() error {
@@ -277,6 +278,10 @@ func (v *CreateView) Exec() error {
 	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody, v.Parser)
 	if err != nil {
 		return ParseJsonDataError
+	}
+
+	if v.Validate != nil {
+		v.Validate(v)
 	}
 
 	err = copier.Copy(v.Model, v.Parser)
