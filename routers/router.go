@@ -58,7 +58,7 @@ func init() {
 			beego.NSRouter("/:id", &wishlist.ApiWishListController{}, "delete:DeleteItem"),
 		),
 		beego.NSNamespace("carts",
-			beego.NSRouter("/", &cart.ApiCartController{}, "post:Create"),
+			beego.NSRouter("/", &cart.ApiCartController{}, "post:Create;get:GetCartList"),
 		),
 		beego.NSNamespace("/orders",
 
