@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -69,5 +70,31 @@ func (c *ApiCartController) Create() {
 			panic(err)
 		}
 
+	})
+}
+
+func (c *ApiCartController) DeleteItem() {
+	c.WithErrorContext(func() {
+		deleteView := api.DeleteView{
+			Controller: &c.ApiController,
+			Model:      &models.CartItem{},
+			Permissions: []api.PermissionInterface{
+				&DeleteCartPermission{},
+			},
+			GetPermissionContext: func(permissionContext *map[string]interface{}) *map[string]interface{} {
+				context := *permissionContext
+				idParam := c.Ctx.Input.Param(":id")
+				id, err := strconv.Atoi(idParam)
+				if err != nil {
+					panic(err)
+				}
+				context["cartId"] = id
+				return permissionContext
+			},
+		}
+		err := deleteView.Exec()
+		if err != nil {
+			panic(err)
+		}
 	})
 }

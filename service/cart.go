@@ -39,7 +39,9 @@ func (b *CartQueryBuilder) SetPage(page int64, pageSize int64) {
 
 func (b *CartQueryBuilder) Query() (int64, []*models.CartItem, error) {
 	cond := orm.NewCondition()
-
+	if len(b.ids) > 0 {
+		cond = cond.And("id__in", b.ids...)
+	}
 	if len(b.userIds) > 0 {
 		cond = cond.And("user_id__in", b.userIds...)
 	}
