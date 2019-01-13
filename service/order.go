@@ -5,33 +5,36 @@ import (
 	"yougame.com/yougame-server/models"
 )
 
-type GetOrderListBuilder struct {
-	user     int64
-	state    []string
-	page     int64
-	pageSize int64
+type OrderQueryBuilder struct {
+	user  []interface{}
+	state []interface{}
+	ResourceQueryBuilder
 }
 
-func (builder *GetOrderListBuilder) SetUser(userId int64) *GetOrderListBuilder {
-	builder.user = userId
+func (builder *OrderQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return builder.Query()
+}
+
+func (builder *OrderQueryBuilder) SetPage(page int64, pageSize int64) {
+	builder.pageOption = &PageOption{
+		PageSize: pageSize,
+		Page:     page,
+	}
+}
+
+func (builder *OrderQueryBuilder) InUser(userId ...interface{}) *OrderQueryBuilder {
+	builder.user = append(builder.user, userId...)
 	return builder
 }
-func (builder *GetOrderListBuilder) SetState(state []string) *GetOrderListBuilder {
-	builder.state = state
+func (builder *OrderQueryBuilder) SetState(state ...interface{}) *OrderQueryBuilder {
+	builder.state = append(builder.state, state...)
 	return builder
 }
-func (builder *GetOrderListBuilder) SetPage(page int64) *GetOrderListBuilder {
-	builder.page = page
-	return builder
-}
-func (builder *GetOrderListBuilder) SetPageSize(pageSize int64) *GetOrderListBuilder {
-	builder.pageSize = pageSize
-	return builder
-}
-func (builder *GetOrderListBuilder) build() *orm.Condition {
-	cond := orm.NewCondition()
-	if builder.user != 0 {
-		cond = cond.And("user_id", builder.user)
+
+func (builder *OrderQueryBuilder) buildQuery() *orm.Condition {
+	cond := builder.build()
+	if len(builder.user) > 0 {
+		cond = cond.And("user_id__in", builder.user...)
 	}
 	if len(builder.state) > 0 {
 		stateCond := orm.NewCondition()
@@ -40,60 +43,84 @@ func (builder *GetOrderListBuilder) build() *orm.Condition {
 		}
 		cond = cond.AndCond(stateCond)
 	}
-	if builder.page == 0 {
-		builder.page = 1
-	}
-	if builder.pageSize == 0 {
-		builder.page = 10
-	}
+
 	return cond
 }
 
-func GetOrderList(builder GetOrderListBuilder) (int64, []*models.Order, error) {
+func (builder *OrderQueryBuilder)Query() (*int64, []*models.Order, error) {
 	count, orders, err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
-		cond := builder.build()
-		return o.SetCond(cond).Limit(builder.pageSize).Offset((builder.page - 1) * builder.pageSize)
+		cond := builder.buildQuery()
+		setter := o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
+		if len(builder.orders) > 0 {
+			setter = setter.OrderBy(builder.orders...)
+		}
+		return setter
 	})
-	return count, orders, err
+	return &count, orders, err
 }
 
-func GetOrderById(id int) (*models.Order, error) {
-	order := models.Order{Id: id}
-	err := order.QueryById()
-	return &order, err
+type OrderGoodQueryBuilder struct {
+	ResourceQueryBuilder
 }
 
-type GetOrderGoodListOption struct {
-	order int64
-	page  PageOption
+func (builder *OrderGoodQueryBuilder) Query(md interface{}) (*int64, []*models.OrderGood, error) {
+	cond := builder.build()
+	count, result, err := models.GetOrderGoodList(func(o orm.QuerySeter) orm.QuerySeter {
+		setter := o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
+		if len(builder.orders) > 0 {
+			setter = setter.OrderBy(builder.orders...)
+		}
+		return setter
+	})
+	return &count, result, err
 }
 
-func (option *GetOrderGoodListOption) SetOrder(orderId int64) *GetOrderGoodListOption {
-	option.order = orderId
-	return option
-}
-func (option *GetOrderGoodListOption) SetPage(pageOption PageOption) *GetOrderGoodListOption {
-	option.page = pageOption
-	return option
-}
-func (option *GetOrderGoodListOption) build() *orm.Condition {
-	cond := orm.NewCondition()
-	if option.order != 0 {
-		cond = cond.And("order_id", option.order)
+func CreateOrder(order *models.Order, goods []int64) error {
+	o := orm.NewOrm()
+	order.Enable = true
+	order.State = "Create"
+	transaction := func() error {
+		err := o.Begin()
+		if err != nil {
+			return err
+		}
+
+		err = order.Save(o)
+		if err != nil {
+			return err
+		}
+
+		for _, goodId := range goods {
+			good := &models.Good{}
+			err := good.Query(goodId)
+			if err != nil {
+				return err
+			}
+			orderGood := &models.OrderGood{
+				Good:  good,
+				Order: order,
+				Name:  good.Name,
+				Price: good.Price,
+			}
+			_, err = o.Insert(orderGood)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+
 	}
-	if option.page.Page == 0 {
-		option.page.Page = 1
+	err := transaction()
+	if err != nil {
+		err := o.Rollback()
+		if err != nil {
+			return err
+		}
+	} else {
+		err := o.Commit()
+		if err != nil {
+			return err
+		}
 	}
-	if option.page.PageSize == 0 {
-		option.page.PageSize = 10
-	}
-	return cond
-}
-func (option *GetOrderGoodListOption) Query(md interface{}) (int64, error) {
-	modelStruct := models.OrderGood{}
-	count, err := modelStruct.GetList(func(o orm.QuerySeter) orm.QuerySeter {
-		cond := option.build()
-		return o.SetCond(cond).Limit(option.page.PageSize).Offset((option.page.Page - 1) * option.page.PageSize)
-	}, md)
-	return count, err
+	return nil
 }

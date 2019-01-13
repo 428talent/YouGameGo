@@ -49,7 +49,7 @@ func PayOrder(order models.Order) error {
 		panic(err)
 	}
 	order.State = models.OrderStateDone
-	err = order.Update(o, "State")
+	err = order.Update(int64(order.Id),o, "State")
 	if err != nil {
 		panic(err)
 	}

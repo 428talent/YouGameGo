@@ -12,5 +12,3 @@ type DataModel interface {
 	Delete(o orm.Ormer) error
 	Update(id int64, o orm.Ormer, fields ...string) error
 }
-
-

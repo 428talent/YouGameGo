@@ -254,6 +254,7 @@ type CreateView struct {
 	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
 	OnPrepareSave func(c *CreateView)
 	Validate      func(v *CreateView)
+	OnSave        func(v *CreateView) error
 }
 
 func (v *CreateView) Exec() error {
@@ -293,9 +294,16 @@ func (v *CreateView) Exec() error {
 		v.OnPrepareSave(v)
 	}
 
-	err = service.SaveData(v.Model)
-	if err != nil {
-		panic(err)
+	if v.OnSave != nil {
+		err := v.OnSave(v)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err = service.SaveData(v.Model)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if v.GetTemplate != nil {

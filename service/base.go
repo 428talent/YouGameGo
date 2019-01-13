@@ -42,3 +42,52 @@ func SaveData(model models.DataModel) error {
 	o := orm.NewOrm()
 	return model.Save(o)
 }
+
+type ResourceQueryBuilder struct {
+	ids        []interface{}
+	pageOption *PageOption
+	enable     string
+	orders     []string
+}
+
+func (b *ResourceQueryBuilder) build() *orm.Condition {
+	condition := orm.NewCondition()
+	if len(b.ids) > 0 {
+		condition = condition.And("id__in")
+	}
+	if b.pageOption == nil {
+		b.pageOption = &PageOption{
+			Page:     1,
+			PageSize: 10,
+		}
+	}
+	if len(b.enable) > 0 {
+		switch b.enable {
+		case "visit":
+			condition = condition.And("enable", true)
+		case "remove":
+			condition = condition.And("enable", false)
+		}
+
+	}
+	return condition
+}
+
+func (b *ResourceQueryBuilder) SetPage(page int64, pageSize int64) {
+	b.pageOption = &PageOption{
+		PageSize: pageSize,
+		Page:     page,
+	}
+}
+
+func (b *ResourceQueryBuilder) InId(id ...interface{}) {
+	b.ids = append(b.ids, id...)
+}
+
+func (b *ResourceQueryBuilder) WithEnable(visibility string) {
+	b.enable = visibility
+}
+
+func (b *ResourceQueryBuilder) ByOrder(orders ...string) {
+	b.orders = append(b.orders, orders...)
+}

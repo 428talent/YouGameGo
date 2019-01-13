@@ -23,6 +23,30 @@ type Order struct {
 	Updated     time.Time    `orm:"auto_now;type(datetime)"`
 }
 
+func (order *Order) Query(id int64) error {
+	order.Id = int(id)
+	o := orm.NewOrm()
+	err := o.Read(order)
+	return err
+}
+
+func (order *Order) Save(o orm.Ormer) error {
+	_, err := o.Insert(order)
+	return err
+}
+
+func (order *Order) Delete(o orm.Ormer) error {
+	order.Enable = false
+	_, err := o.Update(order, "enable")
+	return err
+}
+
+func (order *Order) Update(id int64, o orm.Ormer, fields ...string) error {
+	order.Id = int(id)
+	_, err := o.Update(order, fields...)
+	return err
+}
+
 type OrderGood struct {
 	Id      int
 	Price   float64
@@ -32,16 +56,7 @@ type OrderGood struct {
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
-func (orderGood *OrderGood) GetList(filter func(o orm.QuerySeter) orm.QuerySeter, md interface{}) (count int64, err error) {
-	o := orm.NewOrm()
-	seter := o.QueryTable("order_good")
-	_, err = filter(seter).All(md)
-	if err != nil {
-		return
-	}
-	count, err = filter(seter).Count()
-	return
-}
+
 
 func (order *Order) SaveOrder() error {
 	o := orm.NewOrm()
@@ -103,9 +118,5 @@ func (order *Order) ReadOrderGoods() error {
 func (orderGood *OrderGood) ReadGood() error {
 	o := orm.NewOrm()
 	err := o.Read(orderGood)
-	return err
-}
-func (d *Order) Update(o orm.Ormer, fields ...string) error {
-	_, err := o.Update(d, fields...)
 	return err
 }
