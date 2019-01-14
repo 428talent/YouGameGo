@@ -67,6 +67,9 @@ func (c *ApiOrderController) GetOrderList() {
 				orderQueryBuilder.InUser(c.User.Id)
 				orderQueryBuilder.WithEnable("visit")
 				orderQueryBuilder.ByOrder("-id")
+				for _, state := range c.GetStrings("state") {
+					orderQueryBuilder.SetState(state)
+				}
 			},
 		}
 		err := listView.Exec()
@@ -132,64 +135,28 @@ func (c *ApiOrderController) GetOrderGoodsWithOrder() {
 	//c.ServerPageResult(serializerDataList, count, page, pageSize)
 }
 func (c *ApiOrderController) GetOrderGoods() {
-	//var err error
-	//defer api.CheckError(func(e error) {
-	//	logrus.Error(e)
-	//	api.HandleApiError(c.Controller, e)
-	//})
-	//claims, err := security.ParseAuthHeader(c.Controller)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//if claims == nil {
-	//	panic(security.ReadAuthorizationFailed)
-	//}
-	////orderUserId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	////if err != nil {
-	////	panic(err)
-	////}
-	//page, pageSize := util.ParsePageRequest(c.Controller)
-	////permissionContext := map[string]interface{}{
-	////	"claims":      *claims,
-	////	"orderUserId": orderUserId,
-	////}
-	////permissions := []api.ApiPermissionInterface{
-	////	GetOwnOrderPermission{},
-	////}
-	////err = c.CheckPermission(permissions, permissionContext)
-	////if err != nil {
-	////	panic(api.PermissionDeniedError)
-	////}
-	////query filter
-	//option := service.OrderGoodQueryBuilder{}
-	//option.SetPage(service.PageOption{
-	//	Page:     page,
-	//	PageSize: pageSize,
-	//})
-	//
-	//if orderIdParam := c.GetString("order"); len(orderIdParam) != 0 {
-	//	orderId, err := strconv.Atoi(orderIdParam)
-	//	if err == nil {
-	//		option.SetOrder(int64(orderId))
-	//	}
-	//}
-	//var orderGoods []*models.OrderGood
-	//count, err := option.Query(&orderGoods)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//results := make([]interface{}, 0)
-	//for _, item := range orderGoods {
-	//	results = append(results, reflect.ValueOf(*item).Interface())
-	//}
-	//serializerDataList := serializer.SerializeMultipleTemplate(
-	//	orderGoods,
-	//	serializer.NewOrderGoodTemplate(serializer.DefaultOrderTemplateType),
-	//	map[string]interface{}{
-	//		"site": util.GetSiteAndPortUrl(c.Controller),
-	//	},
-	//)
-	//c.ServerPageResult(serializerDataList, count, page, pageSize)
+	c.WithErrorContext(func() {
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.OrderGoodQueryBuilder{},
+			ModelTemplate: serializer.NewOrderGoodTemplate(serializer.DefaultOrderGoodTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				orderGoodQueryBuilder := builder.(*service.OrderGoodQueryBuilder)
+				orderIdParams := c.GetStrings("orderId")
+				for _, orderIdParam := range orderIdParams {
+					orderId, err := strconv.Atoi(orderIdParam)
+					if err != nil {
+						panic(err)
+					}
+					orderGoodQueryBuilder.WishOrderId(orderId)
+				}
+			},
+		}
+		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 func (c *ApiOrderController) PayOrder() {
 	var err error

@@ -101,6 +101,9 @@ func GetOrderGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*O
 	var orderGoodList []*OrderGood
 	seter := o.QueryTable("order_good")
 	_, err := filter(seter).All(&orderGoodList)
+	if err != nil {
+		return 0,nil,err
+	}
 	count, err := filter(seter).Count()
 	return count, orderGoodList, err
 }

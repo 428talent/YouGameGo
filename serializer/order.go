@@ -47,14 +47,13 @@ func NewOrderGoodTemplate(templateType string) Template {
 }
 
 type OrderItemTemplate struct {
-	Id       int        `json:"id" source:"Id" source_type:"int"`
-	GoodName string     `json:"good_name" source:"GoodName" source_type:"string"`
-	Name     string     `json:"name" source:"Name" source_type:"string"`
-	GameId   int        `json:"game_id"source:"Game.Id" source_type:"int"`
-	Price    float64    `json:"price" source:"Price" source_type:"float"`
-	BandPic  string     `json:"band_pic" source:"BandPic" source_type:"string"`
-	Created  int64      `json:"created" source:"Created" source_type:"string" converter:"time"`
-	Link     []*ApiLink `json:"link"`
+	Id      int        `json:"id" source:"Id" source_type:"int"`
+	Name    string     `json:"name" source:"Name" source_type:"string"`
+	OrderId int        `json:"order_id"source:"Order.Id" source_type:"int"`
+	Price   float64    `json:"price" source:"Price" source_type:"float"`
+	GoodId  int        `json:"good_id" source:"Good.Id" source_type:"int"`
+	Created string      `json:"created" source:"Created" source_type:"string" converter:"time"`
+	Link    []*ApiLink `json:"link"`
 }
 
 func (t *OrderItemTemplate) Serialize(model interface{}, context map[string]interface{}) {

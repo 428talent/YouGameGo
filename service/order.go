@@ -37,17 +37,14 @@ func (builder *OrderQueryBuilder) buildQuery() *orm.Condition {
 		cond = cond.And("user_id__in", builder.user...)
 	}
 	if len(builder.state) > 0 {
-		stateCond := orm.NewCondition()
-		for _, state := range builder.state {
-			stateCond = stateCond.Or("state", state)
-		}
-		cond = cond.AndCond(stateCond)
+		cond = cond.And("state__in", builder.state...)
+
 	}
 
 	return cond
 }
 
-func (builder *OrderQueryBuilder)Query() (*int64, []*models.Order, error) {
+func (builder *OrderQueryBuilder) Query() (*int64, []*models.Order, error) {
 	count, orders, err := models.GetOrderList(func(o orm.QuerySeter) orm.QuerySeter {
 		cond := builder.buildQuery()
 		setter := o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
@@ -61,10 +58,22 @@ func (builder *OrderQueryBuilder)Query() (*int64, []*models.Order, error) {
 
 type OrderGoodQueryBuilder struct {
 	ResourceQueryBuilder
+	orderIds []interface{}
 }
 
-func (builder *OrderGoodQueryBuilder) Query(md interface{}) (*int64, []*models.OrderGood, error) {
+func (builder *OrderGoodQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return builder.Query()
+
+}
+func (builder *OrderGoodQueryBuilder) WishOrderId(orderId ...interface{}) {
+	builder.orderIds = append(builder.orderIds, orderId...)
+}
+
+func (builder *OrderGoodQueryBuilder) Query() (*int64, []*models.OrderGood, error) {
 	cond := builder.build()
+	if len(builder.orderIds) > 0 {
+		cond = cond.And("order_id__in", builder.orderIds...)
+	}
 	count, result, err := models.GetOrderGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		setter := o.SetCond(cond).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
 		if len(builder.orders) > 0 {
