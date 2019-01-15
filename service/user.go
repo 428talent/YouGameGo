@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	UserExistError  = errors.New("user already exist")
-	LoginUserFailed = errors.New("user login failed")
+	UserExistError       = errors.New("user already exist")
+	LoginUserFailed      = errors.New("user login failed")
+	VerifyCodeInvalidate = errors.New("verify code invalidate")
 )
 
 func CreateUserAccount(username string, password string, email string) (*models.User, error) {
@@ -171,5 +172,30 @@ func SendResetMail(username string) error {
 	}
 
 	return nil
+
+}
+
+func UpdatePassword(code int, rawPassword string) error {
+	userId := security.GetVerifyCodeValue(security.VerifyCodeTypeResetPassword, code)
+	if userId == 0 {
+		return VerifyCodeInvalidate
+	}
+
+	o := orm.NewOrm()
+	password, err := util.EncryptSha1WithSalt(rawPassword)
+	if err != nil {
+		return err
+	}
+	user := &models.User{
+		Id:       userId,
+		Password: *password,
+	}
+
+	_, err = o.Update(user, "password")
+	if err != nil {
+		return err
+	}
+	err = security.ClearVerifyCode(security.VerifyCodeTypeResetPassword, code)
+	return err
 
 }

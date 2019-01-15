@@ -12,34 +12,35 @@ const (
 	VerifyCodeTypeResetPassword = "ResetPassword"
 )
 
-func getNamespace(userId int, verifyType string) string {
-	return fmt.Sprintf("verify:%s:%d", verifyType, userId)
+func getNamespace(code int, verifyType string) string {
+	return fmt.Sprintf("verify:%s:%d", verifyType, code)
 }
 func GenerateVerifyCode(userId int, verifyType string) (int, error) {
 	code := generateRandomCode()
-	_, err := database.RedisClient.Set(getNamespace(userId, verifyType), code, time.Minute*15).Result()
+	_, err := database.RedisClient.Set(getNamespace(code, verifyType), userId, time.Minute*15).Result()
 	return code, err
 }
 
-func CheckGenerateVerifyCodeValidate(userId int, verifyType string, code int) bool {
-	cacheCode, err := database.RedisClient.Get(getNamespace(userId, verifyType)).Result()
+func GetVerifyCodeValue(verifyType string, code int) int {
+	cacheCode, err := database.RedisClient.Get(getNamespace(code, verifyType)).Result()
 	if err != nil {
-		return false
+		return 0
 	}
 
-	verifyCode, err := strconv.Atoi(cacheCode)
+	cacheUserId, err := strconv.Atoi(cacheCode)
 	if err != nil {
-		return false
+		return 0
 	}
 
-	if verifyCode == code {
-		return true
-	}
-	return false
+	return cacheUserId
+}
 
+func ClearVerifyCode(verifyType string, code int) error {
+	_, err := database.RedisClient.Del(getNamespace(code, verifyType)).Result()
+	return err
 }
 
 func generateRandomCode() int {
 	rand.Seed(time.Now().UnixNano())
-	return 1000 + rand.Intn(9999-1000)
+	return 100000 + rand.Intn(999999-100000)
 }

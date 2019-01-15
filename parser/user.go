@@ -65,3 +65,16 @@ func (r *ResetUserPasswordRequestStruct) Parse(body []byte) error {
 	}
 	return nil
 }
+
+type RecoveryPasswordRequestStruct struct {
+	Code     int `json:"code"`
+	Password string `json:"password"`
+}
+
+func (r *RecoveryPasswordRequestStruct) Parse(body []byte) error {
+	err := json.Unmarshal(body, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}

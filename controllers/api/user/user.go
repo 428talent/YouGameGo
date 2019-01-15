@@ -361,5 +361,22 @@ func (c *ApiUserController) SendResetPasswordEmail() {
 		c.Data["json"] = responseBody
 		c.ServeJSON()
 	})
-
+}
+func (c *ApiUserController) RecoveryPassword() {
+	c.WithErrorContext(func() {
+		requestBody := parser.RecoveryPasswordRequestStruct{}
+		err := requestBody.Parse(c.Ctx.Input.RequestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.UpdatePassword(requestBody.Code, requestBody.Password)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
+	})
 }
