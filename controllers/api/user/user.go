@@ -32,37 +32,28 @@ type CreateUserResponsePayload struct {
 }
 
 func (c *ApiUserController) CreateUser() {
-	var err error
-	defer api.CheckError(func(e error) {
-		if validateError, ok := e.(*validate.ValidateError); ok {
-			validateError.BuildResponse().ServerError(c.Controller)
-			return
+	c.WithErrorContext(func() {
+		var requestBody parser.CreateUserRequestStruct
+		err := requestBody.Parse(c.Ctx.Input.RequestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
 		}
-		switch err {
-		case service.UserExistError:
-			UserExistError.ServerError(c.Controller)
-			return
-		default:
-			api.HandleApiError(c.Controller, err)
+		err = validate.ValidateData(requestBody)
+		if err != nil {
+			panic(err)
 		}
+		user, err := service.CreateUserAccount(requestBody.Username, requestBody.Password, requestBody.Email)
+		if err != nil {
+			panic(err)
+		}
+		serializerModel := serializer.NewUserTemplate(serializer.DefaultUserTemplateType)
+		serializerModel.Serialize(user, map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.Data["json"] = serializerModel
+		c.ServeJSON()
 	})
-	var requestBody parser.CreateUserRequestStruct
-	err = requestBody.Parse(c.Ctx.Input.RequestBody)
-	if err != nil {
-		panic(err)
-	}
-	err = validate.ValidateData(requestBody)
-	if err != nil {
-		panic(err)
-	}
-	user, err := models.CreateUserAccount(requestBody.Username, requestBody.Password)
-	if err != nil {
-		panic(err)
-	}
-	serializerModel := serializer.UserSerializerModel{}
 
-	c.Data["json"] = serializerModel.Serialize(*user, util.GetSiteAndPortUrl(c.Controller))
-	c.ServeJSON()
 }
 
 func (c *ApiUserController) UserLogin() {
@@ -307,7 +298,7 @@ func (c *ApiUserController) GetUserWishList() {
 
 	queryBuilder := service.WishListQueryBuilder{}
 	page, pageSize := c.GetPage()
-	queryBuilder.SetPage(page,pageSize)
+	queryBuilder.SetPage(page, pageSize)
 	userId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		panic(err)
@@ -331,9 +322,20 @@ func (c *ApiUserController) GetUserWishList() {
 func (c *ApiUserController) GetUserProfile() {
 	c.WithErrorContext(func() {
 		objectView := api.ObjectView{
-			Controller:&c.ApiController,
+			Controller:    &c.ApiController,
 			QueryBuilder:  &service.UserProfileQueryBuilder{},
+			LookUpField:   "-",
 			ModelTemplate: serializer.NewProfileTemplate(serializer.DefaultProfileTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				profileQueryBuilder := builder.(*service.UserProfileQueryBuilder)
+				userId := c.Ctx.Input.Param(":id")
+				profileQueryBuilder.InUser(userId)
+			},
+			OnGetResult: func(i interface{}) {
+				profile := i.(*models.Profile)
+				profile.ReadUser()
+
+			},
 		}
 		err := objectView.Exec()
 		if err != nil {

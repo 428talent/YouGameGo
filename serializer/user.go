@@ -137,14 +137,13 @@ func NewProfileTemplate(templateType string) Template {
 }
 
 type UserProfileTemplate struct {
+	UserId   int64  `json:"user_id" source:"User.Id" source_type:"int"`
 	Nickname string `json:"nickname" source:"Nickname" source_type:"string"`
 	Email    string `json:"email" source:"Email" source_type:"string"`
 	Avatar   string `json:"avatar" source:"Avatar" source_type:"string" `
-	UpdateAt string  `json:"update_at" source:"Updated" source_type:"string" converter:"time"`
+	UpdateAt string `json:"update_at" source:"Updated" source_type:"string" converter:"time"`
 }
 
 func (t *UserProfileTemplate) Serialize(model interface{}, context map[string]interface{}) {
 	SerializeModelData(model, t)
 }
-
-

@@ -25,6 +25,11 @@ func ReadProfile(user *User) error {
 	}
 	return nil
 }
+func (p *Profile) ReadUser() error {
+	o := orm.NewOrm()
+	_, err := o.LoadRelated(p, "User")
+	return err
+}
 
 func GetProfileByUser(userId int64) (*Profile, error) {
 	o := orm.NewOrm()
@@ -62,4 +67,16 @@ func (p *Profile) SaveAvatar(path string) error {
 func (p *Profile) Update(o orm.Ormer, fields ...string) error {
 	_, err := o.Update(p, fields...)
 	return err
+}
+
+func GetProfileList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Profile, error) {
+	o := orm.NewOrm()
+	var profileList []*Profile
+	seter := o.QueryTable("profile")
+	_, err := filter(seter).All(&profileList)
+	if err != nil {
+		return nil, nil, err
+	}
+	count, err := filter(seter).Count()
+	return &count, profileList, err
 }

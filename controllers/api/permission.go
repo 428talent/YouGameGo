@@ -1,6 +1,6 @@
 package api
 
-import "github.com/pkg/errors"
+import "errors"
 
 var PermissionDeniedError = errors.New("permission denied")
 

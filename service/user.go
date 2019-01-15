@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"time"
+	"yougame.com/yougame-server/mail"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/util"
@@ -14,47 +16,67 @@ var (
 	LoginUserFailed = errors.New("user login failed")
 )
 
-func CreateUserAccount(username string, password string) (*int64, error) {
+func CreateUserAccount(username string, password string, email string) (*models.User, error) {
 	o := orm.NewOrm()
 	if o.QueryTable("auth_user").Filter("UserName", username).Exist() {
-		panic(UserExistError)
+		return nil, errors.New("user exist !")
 	}
 	encryptPassword, err := util.EncryptSha1WithSalt(password)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+
 	err = o.Begin()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-
-	profile := models.Profile{
-		Nickname: username,
-		Avatar:   "",
-		Email:    "",
-	}
-	profileId, err := o.Insert(&profile)
-	if err != nil {
-		panic(err)
-	}
-
-	user := models.User{
-		Username: username,
-		Password: *encryptPassword,
-		Enable:   true,
-		Profile: &models.Profile{
-			Id: int(profileId),
-		},
-	}
-	userId, err := o.Insert(&user)
-	defer func() {
-		troubleMaker := recover()
-		if troubleMaker != nil {
-			err = troubleMaker.(error)
-			err = o.Rollback()
+	dbTransaction := func() (*models.User, error) {
+		profile := models.Profile{
+			Nickname: username,
+			Avatar:   "",
+			Email:    email,
 		}
-	}()
-	return &userId, err
+		profileId, err := o.Insert(&profile)
+		if err != nil {
+			beego.Error(err)
+			err = o.Rollback()
+			return nil, err
+		}
+
+		user := &models.User{
+			Username: username,
+			Password: *encryptPassword,
+			Enable:   true,
+			Profile: &models.Profile{
+				Id: int(profileId),
+			},
+		}
+		_, err = o.Insert(user)
+		if err != nil {
+			return nil, err
+		}
+		return user, nil
+	}
+
+	user, err := dbTransaction()
+	if err != nil {
+		err := o.Rollback()
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = o.Commit()
+	if err != nil {
+		beego.Error(err)
+		return nil, err
+	}
+
+	//send welcome mail
+	err = mail.SendWelcomeEmail(user, email)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func GetUserById(userId int) *models.User {

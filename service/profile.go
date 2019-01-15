@@ -1,35 +1,34 @@
 package service
 
 import (
-	"errors"
+	"github.com/astaxie/beego/orm"
 	"yougame.com/yougame-server/models"
 )
 
 type UserProfileQueryBuilder struct {
-	ids []interface{}
+	ResourceQueryBuilder
+	userIds []interface{}
+}
+
+func (b *UserProfileQueryBuilder) InUser(userId ...interface{}) {
+	b.userIds = append(b.userIds, userId...)
+}
+
+func (b *UserProfileQueryBuilder) Query() (*int64, []*models.Profile, error) {
+	condition := b.build()
+	if len(b.userIds) > 0 {
+		condition = condition.And("User__id__in", b.userIds...)
+	}
+	return models.GetProfileList(func(o orm.QuerySeter) orm.QuerySeter {
+		setter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		if len(b.orders) > 0 {
+			setter = setter.OrderBy(b.orders...)
+		}
+		return setter
+	})
+
 }
 
 func (b *UserProfileQueryBuilder) ApiQuery() (*int64, interface{}, error) {
-	var count int64
-	count = 0
-	user := GetUserById(b.ids[0].(int))
-	if user == nil {
-		return &count, nil, errors.New("no found profile")
-	}
-	err := user.ReadProfile()
-	if err != nil {
-		return &count, nil, err
-	}
-	count = 1
-	profiles := make([]*models.Profile, 0)
-	profiles = append(profiles, user.Profile)
-	return &count, profiles, nil
-}
-
-func (b *UserProfileQueryBuilder) SetPage(page int64, pageSize int64) {
-
-}
-
-func (b *UserProfileQueryBuilder) InId(id ...interface{}) {
-	b.ids = append(b.ids, id...)
+	return b.Query()
 }

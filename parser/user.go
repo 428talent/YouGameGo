@@ -7,6 +7,7 @@ import (
 type CreateUserRequestStruct struct {
 	Username string `json:"username" valid:"Required;MinSize(4);MaxSize(16)"`
 	Password string `json:"password" valid:"Required;MinSize(4);MaxSize(16)"`
+	Email    string `json:"email" valid:"Required;MinSize(4);MaxSize(16)"`
 }
 
 func (r *CreateUserRequestStruct) Parse(body []byte) error {
@@ -44,6 +45,7 @@ func (r *UploadUserAvatarRequestStruct) Parse(body []byte) error {
 type ChangeProfileRequestStruct struct {
 	Nickname string `json:"nickname"`
 }
+
 func (r *ChangeProfileRequestStruct) Parse(body []byte) error {
 	err := json.Unmarshal(body, r)
 	if err != nil {

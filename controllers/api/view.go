@@ -73,17 +73,19 @@ type ObjectView struct {
 }
 
 func (v *ObjectView) Exec() error {
-	lookup := ":id"
-	if len(v.LookUpField) > 0 {
-		lookup = v.LookUpField
-	}
-	lookUpParam := v.Controller.Ctx.Input.Param(lookup)
-	id, err := strconv.Atoi(lookUpParam)
-	if err != nil {
-		return err
+	if v.LookUpField != "-" {
+		lookup := ":id"
+		if len(v.LookUpField) > 0 {
+			lookup = v.LookUpField
+		}
+		lookUpParam := v.Controller.Ctx.Input.Param(lookup)
+		id, err := strconv.Atoi(lookUpParam)
+		if err != nil {
+			return err
+		}
+		v.QueryBuilder.InId(id)
 	}
 
-	v.QueryBuilder.InId(id)
 	if v.SetFilter != nil {
 		v.SetFilter(v.QueryBuilder)
 	}
@@ -95,8 +97,7 @@ func (v *ObjectView) Exec() error {
 	if *count == 0 {
 		return ResourceNotFoundError
 	}
-	//beego.Debug(reflect.ValueOf(resultSet).Index(0).Interface())
-	//data := reflect.ValueOf(resultSet).Index(0).Elem().Interface()
+
 	v.SerializeContext = map[string]interface{}{
 		"site": util.GetSiteAndPortUrl(v.Controller.Controller),
 	}

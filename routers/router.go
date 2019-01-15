@@ -9,6 +9,7 @@ import (
 	"yougame.com/yougame-server/controllers/api/image"
 	"yougame.com/yougame-server/controllers/api/inventory"
 	"yougame.com/yougame-server/controllers/api/order"
+	"yougame.com/yougame-server/controllers/api/profile"
 	"yougame.com/yougame-server/controllers/api/user"
 	"yougame.com/yougame-server/controllers/api/wishlist"
 )
@@ -53,6 +54,10 @@ func init() {
 		beego.NSNamespace("/games",
 
 			beego.NSRouter("/", &game.GameController{}, "post:CreateGame;get:GetGameList"),
+		),
+		beego.NSNamespace("/profile",
+
+			beego.NSRouter("/", &profile.Controller{}, "get:GetProfileList"),
 		),
 		beego.NSNamespace("wishlist",
 			beego.NSRouter("/", &wishlist.ApiWishListController{}, "get:GetWishList;delete:DeleteWishListItems;post:Create"),

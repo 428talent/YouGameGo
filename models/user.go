@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"time"
-	AppError "yougame.com/yougame-server/application"
 	"yougame.com/yougame-server/util"
 )
 
@@ -31,58 +30,7 @@ func (u *User) TableName() string {
 	return "auth_user"
 }
 
-func CreateUserAccount(username string, password string) (*User, error) {
-	o := orm.NewOrm()
-	if o.QueryTable("auth_user").Filter("UserName", username).Exist() {
-		return nil, &AppError.APIError{
-			Err:    "User exist",
-			Detail: "User already exist!",
-			Code:   AppError.UserExist,
-		}
-	}
-	encryptPassword, err := util.EncryptSha1WithSalt(password)
-	if err != nil {
-		return nil, err
-	}
-	err = o.Begin()
-	if err != nil {
-		return nil, err
-	}
 
-	profile := Profile{
-		Nickname: username,
-		Avatar:   "",
-		Email:    "",
-	}
-	profileId, err := o.Insert(&profile)
-	if err != nil {
-		beego.Error(err)
-		err = o.Rollback()
-		return nil, err
-	}
-
-	user := User{
-		Username: username,
-		Password: *encryptPassword,
-		Enable:   true,
-		Profile: &Profile{
-			Id: int(profileId),
-		},
-	}
-	_, err = o.Insert(&user)
-	if err != nil {
-		beego.Error(err)
-		err = o.Rollback()
-		return nil, err
-	} else {
-		err = o.Commit()
-		if err != nil {
-			beego.Error(err)
-			return nil, err
-		}
-	}
-	return &user, err
-}
 
 func GetUserById(userId int) (*User, error) {
 	o := orm.NewOrm()
