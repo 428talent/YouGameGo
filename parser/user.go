@@ -53,3 +53,15 @@ func (r *ChangeProfileRequestStruct) Parse(body []byte) error {
 	}
 	return nil
 }
+
+type ResetUserPasswordRequestStruct struct {
+	Username string `json:"username"`
+}
+
+func (r *ResetUserPasswordRequestStruct) Parse(body []byte) error {
+	err := json.Unmarshal(body, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}

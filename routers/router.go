@@ -41,6 +41,7 @@ func init() {
 				),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),
+			beego.NSRouter("/reset",&user.ApiUserController{},"post:SendResetPasswordEmail"),
 		),
 		beego.NSNamespace("/game",
 			beego.NSNamespace("/:id",

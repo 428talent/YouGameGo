@@ -343,3 +343,23 @@ func (c *ApiUserController) GetUserProfile() {
 		}
 	})
 }
+
+func (c *ApiUserController) SendResetPasswordEmail() {
+	c.WithErrorContext(func() {
+		requestBody := parser.ResetUserPasswordRequestStruct{}
+		err := requestBody.Parse(c.Ctx.Input.RequestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.SendResetMail(requestBody.Username)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
+	})
+
+}

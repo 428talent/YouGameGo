@@ -4,6 +4,7 @@ import (
 	"github.com/jordan-wright/email"
 	"github.com/matcornic/hermes"
 	"net/textproto"
+	"strconv"
 	"yougame.com/yougame-server/models"
 )
 
@@ -36,6 +37,23 @@ func RenderWelcomeMail(user *models.User) *hermes.Email {
 	}
 
 }
+func RenderVerifyCodeMail(user *models.User,code int) *hermes.Email {
+	return &hermes.Email{
+		Body: hermes.Body{
+			Name: user.Username,
+			Intros: []string{
+				"您正在使用YouGame账户服务，以下是您的验证码",
+			},
+			Dictionary: []hermes.Entry{
+				{Key: "验证码", Value: strconv.Itoa(code)},
+			},
+			Outros: []string{
+				"请勿将验证码泄露给任何人，避免给您的账号安全带来不必要的麻烦。",
+			},
+		},
+	}
+
+}
 
 func SendWelcomeEmail(user *models.User, to string) error {
 	template := RenderWelcomeMail(user)
@@ -51,6 +69,28 @@ func SendWelcomeEmail(user *models.User, to string) error {
 		To:      []string{to,},
 		From:    "YouGame Project <takayamaaren@sina.com>",
 		Subject: "注册成功",
+		Text:    []byte(textString),
+		HTML:    []byte(htmlString),
+		Headers: textproto.MIMEHeader{},
+	}
+	SendMail(mail)
+	return nil
+}
+
+func SendVerifyCodeEmail(user *models.User, to string,code int) error{
+	template := RenderVerifyCodeMail(user,code)
+	htmlString, err := hermesApp.GenerateHTML(*template)
+	if err != nil {
+		return err
+	}
+	textString, err := hermesApp.GeneratePlainText(*template)
+	if err != nil {
+		return err
+	}
+	mail := &email.Email{
+		To:      []string{to,},
+		From:    "YouGame Project <takayamaaren@sina.com>",
+		Subject: "YouGame验证码",
 		Text:    []byte(textString),
 		HTML:    []byte(htmlString),
 		Headers: textproto.MIMEHeader{},

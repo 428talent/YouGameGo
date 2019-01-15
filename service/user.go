@@ -144,3 +144,32 @@ func UpdateUserProfile(profile models.Profile, fields ...string) (*models.Profil
 	return userProfile, nil
 
 }
+
+func SendResetMail(username string) error {
+	user := &models.User{
+		Username: username,
+	}
+	o := orm.NewOrm()
+	err := o.Read(user, "Username")
+	if err != nil {
+		return err
+	}
+
+	code, err := security.GenerateVerifyCode(user.Id, security.VerifyCodeTypeResetPassword)
+	if err != nil {
+		return err
+	}
+
+	err = user.ReadProfile()
+	if err != nil {
+		return err
+	}
+
+	err = mail.SendVerifyCodeEmail(user, user.Profile.Email, code)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

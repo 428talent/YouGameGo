@@ -5,7 +5,7 @@ require (
 	github.com/casbin/casbin v1.8.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
-	github.com/go-redis/redis v6.15.0+incompatible // indirect
+	github.com/go-redis/redis v6.15.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/google/uuid v1.1.0 // indirect
