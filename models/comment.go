@@ -11,14 +11,32 @@ const (
 )
 
 type Comment struct {
-	Id         int
-	Good       *Good `orm:"rel(fk)"`
-	User       *User `orm:"rel(fk)"`
-	Content    string
-	Evaluation string
-	Enable     bool
-	Created    time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated    time.Time `orm:"auto_now;type(datetime)"`
+	Id      int
+	Good    *Good `orm:"rel(fk)"`
+	User    *User `orm:"rel(fk)"`
+	Content string
+	Rating  int
+	Enable  bool
+	Created time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated time.Time `orm:"auto_now;type(datetime)"`
+}
+
+func (comment *Comment) Query(id int64) error {
+	comment.Id = int(id)
+	err := orm.NewOrm().Read(comment)
+	return err
+}
+
+func (comment *Comment) Delete(o orm.Ormer) error {
+	comment.Enable = false
+	_, err := o.Update(comment, "enable")
+	return err
+}
+
+func (comment *Comment) Update(id int64, o orm.Ormer, fields ...string) error {
+	comment.Id = int(id)
+	_, err := o.Update(comment, fields...)
+	return err
 }
 
 func (comment *Comment) Save(o orm.Ormer) error {
@@ -26,22 +44,16 @@ func (comment *Comment) Save(o orm.Ormer) error {
 	return err
 }
 
-func GetCommentList(filter func(o orm.QuerySeter) orm.QuerySeter) ([]*Comment, error) {
-	o := orm.NewOrm()
-	var commentList []*Comment
-	seter := o.QueryTable("comment")
-	_, err := filter(seter).All(&commentList)
-	return commentList, err
-}
-func (comment *Comment) GetList(filter func(o orm.QuerySeter) orm.QuerySeter, md interface{}) (count int64, err error) {
+func GetCommentList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Comment, error) {
 	o := orm.NewOrm()
 	seter := o.QueryTable("comment")
-	_, err = filter(seter).All(md)
+	var result []*Comment
+	_, err := filter(seter).All(&result)
 	if err != nil {
-		return
+		return nil, nil, err
 	}
-	count, err = filter(seter).Count()
-	return
+	count, err := filter(seter).Count()
+	return &count, result, err
 }
 func GetGameCommentCount(gameId int) (int64, error) {
 	o := orm.NewOrm()

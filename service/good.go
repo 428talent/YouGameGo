@@ -56,7 +56,7 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 		User:       &user,
 		Good:       &good,
 		Enable:     true,
-		Evaluation: evaluation,
+
 		Content:    content,
 	}
 	//存储商品评论

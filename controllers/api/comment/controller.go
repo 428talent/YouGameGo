@@ -1,16 +1,11 @@
 package comment
 
 import (
-	"encoding/json"
-	"github.com/astaxie/beego"
-	"reflect"
-	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
-	"yougame.com/yougame-server/util"
 )
 
 type ApiCommentController struct {
@@ -19,84 +14,51 @@ type ApiCommentController struct {
 
 func (c *ApiCommentController) GetCommentList() {
 	c.WithErrorContext(func() {
-		page, pageSize := c.GetPage()
-		builder := service.CommentQueryBuilder{}
-		builder.SetPage(service.PageOption{
-			Page:     page,
-			PageSize: pageSize,
-		})
-		if userId, err := c.GetInt64("user", 0); err == nil && userId != 0 {
-			builder.SetUser(userId)
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.CommentQueryBuilder{},
+			ModelTemplate: serializer.NewCommentTemplate(serializer.DefaultCommentTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				commentQueryBuilder := builder.(*service.CommentQueryBuilder)
+				for _, gameId := range c.GetStrings("game") {
+					commentQueryBuilder.SetGame(gameId)
+				}
+				for _, goodId := range c.GetStrings("good") {
+					commentQueryBuilder.SetGood(goodId)
+				}
+				for _, userId := range c.GetStrings("user") {
+					commentQueryBuilder.SetUser(userId)
+				}
+			},
 		}
-		if gameId, err := c.GetInt64("game"); err == nil && gameId != 0 {
-			builder.SetGame(gameId)
-		}
-		if goodId, err := c.GetInt64("good"); err == nil && goodId != 0 {
-			builder.SetGood(goodId)
-		}
-		var commentList []*models.Comment
-		count, err := builder.Query(&commentList)
+		err := listView.Exec()
 		if err != nil {
 			panic(err)
 		}
-
-		results := make([]interface{}, 0)
-		for _, item := range commentList {
-			results = append(results, reflect.ValueOf(*item).Interface())
-		}
-		serializerDataList := serializer.SerializeMultipleData(&serializer.CommentSerializeModel{}, results, util.GetSiteAndPortUrl(c.Controller))
-		c.ServerPageResult(serializerDataList, count, page, pageSize)
 	})
 
 }
 
 func (c *ApiCommentController) CreateComment() {
-	var err error
-	defer api.CheckError(func(e error) {
-		beego.Error(err)
-		switch e {
-		case service.CommentExistError:
-			CommentAlreadyExistError.ServerError(c.Controller)
-			return
+	c.WithErrorContext(func() {
+		createView := api.CreateView{
+			Controller:    &c.ApiController,
+			Parser:        &parser.CreateCommentModel{},
+			Model:         &models.Comment{},
+			ModelTemplate: serializer.NewCommentTemplate(serializer.DefaultCommentTemplateType),
+			OnPrepareSave: func(c *api.CreateView) {
+				commentModel := c.Model.(*models.Comment)
+				requestData := c.Parser.(*parser.CreateCommentModel)
+				commentModel.User = c.Controller.User
+				commentModel.Good = &models.Good{
+					Id: int(requestData.GoodId),
+				}
+				commentModel.Enable = true
+			},
 		}
-		api.HandleApiError(c.Controller, err)
+		err := createView.Exec()
+		if err != nil {
+			panic(err)
+		}
 	})
-
-	claims, err := c.GetAuth()
-	if err != nil {
-		panic(err)
-	}
-
-	err = c.CheckPermission([]api.PermissionInterface{
-		CreateCommentPermission{},
-	}, map[string]interface{}{
-		"claims": *claims,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	requestBodyModel := parser.CreateCommentModel{}
-	err = json.Unmarshal(c.Ctx.Input.RequestBody, &requestBodyModel)
-	if err != nil {
-		panic(api.ParseJsonDataError)
-	}
-
-	err = requestBodyModel.Validate()
-	if err != nil {
-		panic(err)
-	}
-
-	goodId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-
-	comment, err := service.CreateComment(requestBodyModel.Content, requestBodyModel.Evaluation, &models.User{Id: claims.UserId}, &models.Good{Id: goodId})
-	if err != nil {
-		panic(err)
-	}
-	serializeModel := serializer.CommentSerializeModel{}
-	c.Data["json"] = serializeModel.SerializeData(*comment, util.GetSiteAndPortUrl(c.Controller))
-	c.ServeJSON()
 }
