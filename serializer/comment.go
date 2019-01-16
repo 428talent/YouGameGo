@@ -42,28 +42,6 @@ func (t *DefaultCommentSerializeTemplate) Serialize(model interface{}, context m
 	}
 }
 
-//func (c *DefaultCommentSerializeTemplate) SerializeData(model interface{}, site string) interface{} {
-//	comment := model.(models.Comment)
-//	serializeData := DefaultCommentSerializeTemplate{
-//		Id:         comment.Id,
-//		UserId:     comment.User.Id,
-//		GoodId:     comment.Good.Id,
-//		Content:    comment.Content,
-//		Evaluation: comment.Evaluation,
-//		CreateAt:   comment.Created.Unix(),
-//		UpdateAt:   comment.Updated.Unix(),
-//		Link: []*ApiLink{
-//			{
-//				Rel:  "user",
-//				Href: fmt.Sprintf("%s/api/user/%d", site, comment.User.Id),
-//				Type: "GET",
-//			},
-//			{
-//				Rel:  "good",
-//				Href: fmt.Sprintf("%s/api/good/%d", site, comment.Good.Id),
-//				Type: "GET",
-//			},
-//		},
-//	}
-//	return serializeData
-//}
+type CommentSummarySerializeTemplate struct {
+	Rating []*models.CommentRatingCountResult `json:"rating"`
+}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/astaxie/beego/orm"
 	"yougame.com/yougame-server/models"
+	"yougame.com/yougame-server/serializer"
 )
 
 var (
@@ -90,4 +91,16 @@ func GetGameCommentStatistics(gameId int) (count int64, positive int64, negative
 		return
 	}
 	return
+}
+
+func GetCommentSummary(gameId int) (*serializer.CommentSummarySerializeTemplate, error) {
+
+	ratingCount, err := models.GetGameRatingCount(gameId)
+	if err != nil {
+		return nil, err
+	}
+	result := &serializer.CommentSummarySerializeTemplate{
+		Rating: ratingCount,
+	}
+	return result, nil
 }

@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
@@ -60,5 +61,17 @@ func (c *ApiCommentController) CreateComment() {
 		if err != nil {
 			panic(err)
 		}
+	})
+}
+
+func (c *ApiCommentController) GetCommentSummary() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		result, err := service.GetCommentSummary(gameId)
+		c.Data["json"] = result
+		c.ServeJSON()
 	})
 }

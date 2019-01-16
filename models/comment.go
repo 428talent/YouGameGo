@@ -64,3 +64,26 @@ func GetGameCommentWithEvaluationCount(gameId int, evaluation string) (int64, er
 	o := orm.NewOrm()
 	return o.QueryTable("comment").Filter("Good__Game__id", gameId).Filter("evaluation", evaluation).Filter("enable", true).Count()
 }
+
+type CommentRatingCountResult struct {
+	Rating int64 `json:"rating"`
+	Count  int64 `json:"count"`
+}
+
+func GetGameRatingCount(gameId int) ([]*CommentRatingCountResult, error) {
+	o := orm.NewOrm()
+
+	var resultList []*CommentRatingCountResult
+	sql := `select comment.rating,count(*) as count
+from comment
+       inner join good
+       inner join game
+where
+      good.game_id = game.id AND good.id = comment.good_id AND game_id = ?
+group by rating`
+	_, err := o.Raw(sql, gameId).QueryRows(&resultList)
+	if err != nil {
+		return nil, err
+	}
+	return resultList, nil
+}
