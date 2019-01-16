@@ -43,5 +43,5 @@ func (t *DefaultCommentSerializeTemplate) Serialize(model interface{}, context m
 }
 
 type CommentSummarySerializeTemplate struct {
-	Rating []*models.CommentRatingCountResult `json:"rating"`
+	Rating []*models.CommentRatingCountResult `json:"rating_count"`
 }
