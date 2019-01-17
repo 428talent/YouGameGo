@@ -17,6 +17,7 @@ type DefaultInventoryTemplate struct {
 	Id     int64      `json:"id" source:"Id" source_type:"int"`
 	UserId int64      `json:"user_id" source:"User.Id" source_type:"int"`
 	GoodId int64      `json:"good_id" source:"Good.Id" source_type:"int"`
+	Created     string     `json:"created" source:"Created" source_type:"string" converter:"time"`
 	Link   []*ApiLink `json:"link"`
 }
 
