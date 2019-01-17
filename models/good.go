@@ -6,15 +6,16 @@ import (
 )
 
 type Good struct {
-	Id       int
-	Name     string
-	Price    float64
-	Enable   bool
-	Users    []*User    `orm:"reverse(many)"`
-	Comments []*Comment `orm:"reverse(many)"`
-	Game     *Game      `orm:"rel(fk)"`
-	Created  time.Time  `orm:"auto_now_add;type(datetime)"`
-	Updated  time.Time  `orm:"auto_now;type(datetime)"`
+	Id             int
+	Name           string
+	Price          float64
+	Enable         bool
+	Users          []*User          `orm:"reverse(many)"`
+	InventoryItems []*InventoryItem `orm:"reverse(many)"`
+	Comments       []*Comment       `orm:"reverse(many)"`
+	Game           *Game            `orm:"rel(fk)"`
+	Created        time.Time        `orm:"auto_now_add;type(datetime)"`
+	Updated        time.Time        `orm:"auto_now;type(datetime)"`
 }
 
 func (g *Good) Query(id int64) error {

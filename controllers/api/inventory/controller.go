@@ -26,6 +26,9 @@ func (c *Controller) GetInventoryList() {
 				for _, goodIdParam := range c.GetStrings("good") {
 					inventoryQueryBuilder.InGood(goodIdParam)
 				}
+				for _, gameIdParam := range c.GetStrings("game") {
+					inventoryQueryBuilder.InGame(gameIdParam)
+				}
 			},
 		}
 		err := listView.Exec()

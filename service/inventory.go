@@ -9,6 +9,7 @@ type InventoryQueryBuilder struct {
 	ResourceQueryBuilder
 	userIds []interface{}
 	goodIds []interface{}
+	gameIds []interface{}
 }
 
 func (builder *InventoryQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -22,6 +23,10 @@ func (builder *InventoryQueryBuilder) BelongUser(id ...interface{}) {
 func (builder *InventoryQueryBuilder) InGood(id ...interface{}) {
 	builder.goodIds = append(builder.goodIds, id...)
 }
+
+func (builder *InventoryQueryBuilder) InGame(id ...interface{}) {
+	builder.gameIds = append(builder.gameIds, id...)
+}
 func (builder *InventoryQueryBuilder) Query() (*int64, []*models.InventoryItem, error) {
 	condition := builder.build()
 	if len(builder.userIds) > 0 {
@@ -29,6 +34,9 @@ func (builder *InventoryQueryBuilder) Query() (*int64, []*models.InventoryItem, 
 	}
 	if len(builder.goodIds) > 0 {
 		condition = condition.And("good_id__in", builder.goodIds...)
+	}
+	if len(builder.gameIds) > 0 {
+		condition = condition.And("Good__Game__id__in", builder.gameIds)
 	}
 	return models.GetInventoryItemList(func(o orm.QuerySeter) orm.QuerySeter {
 		querySetter := o.SetCond(condition).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
