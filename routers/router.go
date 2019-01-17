@@ -22,6 +22,7 @@ func init() {
 				beego.NSRouter("/", &user.ApiUserController{}, "get:GetUser"),
 				beego.NSRouter("/orders", &order.ApiOrderController{}, "get:GetOrderList"),
 				beego.NSRouter("/profile", &user.ApiUserController{}, "get:GetUserProfile"),
+				beego.NSRouter("/inventory/game", &user.ApiUserController{}, "get:GetInventoryGame"),
 
 				beego.NSNamespace("/avatar",
 					beego.NSRouter("/upload", &user.ApiUserController{}, "post:UploadAvatar"),

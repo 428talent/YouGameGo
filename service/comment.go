@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/astaxie/beego/orm"
+	"sort"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/serializer"
 )
@@ -98,6 +99,21 @@ func GetCommentSummary(gameId int) (*serializer.CommentSummarySerializeTemplate,
 	ratingCount, err := models.GetGameRatingCount(gameId)
 	if err != nil {
 		return nil, err
+	}
+	for idx := 1; idx < 6; idx++ {
+		flag := false
+		for _, item := range ratingCount {
+			if item.Rating == int64(idx) {
+				flag = true
+				break
+			}
+		}
+		if !flag {
+			ratingCount = append(ratingCount, &models.CommentRatingCountResult{Rating: int64(idx), Count: 0})
+			sort.Slice(ratingCount, func(i, j int) bool {
+				return ratingCount[i].Rating < ratingCount[j].Rating
+			})
+		}
 	}
 	result := &serializer.CommentSummarySerializeTemplate{
 		Rating: ratingCount,

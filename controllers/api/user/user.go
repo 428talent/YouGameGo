@@ -380,3 +380,19 @@ func (c *ApiUserController) RecoveryPassword() {
 		c.ServeJSON()
 	})
 }
+
+func (c *ApiUserController) GetInventoryGame() {
+	c.WithErrorContext(func() {
+		claims, err := c.GetAuth()
+		if err != nil {
+			panic(err)
+		}
+		page, pageSize := c.GetPage()
+		count, gameList, err := service.GetGameWithUserInventory(claims.UserId, service.PageOption{Page: page, PageSize: pageSize})
+		result := serializer.SerializeMultipleTemplate(gameList, serializer.NewGameTemplate(serializer.DefaultGameTemplateType), map[string]interface{}{
+			"site": util.GetSiteAndPortUrl(c.Controller),
+		})
+		c.ServerPageResult(result, count, page, pageSize)
+		c.ServeJSON()
+	})
+}

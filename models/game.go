@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -39,8 +40,6 @@ func (g *Game) Delete(o orm.Ormer) error {
 	_, err := o.Update(g, "enable")
 	return err
 }
-
-
 
 func (g *Game) Query(id int64) error {
 	g.Id = int(id)
@@ -182,4 +181,40 @@ func SearchGame(key string) ([]*Game, error) {
 func (g *Game) UpdateGame(o orm.Ormer, fields ...string) error {
 	_, err := o.Update(g, fields...)
 	return err
+}
+
+func GetGameWithInventory(userId int, limit int, offset int) (int64, []*Game, error) {
+	o := orm.NewOrm()
+	sql := `select distinct game.* from game
+				inner join good
+				inner join inventory_item
+				inner join you_game.auth_user
+				inner join image
+				where good.game_id = game.id and
+      					inventory_item.good_id = good.id and
+						auth_user.id = inventory_item.user_id and
+						auth_user.id = ? limit ? offset ?`
+	countSql := `select  count(distinct game.id) as count
+						from game
+       						inner join good
+       						inner join inventory_item
+       						inner join you_game.auth_user
+       						inner join image
+						where good.game_id = game.id
+  							and inventory_item.good_id = good.id
+  							and auth_user.id = inventory_item.user_id
+  							and auth_user.id = ?`
+	var resultSet []*Game
+	_, err := o.Raw(sql, userId, limit, offset).QueryRows(&resultSet)
+	if err != nil {
+		return 0, nil, err
+	}
+	var countResult []orm.Params
+	_, err = o.Raw(countSql, userId).Values(&countResult)
+	if err != nil {
+		return 0,nil,err
+	}
+	countValue := countResult[0]["count"].(string)
+	count,err := strconv.Atoi(countValue)
+	return int64(count), resultSet, err
 }

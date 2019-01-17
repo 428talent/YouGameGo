@@ -150,3 +150,7 @@ func UpdateGame(game *models.Game, fields ...string) error {
 
 	return err
 }
+
+func GetGameWithUserInventory(userId int, pageOption PageOption) (int64,[]*models.Game, error) {
+	return models.GetGameWithInventory(userId, int(pageOption.PageSize), int(pageOption.Offset()))
+}
