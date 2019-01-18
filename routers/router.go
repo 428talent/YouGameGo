@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"yougame.com/yougame-server/controllers/api/cart"
+	"yougame.com/yougame-server/controllers/api/collection"
 	"yougame.com/yougame-server/controllers/api/comment"
 	"yougame.com/yougame-server/controllers/api/game"
 	"yougame.com/yougame-server/controllers/api/good"
@@ -63,6 +64,15 @@ func init() {
 				beego.NSNamespace("/comments",
 					beego.NSRouter("/summary", &comment.ApiCommentController{}, "get:GetCommentSummary"),
 				),
+			),
+		),
+		beego.NSNamespace("/collections",
+			beego.NSRouter("/", &collection.Controller{}, "get:GetGameCollectionList;post:Create"),
+		),
+		beego.NSNamespace("/collection",
+			beego.NSNamespace("/:id",
+				beego.NSRouter("/", &collection.Controller{}, "delete:DeleteGameCollection;patch:Update;put:Update"),
+				beego.NSRouter("/games", &collection.Controller{}, "post:AddGame"),
 			),
 		),
 		beego.NSNamespace("/games",

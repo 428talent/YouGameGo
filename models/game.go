@@ -17,11 +17,12 @@ type Game struct {
 	Enable        bool      `json:"enable"`
 	Band          *Image    `orm:"null;rel(one);on_delete(set_null)"`
 	Intro         string
-	Tags          []*Tag    `orm:"rel(m2m)"`
-	PreviewImages []*Image  `orm:"rel(m2m)"`
-	Goods         []*Good   `orm:"reverse(many)"`
-	Created       time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated       time.Time `orm:"auto_now;type(datetime)"`
+	Tags          []*Tag            `orm:"rel(m2m)"`
+	PreviewImages []*Image          `orm:"rel(m2m)"`
+	Goods         []*Good           `orm:"reverse(many)"`
+	Collections   []*GameCollection `orm:"reverse(many)"`
+	Created       time.Time         `orm:"auto_now_add;type(datetime)"`
+	Updated       time.Time         `orm:"auto_now;type(datetime)"`
 }
 
 func (g *Game) Save(o orm.Ormer) error {
@@ -212,9 +213,9 @@ func GetGameWithInventory(userId int, limit int, offset int) (int64, []*Game, er
 	var countResult []orm.Params
 	_, err = o.Raw(countSql, userId).Values(&countResult)
 	if err != nil {
-		return 0,nil,err
+		return 0, nil, err
 	}
 	countValue := countResult[0]["count"].(string)
-	count,err := strconv.Atoi(countValue)
+	count, err := strconv.Atoi(countValue)
 	return int64(count), resultSet, err
 }
