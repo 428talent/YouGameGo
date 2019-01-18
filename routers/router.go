@@ -10,7 +10,9 @@ import (
 	"yougame.com/yougame-server/controllers/api/inventory"
 	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/controllers/api/profile"
+	"yougame.com/yougame-server/controllers/api/transaction"
 	"yougame.com/yougame-server/controllers/api/user"
+	"yougame.com/yougame-server/controllers/api/wallet"
 	"yougame.com/yougame-server/controllers/api/wishlist"
 )
 
@@ -39,6 +41,12 @@ func init() {
 				),
 				beego.NSNamespace("/orders",
 					beego.NSRouter("/", &user.ApiUserController{}, "get:GetOrderList"),
+				),
+				beego.NSNamespace("/wallet",
+					beego.NSRouter("/", &wallet.Controller{}, "get:GetWallet"),
+				),
+				beego.NSNamespace("/transactions",
+					beego.NSRouter("/", &transaction.Controller{}, "get:GetTransactionList"),
 				),
 			),
 			beego.NSRouter("/auth", &user.ApiUserController{}, "post:UserLogin"),

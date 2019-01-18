@@ -91,3 +91,10 @@ func (b *ResourceQueryBuilder) WithEnable(visibility string) {
 func (b *ResourceQueryBuilder) ByOrder(orders ...string) {
 	b.orders = append(b.orders, orders...)
 }
+
+type UserIdOption struct {
+	userIds []interface{}
+}
+func (builder *UserIdOption) InUser(userId ...interface{}) {
+	builder.userIds = append(builder.userIds, userId...)
+}

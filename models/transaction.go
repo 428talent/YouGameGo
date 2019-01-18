@@ -22,3 +22,16 @@ func (t *Transaction) Save(o orm.Ormer) error {
 	t.Id = int(transaction)
 	return err
 }
+
+func GetTransactionList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Transaction, error) {
+	o := orm.NewOrm()
+	var TransactionList []*Transaction
+	seter := o.QueryTable("transaction")
+
+	_, err := filter(seter).All(&TransactionList)
+	if err != nil {
+		return nil, nil, err
+	}
+	count, err := filter(seter).Count()
+	return &count, TransactionList, err
+}

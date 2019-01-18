@@ -64,7 +64,6 @@ type ObjectView struct {
 	QueryBuilder        service.ApiQueryBuilder
 	ModelTemplate       serializer.Template
 	LookUpField         string
-	Model               interface{}
 	SerializeContext    map[string]interface{}
 	GetTemplate         func() serializer.Template
 	SetFilter           func(builder service.ApiQueryBuilder)
@@ -73,6 +72,7 @@ type ObjectView struct {
 }
 
 func (v *ObjectView) Exec() error {
+	v.Controller.GetAuth()
 	if v.LookUpField != "-" {
 		lookup := ":id"
 		if len(v.LookUpField) > 0 {
