@@ -8,17 +8,20 @@ import (
 )
 
 type GameQueryBuilder struct {
-	ids        []interface{}
-	pageOption *PageOption
-	orders     []string
-	enable     string
-	searchName string
+	ids               []interface{}
+	pageOption        *PageOption
+	orders            []string
+	enable            string
+	searchName        string
+	gameCollectionIds []interface{}
 }
 
 func (b *GameQueryBuilder) InId(id ...interface{}) {
 	b.ids = append(b.ids, id)
 }
-
+func (b *GameQueryBuilder) InGameCollection(id ...interface{}) {
+	b.gameCollectionIds = append(b.gameCollectionIds, id)
+}
 func (b *GameQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return b.Query()
 }
@@ -64,6 +67,9 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 
 	if len(b.searchName) > 0 {
 		condition = condition.And("name__icontains", b.searchName)
+	}
+	if len(b.gameCollectionIds) > 0 {
+		condition = condition.And("Collections__game_collection_id__in", b.gameCollectionIds...)
 	}
 
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
@@ -151,6 +157,6 @@ func UpdateGame(game *models.Game, fields ...string) error {
 	return err
 }
 
-func GetGameWithUserInventory(userId int, pageOption PageOption) (int64,[]*models.Game, error) {
+func GetGameWithUserInventory(userId int, pageOption PageOption) (int64, []*models.Game, error) {
 	return models.GetGameWithInventory(userId, int(pageOption.PageSize), int(pageOption.Offset()))
 }

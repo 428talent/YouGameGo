@@ -546,9 +546,12 @@ func (c *GameController) GetGameList() {
 						gameQueryBuilder.WithEnable(enable)
 					}
 				}
-
 				if name := c.GetString("name"); len(name) > 0 {
 					gameQueryBuilder.SearchWithName(name)
+				}
+
+				for _, collectionId := range c.GetStrings("collection") {
+					gameQueryBuilder.InGameCollection(collectionId)
 				}
 
 			},
