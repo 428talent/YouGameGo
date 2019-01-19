@@ -72,11 +72,10 @@ func init() {
 		beego.NSNamespace("/collection",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &collection.Controller{}, "delete:DeleteGameCollection;patch:Update;put:Update"),
-				beego.NSRouter("/games", &collection.Controller{}, "post:AddGame"),
+				beego.NSRouter("/games", &collection.Controller{}, "post:AddGame;delete:DeleteGame"),
 			),
 		),
 		beego.NSNamespace("/games",
-
 			beego.NSRouter("/", &game.GameController{}, "post:CreateGame;get:GetGameList"),
 		),
 		beego.NSNamespace("/profile",

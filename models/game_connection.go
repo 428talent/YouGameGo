@@ -55,3 +55,9 @@ func (c *GameCollection) AddGame(o orm.Ormer, gameId int) error {
 	_, err := m2mRel.Add(&Game{Id: gameId})
 	return err
 }
+
+func (c *GameCollection) DeleteGame(o orm.Ormer, gameId int) error {
+	m2mRel := o.QueryM2M(c, "Games")
+	_, err := m2mRel.Remove(&Game{Id: gameId})
+	return err
+}

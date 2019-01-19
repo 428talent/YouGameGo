@@ -19,6 +19,12 @@ func (c *Controller) GetGameCollectionList() {
 			Controller:    &c.ApiController,
 			QueryBuilder:  &service.GameCollectionQueryBuilder{},
 			ModelTemplate: serializer.NewGameCollectionTemplate(serializer.DefaultGameCollectionTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				gameCollectionQueryBuilder := builder.(*service.GameCollectionQueryBuilder)
+				for _, orderParam := range c.GetStrings("order") {
+					gameCollectionQueryBuilder.ByOrder(orderParam)
+				}
+			},
 		}
 		err := listView.Exec()
 		if err != nil {
@@ -93,4 +99,26 @@ func (c *Controller) AddGame() {
 		c.Data["json"] = responseBody
 		c.ServeJSON()
 	})
+}
+
+func (c *Controller) DeleteGame() {
+	requestBody := parser.AddGameRequestBody{}
+	err := requestBody.Parse(c.Ctx.Input.RequestBody)
+	if err != nil {
+		panic(api.ParseJsonDataError)
+	}
+	collectionId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		panic(err)
+	}
+	err = service.DeleteGameFromCollection(collectionId, requestBody.Games...)
+	if err != nil {
+		panic(err)
+	}
+
+	responseBody := serializer.CommonApiResponseBody{
+		Success: true,
+	}
+	c.Data["json"] = responseBody
+	c.ServeJSON()
 }

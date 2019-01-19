@@ -38,3 +38,19 @@ func AddGameToCollection(collectionId int, games ...int) error {
 	}
 	return nil
 }
+
+func DeleteGameFromCollection(collectionId int, games ...int) error {
+	gameCollection := models.GameCollection{}
+	err := gameCollection.Query(int64(collectionId))
+	if err != nil {
+		return err
+	}
+	o := orm.NewOrm()
+	for _, gameId := range games {
+		err = gameCollection.DeleteGame(o, gameId)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
