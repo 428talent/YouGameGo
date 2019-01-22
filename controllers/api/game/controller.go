@@ -192,7 +192,7 @@ func (c *GameController) AddTags() {
 	if err != nil {
 		panic(err)
 	}
-	tagTemplate := serializer.TagTemplate{}
+	tagTemplate := serializer.DefaultTagTemplate{}
 	c.Data["json"] = serializer.SerializeMultipleTemplate(tags, &tagTemplate, map[string]interface{}{})
 	c.ServeJSON()
 }
@@ -489,7 +489,7 @@ func (c *GameController) GetTags() {
 		if err != nil {
 			panic(err)
 		}
-		template := serializer.TagTemplate{}
+		template := serializer.DefaultTagTemplate{}
 		c.ServerPageResult(serializer.SerializeMultipleTemplate(tags, &template, map[string]interface{}{}), *count, page, pageSize)
 	})
 }

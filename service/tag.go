@@ -6,19 +6,13 @@ import (
 )
 
 type TagQueryBuilder struct {
-	pageOption *PageOption
-	ids        []interface{}
-	game       []interface{}
+	ResourceQueryBuilder
+	game []interface{}
+	NameOption
 }
 
-func (b *TagQueryBuilder) InId(id ...interface{}) {
-	b.ids = append(b.ids, id)
-}
-func (b *TagQueryBuilder) SetPage(page int64, pageSize int64) {
-	b.pageOption = &PageOption{
-		PageSize: pageSize,
-		Page:     page,
-	}
+func (b *TagQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return b.Query()
 }
 
 func (b *TagQueryBuilder) WithGame(game ...interface{}) {
@@ -26,7 +20,7 @@ func (b *TagQueryBuilder) WithGame(game ...interface{}) {
 }
 
 func (b *TagQueryBuilder) Query() (*int64, []*models.Tag, error) {
-	condition := orm.NewCondition()
+	condition := b.build()
 	if len(b.ids) > 0 {
 		condition = condition.And("id", b.ids...)
 	}
@@ -36,11 +30,18 @@ func (b *TagQueryBuilder) Query() (*int64, []*models.Tag, error) {
 			PageSize: 10,
 		}
 	}
+	if len(b.names) > 0 {
+		condition = condition.And("name__in", b.names...)
+	}
 	if len(b.game) > 0 {
 		condition = condition.And("Games__Game__Id__in", b.game...)
 	}
 	return models.GetTagList(func(o orm.QuerySeter) orm.QuerySeter {
-		return o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		setter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		if len(b.orders) > 0 {
+			setter = setter.OrderBy(b.orders...)
+		}
+		return setter
 
 	})
 }

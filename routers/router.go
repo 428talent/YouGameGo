@@ -11,6 +11,7 @@ import (
 	"yougame.com/yougame-server/controllers/api/inventory"
 	"yougame.com/yougame-server/controllers/api/order"
 	"yougame.com/yougame-server/controllers/api/profile"
+	"yougame.com/yougame-server/controllers/api/tag"
 	"yougame.com/yougame-server/controllers/api/transaction"
 	"yougame.com/yougame-server/controllers/api/user"
 	"yougame.com/yougame-server/controllers/api/wallet"
@@ -66,12 +67,20 @@ func init() {
 				),
 			),
 		),
+		beego.NSNamespace("tags",
+			beego.NSRouter("/", &tag.Controller{}, "post:CreateTag;get:List"),
+		),
+		beego.NSNamespace("tag",
+			beego.NSNamespace("/:id",
+				beego.NSRouter("/", &tag.Controller{}, "patch:Update;put:Update;delete:DeleteTag"),
+			),
+		),
 		beego.NSNamespace("/collections",
 			beego.NSRouter("/", &collection.Controller{}, "get:GetGameCollectionList;post:Create"),
 		),
 		beego.NSNamespace("/collection",
 			beego.NSNamespace("/:id",
-				beego.NSRouter("/", &collection.Controller{}, "delete:DeleteGameCollection;patch:Update;put:Update"),
+				beego.NSRouter("/", &collection.Controller{}, "delete:DeleteGameCollection;patch:Update;put:Update;get:GetObject"),
 				beego.NSRouter("/games", &collection.Controller{}, "post:AddGame;delete:DeleteGame"),
 			),
 		),

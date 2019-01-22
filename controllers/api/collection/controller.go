@@ -13,6 +13,19 @@ type Controller struct {
 	api.ApiController
 }
 
+func (c *Controller) GetObject() {
+	c.WithErrorContext(func() {
+		objectView := api.ObjectView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.GameCollectionQueryBuilder{},
+			ModelTemplate: serializer.NewGameCollectionTemplate(serializer.DefaultGameCollectionTemplateType),
+		}
+		err := objectView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
 func (c *Controller) GetGameCollectionList() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{
@@ -23,6 +36,9 @@ func (c *Controller) GetGameCollectionList() {
 				gameCollectionQueryBuilder := builder.(*service.GameCollectionQueryBuilder)
 				for _, orderParam := range c.GetStrings("order") {
 					gameCollectionQueryBuilder.ByOrder(orderParam)
+				}
+				for _, nameParam := range c.GetStrings("name") {
+					gameCollectionQueryBuilder.WithName(nameParam)
 				}
 			},
 		}

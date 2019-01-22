@@ -7,6 +7,7 @@ import (
 
 type GameCollectionQueryBuilder struct {
 	ResourceQueryBuilder
+	NameOption
 }
 
 func (builder *GameCollectionQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -14,6 +15,9 @@ func (builder *GameCollectionQueryBuilder) ApiQuery() (*int64, interface{}, erro
 }
 func (builder *GameCollectionQueryBuilder) Query() (*int64, []*models.GameCollection, error) {
 	condition := builder.build()
+	if len(builder.names) > 0 {
+		condition = condition.And("name__in", builder.names...)
+	}
 	return models.GetGameCollectionList(func(o orm.QuerySeter) orm.QuerySeter {
 		querySetter := o.SetCond(condition).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())
 		if len(builder.orders) > 0 {

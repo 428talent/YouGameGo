@@ -37,23 +37,20 @@ func UpdateData(id int64, model models.DataModel, fields ...string) error {
 	o := orm.NewOrm()
 	return model.Update(id, o, fields...)
 }
-
 func SaveData(model models.DataModel) error {
 	o := orm.NewOrm()
 	return model.Save(o)
 }
-
 type ResourceQueryBuilder struct {
 	ids        []interface{}
 	pageOption *PageOption
 	enable     string
 	orders     []string
 }
-
 func (b *ResourceQueryBuilder) build() *orm.Condition {
 	condition := orm.NewCondition()
 	if len(b.ids) > 0 {
-		condition = condition.And("id__in")
+		condition = condition.And("id__in", b.ids...)
 	}
 	if b.pageOption == nil {
 		b.pageOption = &PageOption{
@@ -72,6 +69,8 @@ func (b *ResourceQueryBuilder) build() *orm.Condition {
 	}
 	return condition
 }
+
+
 
 func (b *ResourceQueryBuilder) SetPage(page int64, pageSize int64) {
 	b.pageOption = &PageOption{
@@ -92,9 +91,20 @@ func (b *ResourceQueryBuilder) ByOrder(orders ...string) {
 	b.orders = append(b.orders, orders...)
 }
 
+
 type UserIdOption struct {
 	userIds []interface{}
 }
+
 func (builder *UserIdOption) InUser(userId ...interface{}) {
 	builder.userIds = append(builder.userIds, userId...)
 }
+
+type NameOption struct {
+	names []interface{}
+}
+
+func (builder *NameOption) WithName(name ...interface{}) {
+	builder.names = append(builder.names, name...)
+}
+

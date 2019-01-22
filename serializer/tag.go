@@ -1,14 +1,18 @@
 package serializer
 
-type TagTemplate struct {
+const (
+	DefaultTagTemplateType = "DefaultTagTemplateType"
+)
+
+func NewTagTemplate(templateType string) Template {
+	return &DefaultTagTemplate{}
+}
+
+type DefaultTagTemplate struct {
 	Id   int64  `json:"id" source_type:"int"`
 	Name string `json:"name" source_type:"string"`
 }
 
-func (*TagTemplate) CustomSerialize(convertTag string, value interface{}) interface{} {
-	return value
-}
-
-func (t *TagTemplate) Serialize(model interface{}, context map[string]interface{}) {
+func (t *DefaultTagTemplate) Serialize(model interface{}, context map[string]interface{}) {
 	SerializeModelData(model, t)
 }
