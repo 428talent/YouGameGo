@@ -35,8 +35,10 @@ func (c *Controller) List() {
 			ModelTemplate: serializer.NewTagTemplate(serializer.DefaultTagTemplateType),
 			QueryBuilder:  &service.TagQueryBuilder{},
 			SetFilter: func(builder service.ApiQueryBuilder) {
-				util.FilterByParam(&c.Controller, "id", builder, "InId")
-				util.FilterByParam(&c.Controller, "name", builder, "WithName")
+				util.FilterByParam(&c.Controller, "id", builder, "InId", false)
+				util.FilterByParam(&c.Controller, "name", builder, "WithName", false)
+				util.FilterByParam(&c.Controller, "search", builder, "Search", true)
+				util.FilterByParam(&c.Controller, "game", builder, "WithGame", false)
 			},
 		}
 		err := view.Exec()
@@ -64,8 +66,8 @@ func (c *Controller) Update() {
 func (c *Controller) DeleteTag() {
 	c.WithErrorContext(func() {
 		view := api.DeleteView{
-			Controller:    &c.ApiController,
-			Model:         &models.Tag{},
+			Controller: &c.ApiController,
+			Model:      &models.Tag{},
 		}
 		err := view.Exec()
 		if err != nil {

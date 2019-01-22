@@ -7,7 +7,8 @@ import (
 
 type TagQueryBuilder struct {
 	ResourceQueryBuilder
-	game []interface{}
+	game      []interface{}
+	searchKey interface{}
 	NameOption
 }
 
@@ -18,7 +19,9 @@ func (b *TagQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 func (b *TagQueryBuilder) WithGame(game ...interface{}) {
 	b.game = append(b.game, game...)
 }
-
+func (b *TagQueryBuilder) Search(key interface{}) {
+	b.searchKey = key
+}
 func (b *TagQueryBuilder) Query() (*int64, []*models.Tag, error) {
 	condition := b.build()
 	if len(b.ids) > 0 {
@@ -36,6 +39,10 @@ func (b *TagQueryBuilder) Query() (*int64, []*models.Tag, error) {
 	if len(b.game) > 0 {
 		condition = condition.And("Games__Game__Id__in", b.game...)
 	}
+	if b.searchKey != nil {
+		condition = condition.And("name__icontains", b.searchKey)
+	}
+
 	return models.GetTagList(func(o orm.QuerySeter) orm.QuerySeter {
 		setter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
 		if len(b.orders) > 0 {
