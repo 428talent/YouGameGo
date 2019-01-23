@@ -8,17 +8,15 @@ import (
 )
 
 type GameQueryBuilder struct {
-	ids               []interface{}
-	pageOption        *PageOption
-	orders            []string
-	enable            string
+	ResourceQueryBuilder
 	searchName        string
 	gameCollectionIds []interface{}
+	priceStart        *float64
+	priceEnd          *float64
+	releaseTimeStart  string
+	releaseTimeEnd    string
 }
 
-func (b *GameQueryBuilder) InId(id ...interface{}) {
-	b.ids = append(b.ids, id)
-}
 func (b *GameQueryBuilder) InGameCollection(id ...interface{}) {
 	b.gameCollectionIds = append(b.gameCollectionIds, id)
 }
@@ -26,50 +24,44 @@ func (b *GameQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return b.Query()
 }
 
-func (b *GameQueryBuilder) SetPage(page int64, pageSize int64) {
-	b.pageOption = &PageOption{
-		Page:     page,
-		PageSize: pageSize,
-	}
-}
-
 func (b *GameQueryBuilder) SearchWithName(key string) {
 	b.searchName = key
 }
-func (b *GameQueryBuilder) ByOrder(orders ...string) {
-	b.orders = append(b.orders, orders...)
+func (b *GameQueryBuilder) InPriceStart(value float64) {
+	b.priceStart = &value
+}
+func (b *GameQueryBuilder) InPriceEnd(value float64) {
+	b.priceEnd = &value
 }
 
-func (b *GameQueryBuilder) WithEnable(visibility string) {
-	b.enable = visibility
+func (b *GameQueryBuilder) InReleaseTimeStart(value string) {
+	b.releaseTimeStart = value
+}
+func (b *GameQueryBuilder) InReleaseTimeEnd(value string) {
+	b.releaseTimeEnd = value
 }
 func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
-	condition := orm.NewCondition()
-	if len(b.ids) > 0 {
-		condition = condition.And("id", b.ids...)
-	}
-	if b.pageOption == nil {
-		b.pageOption = &PageOption{
-			Page:     1,
-			PageSize: 10,
-		}
-	}
-
-	if len(b.enable) > 0 {
-		switch b.enable {
-		case "visit":
-			condition = condition.And("enable", true)
-		case "remove":
-			condition = condition.And("enable", false)
-		}
-
-	}
+	condition := b.build()
 
 	if len(b.searchName) > 0 {
 		condition = condition.And("name__icontains", b.searchName)
 	}
 	if len(b.gameCollectionIds) > 0 {
 		condition = condition.And("Collections__game_collection_id__in", b.gameCollectionIds...)
+	}
+
+	if b.priceStart != nil {
+		condition = condition.And("price__gte", *b.priceStart)
+	}
+	if b.priceEnd != nil {
+		condition = condition.And("price__lte", *b.priceEnd)
+	}
+
+	if len(b.releaseTimeStart) > 0 {
+		condition = condition.And("release_time__gte", b.releaseTimeStart)
+	}
+	if len(b.releaseTimeEnd) > 0 {
+		condition = condition.And("release_time__lte", b.releaseTimeEnd)
 	}
 
 	return models.GetGameList(func(o orm.QuerySeter) orm.QuerySeter {
@@ -126,24 +118,30 @@ func CreateNewGame(name string, price float32, intro string, publisher string, r
 	return game, nil
 }
 
-func AddGameTags(gameId int, names ...string) ([]*models.Tag, error) {
+func AddGameTags(gameId int, tagIds ...int) error {
 	o := orm.NewOrm()
-	var tags []*models.Tag
-	for _, tagName := range names {
-		tag := models.Tag{
-			Name: tagName,
-		}
-		tagId, err := o.Insert(&tag)
-		if err != nil {
-			return nil, err
-		}
-		tag.Id = int(tagId)
-		tags = append(tags, &tag)
-	}
 
 	m2m := o.QueryM2M(&models.Game{Id: gameId}, "Tags")
-	_, err := m2m.Add(tags)
-	return tags, err
+	for _, tagId := range tagIds {
+		_, err := m2m.Add(&models.Tag{Id: tagId})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func DeleteGameTags(gameId int, tagIds ...int) error {
+	o := orm.NewOrm()
+
+	m2m := o.QueryM2M(&models.Game{Id: gameId}, "Tags")
+	for _, tagId := range tagIds {
+		_, err := m2m.Remove(&models.Tag{Id: tagId})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func UpdateGame(game *models.Game, fields ...string) error {

@@ -167,36 +167,66 @@ func (c *GameController) GetGood() {
 }
 
 func (c *GameController) AddTags() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(err)
-		api.HandleApiError(c.Controller, err)
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		_, err = security.ParseAuthHeader(c.Controller)
+		if err != nil {
+			panic(err)
+		}
+		var requestBodyStruct parser.AddGameTagRequestBody
+
+		err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
+		if err != nil {
+			panic(err)
+
+		}
+
+		err = service.AddGameTags(gameId, requestBodyStruct.Tags...)
+		if err != nil {
+			panic(err)
+		}
+		tagTemplate := &serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = tagTemplate
+		c.ServeJSON()
 	})
-	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-	_, err = security.ParseAuthHeader(c.Controller)
-	if err != nil {
-		panic(err)
-	}
-	var requestBodyStruct parser.AddGameTagRequestBody
 
-	err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
-	if err != nil {
-		panic(err)
-
-	}
-
-	tags, err := service.AddGameTags(gameId, requestBodyStruct.Tags...)
-	if err != nil {
-		panic(err)
-	}
-	tagTemplate := serializer.DefaultTagTemplate{}
-	c.Data["json"] = serializer.SerializeMultipleTemplate(tags, &tagTemplate, map[string]interface{}{})
-	c.ServeJSON()
 }
 
+func (c *GameController) DeleteTags() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		_, err = security.ParseAuthHeader(c.Controller)
+		if err != nil {
+			panic(err)
+		}
+		var requestBodyStruct parser.AddGameTagRequestBody
+
+		err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody)
+		if err != nil {
+			panic(err)
+
+		}
+
+		err = service.DeleteGameTags(gameId, requestBodyStruct.Tags...)
+		if err != nil {
+			panic(err)
+		}
+		tagTemplate := &serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = tagTemplate
+		c.ServeJSON()
+	})
+
+}
 func (c *GameController) AddGood() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
@@ -539,20 +569,38 @@ func (c *GameController) GetGameList() {
 				if len(orders) > 0 {
 					gameQueryBuilder.ByOrder(orders...)
 				}
-
+				enable := "visit"
 				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
-					enable := c.GetString("enable", "visit")
-					if enable != "all" {
-						gameQueryBuilder.WithEnable(enable)
-					}
+					enable = c.GetString("enable", "visit")
 				}
+				gameQueryBuilder.WithEnable(enable)
 				if name := c.GetString("name"); len(name) > 0 {
 					gameQueryBuilder.SearchWithName(name)
 				}
 
-				for _, collectionId := range c.GetStrings("collection") {
-					gameQueryBuilder.InGameCollection(collectionId)
+				util.FilterByParam(&c.Controller, "collection", gameQueryBuilder, "InGameCollection", false)
+
+				priceStartParam := c.GetString("priceStart", "")
+				if len(priceStartParam) > 0 {
+					priceStart, err := strconv.ParseFloat(priceStartParam, 64)
+					if err != nil {
+						panic(err)
+					}
+					gameQueryBuilder.InPriceStart(priceStart)
+
 				}
+
+				priceEndParam := c.GetString("priceEnd", "")
+				if len(priceEndParam) > 0 {
+					priceEnd, err := strconv.ParseFloat(priceEndParam, 64)
+					if err != nil {
+						panic(err)
+					}
+					gameQueryBuilder.InPriceEnd(priceEnd)
+				}
+
+				util.FilterByParam(&c.Controller, "releaseTimeStart", gameQueryBuilder, "InReleaseTimeStart", true)
+				util.FilterByParam(&c.Controller, "releaseTimeEnd", gameQueryBuilder, "InReleaseTimeEnd", true)
 
 			},
 		}

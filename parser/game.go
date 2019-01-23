@@ -18,7 +18,7 @@ func (r *AddGoodRequestBody) Parse(body []byte) error {
 }
 
 type AddGameTagRequestBody struct {
-	Tags []string `json:"tags"`
+	Tags []int `json:"tags"`
 }
 
 func (r *AddGameTagRequestBody) Parse(body []byte) error {
