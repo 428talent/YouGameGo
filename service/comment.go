@@ -36,6 +36,7 @@ type CommentQueryBuilder struct {
 	gameIds []interface{}
 	userId  []interface{}
 	goodId  []interface{}
+	ratings []interface{}
 }
 
 func (builder *CommentQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -60,6 +61,10 @@ func (builder *CommentQueryBuilder) SetGood(goodId ...interface{}) *CommentQuery
 
 }
 
+func (builder *CommentQueryBuilder) WithRating(rating ...interface{}) {
+	builder.ratings = append(builder.ratings, rating...)
+}
+
 func (builder *CommentQueryBuilder) Query() (*int64, []*models.Comment, error) {
 	condition := builder.build()
 	if len(builder.gameIds) != 0 {
@@ -70,6 +75,9 @@ func (builder *CommentQueryBuilder) Query() (*int64, []*models.Comment, error) {
 	}
 	if len(builder.userId) != 0 {
 		condition = condition.And("user_id__in", builder.userId...)
+	}
+	if len(builder.ratings) != 0 {
+		condition = condition.And("rating__in", builder.ratings...)
 	}
 	return models.GetCommentList(func(o orm.QuerySeter) orm.QuerySeter {
 		querySetter := o.SetCond(condition).Limit(builder.pageOption.PageSize).Offset(builder.pageOption.Offset())

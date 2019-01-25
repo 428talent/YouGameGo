@@ -7,6 +7,7 @@ import (
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type ApiCommentController struct {
@@ -20,16 +21,13 @@ func (c *ApiCommentController) GetCommentList() {
 			QueryBuilder:  &service.CommentQueryBuilder{},
 			ModelTemplate: serializer.NewCommentTemplate(serializer.DefaultCommentTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
-				commentQueryBuilder := builder.(*service.CommentQueryBuilder)
-				for _, gameId := range c.GetStrings("game") {
-					commentQueryBuilder.SetGame(gameId)
-				}
-				for _, goodId := range c.GetStrings("good") {
-					commentQueryBuilder.SetGood(goodId)
-				}
-				for _, userId := range c.GetStrings("user") {
-					commentQueryBuilder.SetUser(userId)
-				}
+
+				//commentQueryBuilder := builder.(*service.CommentQueryBuilder)
+				util.FilterByParam(&c.Controller, "game", builder, "SetGame", false)
+				util.FilterByParam(&c.Controller, "good", builder, "SetGood", false)
+				util.FilterByParam(&c.Controller, "user", builder, "SetUser", false)
+				util.FilterByParam(&c.Controller, "rating", builder, "WithRating", false)
+				util.FilterByParam(&c.Controller, "order", builder, "ByOrder", false)
 			},
 		}
 		err := listView.Exec()
