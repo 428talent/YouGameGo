@@ -9,6 +9,7 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type Controller struct {
@@ -117,6 +118,8 @@ func (c *Controller) GetGoods() {
 
 				}
 				goodQueryBuilder.WithEnable(enable)
+
+				util.FilterByParam(&c.Controller, "gameComment", builder, "WithGameCommentGood", false)
 
 			},
 		}

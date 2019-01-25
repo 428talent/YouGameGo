@@ -15,7 +15,7 @@ func GetGoodById(goodId int) (*models.Good, error) {
 
 func UpdateGood(good *models.Good, fields ...string) error {
 	o := orm.NewOrm()
-	err := good.Update(int64(good.Id),o, fields...)
+	err := good.Update(int64(good.Id), o, fields...)
 	if err != nil {
 		return err
 	}
@@ -53,11 +53,11 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 	}
 
 	comment := models.Comment{
-		User:       &user,
-		Good:       &good,
-		Enable:     true,
+		User:   &user,
+		Good:   &good,
+		Enable: true,
 
-		Content:    content,
+		Content: content,
 	}
 	//存储商品评论
 	o := orm.NewOrm()
@@ -71,62 +71,42 @@ func CreateGoodComment(user models.User, content string, goodId int, evaluation 
 }
 
 type GoodQueryBuilder struct {
-	pageOption *PageOption
-	ids        []interface{}
-	gameIds    []interface{}
-	orders     []string
-	enable     string
-
+	ResourceQueryBuilder
+	gameIds        []interface{}
+	gameCommentIds []interface{}
+	goodIds        []interface{}
 }
 
 func (q *GoodQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return q.Query()
 }
 
-func (q *GoodQueryBuilder) SetPage(page int64, pageSize int64) {
-	q.pageOption = &PageOption{
-		Page:     page,
-		PageSize: pageSize,
-	}
-}
-
-func (q *GoodQueryBuilder) InId(id ...interface{}) {
-	q.ids = append(q.ids, id)
-}
-
 func (q *GoodQueryBuilder) InGameId(gameId ...interface{}) {
 	q.gameIds = append(q.gameIds, gameId...)
 }
 
-func (q *GoodQueryBuilder) ByOrder(orders ...string) {
-	q.orders = append(q.orders, orders...)
+func (q *GoodQueryBuilder) WithGameCommentGood(gameId ...interface{}) {
+	q.gameCommentIds = append(q.gameCommentIds, gameId...)
 }
-func (q *GoodQueryBuilder) WithEnable(visibility string) {
-	q.enable = visibility
-}
+
 func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
-	condition := orm.NewCondition()
-	if len(q.ids) > 0 {
-		condition = condition.And("id__in", q.ids...)
-	}
+	condition := q.build()
+
 	if len(q.gameIds) > 0 {
 		condition = condition.And("game_id__in", q.gameIds...)
 	}
-	if q.pageOption == nil {
-		q.pageOption = &PageOption{
-			Page:     1,
-			PageSize: 10,
+	if len(q.gameCommentIds) > 0 {
+		commentQuery := CommentQueryBuilder{}
+		commentQuery.SetGame(q.gameCommentIds...)
+		_, result, err := commentQuery.Query()
+		if err != nil {
+			return nil, nil, err
 		}
-	}
-
-	if len(q.enable) > 0 {
-		switch q.enable {
-		case "visit":
-			condition = condition.And("enable", true)
-		case "remove":
-			condition = condition.And("enable", false)
+		goodIds := make([]interface{}, 0)
+		for _, comment := range result {
+			goodIds = append(goodIds, comment.Good.Id)
 		}
-
+		condition = condition.And("id__in", goodIds...)
 	}
 	return models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		setter := o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())
