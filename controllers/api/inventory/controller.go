@@ -4,6 +4,7 @@ import (
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type Controller struct {
@@ -23,12 +24,9 @@ func (c *Controller) GetInventoryList() {
 				inventoryQueryBuilder := builder.(*service.InventoryQueryBuilder)
 				inventoryQueryBuilder.BelongUser(c.User.Id)
 
-				for _, goodIdParam := range c.GetStrings("good") {
-					inventoryQueryBuilder.InGood(goodIdParam)
-				}
-				for _, gameIdParam := range c.GetStrings("game") {
-					inventoryQueryBuilder.InGame(gameIdParam)
-				}
+				util.FilterByParam(&c.Controller, "good", builder, "InGood", false)
+				util.FilterByParam(&c.Controller, "game", builder, "InGame", false)
+				
 			},
 		}
 		err := listView.Exec()
