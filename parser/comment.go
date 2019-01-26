@@ -11,3 +11,8 @@ type CreateCommentModel struct {
 func (c *CreateCommentModel) Validate() error {
 	return validate.ValidateData(*c)
 }
+
+type UpdateCommentParser struct {
+	Content string `json:"content" valid:"Required;MinSize(15);MaxSize(500)"`
+	Rating  int64  `json:"rating"`
+}

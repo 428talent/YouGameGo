@@ -26,7 +26,6 @@ func (c *Controller) GetInventoryList() {
 
 				util.FilterByParam(&c.Controller, "good", builder, "InGood", false)
 				util.FilterByParam(&c.Controller, "game", builder, "InGame", false)
-				
 			},
 		}
 		err := listView.Exec()

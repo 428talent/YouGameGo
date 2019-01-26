@@ -61,7 +61,20 @@ func (c *ApiCommentController) CreateComment() {
 		}
 	})
 }
-
+func (c *ApiCommentController) Update() {
+	c.WithErrorContext(func() {
+		updateView := api.UpdateView{
+			Controller:    &c.ApiController,
+			Parser:        &parser.UpdateCommentParser{},
+			Model:         &models.Comment{},
+			ModelTemplate: serializer.NewCommentTemplate(serializer.DefaultCommentTemplateType),
+		}
+		err := updateView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
 func (c *ApiCommentController) GetCommentSummary() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
