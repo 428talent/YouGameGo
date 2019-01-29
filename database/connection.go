@@ -16,7 +16,9 @@ func init() {
 	}
 	mysqlUsername := appConfig.DefaultString("mysql_username", "root")
 	mysqlPassword := appConfig.DefaultString("mysql_password", "root")
-	connectString := fmt.Sprintf("%s:%s@/you_game?charset=utf8", mysqlUsername, mysqlPassword)
+	mysqlAddress := appConfig.DefaultString("mysql_address", "0.0.0.0")
+	mysqlPort := appConfig.DefaultString("mysql_port", "3306")
+	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/you_game?charset=utf8", mysqlUsername, mysqlPassword, mysqlAddress, mysqlPort)
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", connectString)
 	orm.RegisterModel(
