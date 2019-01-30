@@ -7,6 +7,7 @@ import (
 	"yougame.com/yougame-server/parser"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type ApiCartController struct {
@@ -26,6 +27,7 @@ func (c ApiCartController) GetCartList() {
 				cartQueryBuilder := builder.(*service.CartQueryBuilder)
 				cartQueryBuilder.InUser(c.User.Id)
 				cartQueryBuilder.WithEnable("visit")
+				util.FilterByParam(&c.Controller, "good", builder, "WithGood", false)
 			},
 		}
 		err := listView.Exec()

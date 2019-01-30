@@ -6,11 +6,9 @@ import (
 )
 
 type CartQueryBuilder struct {
-	pageOption *PageOption
-	ids        []interface{}
+	ResourceQueryBuilder
 	userIds    []interface{}
 	goodIds    []interface{}
-	enable     string
 }
 
 func (b *CartQueryBuilder) ApiQuery() (*int64, interface{}, error) {
@@ -18,24 +16,13 @@ func (b *CartQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return &count, result, err
 }
 
-func (b *CartQueryBuilder) InId(id ...interface{}) {
-	b.ids = append(b.ids, id...)
-}
-func (b *CartQueryBuilder) WithEnable(visibility string) {
-	b.enable = visibility
-}
 func (b *CartQueryBuilder) InUser(id ...interface{}) {
 	b.userIds = append(b.userIds, id...)
 }
 func (b *CartQueryBuilder) WithGood(id ...interface{}) {
 	b.goodIds = append(b.goodIds, id...)
 }
-func (b *CartQueryBuilder) SetPage(page int64, pageSize int64) {
-	b.pageOption = &PageOption{
-		Page:     page,
-		PageSize: pageSize,
-	}
-}
+
 
 func (b *CartQueryBuilder) Query() (int64, []*models.CartItem, error) {
 	cond := orm.NewCondition()
