@@ -76,36 +76,38 @@ func (c *GameController) CreateGame() {
 }
 
 func (c *GameController) UploadGameBand() {
-	gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-	_, err = security.ParseAuthHeader(c.Controller)
-	if err != nil {
-		panic(service.NoAuthError)
-	}
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		_, err = security.ParseAuthHeader(c.Controller)
+		if err != nil {
+			panic(service.NoAuthError)
+		}
 
-	game := models.Game{Id: gameId}
-	err = game.QueryById()
-	if err != nil {
-		beego.Error(err)
-	}
-	f, h, err := c.GetFile("image")
-	if err != nil {
-		beego.Error(err)
-	}
-	defer f.Close()
+		f, h, err := c.GetFile("image")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
 
-	path := "static/upload/img/" + util.EncodeFileName(h.Filename)
-	err = c.SaveToFile("image", path)
-	if err != nil {
-		beego.Error(err)
-	}
-	image, err := game.SaveGameBangImage(path)
-	imageTemplate := serializer.ImageTemplate{}
-	imageTemplate.Serialize(image, map[string]interface{}{})
-	c.Data["json"] = imageTemplate
-	c.ServeJSON()
+		path := "static/upload/img/" + util.EncodeFileName(h.Filename)
+		err = c.SaveToFile("image", path)
+		if err != nil {
+			panic(err)
+		}
+		imageType := c.GetString("type", "desktop")
+		image, err := service.SaveGameBangImage(int64(gameId), path, imageType)
+		if err != nil {
+			panic(err)
+		}
+		imageTemplate := serializer.ImageTemplate{}
+		imageTemplate.Serialize(image, map[string]interface{}{})
+		c.Data["json"] = imageTemplate
+		c.ServeJSON()
+	})
+
 }
 
 func (c *GameController) UploadGamePreviewImage() {
@@ -134,7 +136,6 @@ func (c *GameController) UploadGamePreviewImage() {
 		panic(err)
 	}
 	defer f.Close()
-
 	path := "static/upload/img/" + util.EncodeFileName(h.Filename)
 	err = c.SaveToFile("image", path)
 	if err != nil {
@@ -461,7 +462,8 @@ func (c *GameController) GetGameBand() {
 		if err != nil {
 			panic(err)
 		}
-		image, err := service.GetGameBand(gameId)
+		imageType := c.GetString("type", "desktop")
+		image, err := service.GetGameBand(gameId, imageType)
 		if err != nil {
 			panic(err)
 		}
@@ -577,7 +579,7 @@ func (c *GameController) GetGameList() {
 				if name := c.GetString("name"); len(name) > 0 {
 					gameQueryBuilder.SearchWithName(name)
 				}
-
+				util.FilterByParam(&c.Controller, "id", gameQueryBuilder, "InId", false)
 				util.FilterByParam(&c.Controller, "collection", gameQueryBuilder, "InGameCollection", false)
 
 				priceStartParam := c.GetString("priceStart", "")

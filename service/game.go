@@ -73,14 +73,19 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	})
 }
 
-func GetGameBand(gameId int) (*models.Image, error) {
+func GetGameBand(gameId int, imageType string) (*models.Image, error) {
 	game := models.Game{Id: gameId}
 	err := game.QueryById()
 	if err != nil {
 		return nil, err
 	}
 	imageQueryBuilder := ImageQueryBuilder{}
-	imageQueryBuilder.WithName(fmt.Sprint("Band:", game.Id))
+	if imageType == "android" {
+		imageQueryBuilder.WithName(fmt.Sprint("Band:", game.Id, ":android"))
+	} else {
+		imageQueryBuilder.WithName(fmt.Sprint("Band:", game.Id))
+	}
+
 	count, imageList, err := imageQueryBuilder.Query()
 	if err != nil {
 		panic(err)

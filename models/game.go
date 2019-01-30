@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
-	"os"
 	"strconv"
 	"time"
 )
@@ -57,41 +56,6 @@ func (g *Game) QueryById() error {
 
 }
 
-func (g *Game) SaveGameBangImage(path string) (*Image, error) {
-	o := orm.NewOrm()
-
-	if g.Band == nil {
-		image := Image{
-			Path: path,
-			Type: "Band",
-			Name: fmt.Sprintf("band:%d", g.Id),
-		}
-		_, err := o.Insert(&image)
-		if err != nil {
-			return nil, err
-		}
-		g.Band = &image
-		_, err = o.Update(g, "Band")
-		if err != nil {
-			return nil, err
-		}
-		return nil, err
-	}
-	err := o.Read(g.Band)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := os.Stat(g.Band.Path); os.IsExist(err) {
-		err = os.Remove(g.Band.Path)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	g.Band.Path = path
-	_, err = o.Update(g.Band)
-	return g.Band, err
-}
 
 func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game, error) {
 	o := orm.NewOrm()

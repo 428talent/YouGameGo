@@ -11,3 +11,4 @@ func (t *ImageTemplate) Serialize(model interface{}, context map[string]interfac
 	SerializeModelData(model, t)
 	t.Link = []*ApiLink{}
 }
+
