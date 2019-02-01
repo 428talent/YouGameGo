@@ -20,6 +20,7 @@ require (
 	github.com/sirupsen/logrus v1.3.0
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 // indirect
+	github.com/thoas/go-funk v0.0.0-20181020164546-fbae87fb5b5c // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 	gopkg.in/russross/blackfriday.v2 v2.0.0+incompatible // indirect
