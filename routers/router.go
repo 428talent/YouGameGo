@@ -110,6 +110,7 @@ func init() {
 		beego.NSNamespace("/order",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/goods", &order.ApiOrderController{}, "get:GetOrderGoodsWithOrder"),
+				beego.NSRouter("/", &order.ApiOrderController{}, "get:GetOrder"),
 				beego.NSRouter("/pay", &order.ApiOrderController{}, "post:PayOrder"),
 			),
 		),

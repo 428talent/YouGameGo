@@ -9,6 +9,7 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type ApiOrderController struct {
@@ -69,9 +70,25 @@ func (c *ApiOrderController) GetOrderList() {
 				for _, state := range c.GetStrings("state") {
 					orderQueryBuilder.SetState(state)
 				}
+				util.FilterByParam(&c.Controller, "id", builder, "InId", false)
 			},
 		}
 		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+
+func (c *ApiOrderController) GetOrder() () {
+	c.WithErrorContext(func() {
+		objectView := api.ObjectView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.OrderQueryBuilder{},
+			ModelTemplate: serializer.NewOrderTemplate(serializer.DefaultOrderTemplateType),
+		}
+
+		err := objectView.Exec()
 		if err != nil {
 			panic(err)
 		}
