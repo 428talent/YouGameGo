@@ -201,7 +201,6 @@ func (c *ApiOrderController) PayOrder() {
 	orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if err != nil {
 		panic(err)
-
 	}
 	order := models.Order{Id: orderId}
 	if err = order.QueryById(); err != nil {

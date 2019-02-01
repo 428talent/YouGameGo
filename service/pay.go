@@ -9,6 +9,7 @@ import (
 var (
 	NotSufficientFundsError = errors.New("NotSufficientFunds")
 	WrongOrderStateError    = errors.New("WrongOrderStateError")
+	AlreadyInInventoryError = errors.New("already in inventory")
 )
 
 func PayOrder(order models.Order) error {
@@ -26,14 +27,33 @@ func PayOrder(order models.Order) error {
 		if err != nil {
 			return err
 		}
+		// check order state
 		if order.State != "Created" {
 			return WrongOrderStateError
 		}
-		if err = order.ReadOrderGoods(); err != nil {
+
+		orderGoodQueryBuilder := OrderGoodQueryBuilder{}
+		orderGoodQueryBuilder.WishOrderId(order.Id)
+		_, orderGoodList, err := orderGoodQueryBuilder.Query()
+		if err != nil {
 			return err
 		}
+		// check inventory
+		inventQueryBuilder := InventoryQueryBuilder{}
+		for _, orderGood := range orderGoodList {
+			inventQueryBuilder.InGood(orderGood.Good.Id)
+		}
+		inventoryCount, _, err := inventQueryBuilder.Query()
+		if err != nil {
+			return err
+		}
+		if *inventoryCount != 0 {
+			return AlreadyInInventoryError
+		}
+
+		// check sufficient
 		totalPrice := 0.0
-		for _, orderGood := range order.Goods {
+		for _, orderGood := range orderGoodList {
 			totalPrice += orderGood.Price
 		}
 		if err = user.ReadWallet(); err != nil {
