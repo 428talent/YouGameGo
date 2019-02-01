@@ -1,7 +1,6 @@
 package order
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
@@ -189,7 +188,7 @@ func (c *ApiOrderController) PayOrder() {
 	}
 	order := models.Order{Id: orderId}
 	if err = order.QueryById(); err != nil {
-		beego.Error(err)
+		panic(err)
 	}
 	err = service.PayOrder(order)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type ApiWishListController struct {
@@ -28,14 +29,7 @@ func (c *ApiWishListController) GetWishList() {
 				wishlistItemQueryBuilder := builder.(*service.WishListQueryBuilder)
 				wishlistItemQueryBuilder.BelongToUser(c.User.Id)
 				wishlistItemQueryBuilder.WithEnable("visit")
-				gameParamList := c.GetStrings("game")
-				for _, gameParam := range gameParamList {
-					gameId, err := strconv.Atoi(gameParam)
-					if err != nil {
-						panic(err)
-					}
-					wishlistItemQueryBuilder.WithGame(gameId)
-				}
+				util.FilterByParam(&c.Controller, "game", builder, "WithGame", false)
 			},
 		}
 		err := listView.Exec()
