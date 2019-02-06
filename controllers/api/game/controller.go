@@ -18,11 +18,11 @@ import (
 	"yougame.com/yougame-server/util"
 )
 
-type GameController struct {
+type Controller struct {
 	api.ApiController
 }
 
-func (c *GameController) CreateGame() {
+func (c *Controller) CreateGame() {
 	var err error
 	defer api.CheckError(func(e error) {
 		logrus.Error(e)
@@ -75,7 +75,25 @@ func (c *GameController) CreateGame() {
 
 }
 
-func (c *GameController) UploadGameBand() {
+func (c *Controller) GetGameBand() {
+	c.WithErrorContext(func() {
+		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		imageType := c.GetString("type", "desktop")
+		image, err := service.GetGameBand(gameId, imageType)
+		if err != nil {
+			panic(err)
+		}
+		template := serializer.ImageTemplate{}
+		template.Serialize(image, map[string]interface{}{})
+		c.Data["json"] = template
+		c.ServeJSON()
+	})
+}
+
+func (c *Controller) UploadGameBand() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -109,8 +127,7 @@ func (c *GameController) UploadGameBand() {
 	})
 
 }
-
-func (c *GameController) UploadGamePreviewImage() {
+func (c *Controller) UploadGamePreviewImage() {
 	var err error
 	defer api.CheckError(func(e error) {
 		logrus.Error(err)
@@ -145,7 +162,8 @@ func (c *GameController) UploadGamePreviewImage() {
 	c.Data["json"] = game
 	c.ServeJSON()
 }
-func (c *GameController) GetGood() {
+
+func (c *Controller) GetGood() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -167,7 +185,7 @@ func (c *GameController) GetGood() {
 	})
 }
 
-func (c *GameController) AddTags() {
+func (c *Controller) AddTags() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -197,8 +215,7 @@ func (c *GameController) AddTags() {
 	})
 
 }
-
-func (c *GameController) DeleteTags() {
+func (c *Controller) DeleteTags() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -228,7 +245,8 @@ func (c *GameController) DeleteTags() {
 	})
 
 }
-func (c *GameController) AddGood() {
+
+func (c *Controller) AddGood() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -268,7 +286,7 @@ func (c *GameController) AddGood() {
 
 }
 
-func (c *GameController) PutGame() {
+func (c *Controller) PutGame() {
 	c.WithErrorContext(func() {
 		claims, err := c.GetAuth()
 		if err != nil {
@@ -325,8 +343,7 @@ func (c *GameController) PutGame() {
 		c.ServeJSON()
 	})
 }
-
-func (c *GameController) DeleteGame() {
+func (c *Controller) DeleteGame() {
 	c.WithErrorContext(func() {
 		deleteView := api.DeleteView{
 			Controller: &c.ApiController,
@@ -341,7 +358,7 @@ func (c *GameController) DeleteGame() {
 		}
 	})
 }
-func (c *GameController) PatchGame() {
+func (c *Controller) PatchGame() {
 	c.WithErrorContext(func() {
 		claims, err := c.GetAuth()
 		if err != nil {
@@ -399,7 +416,7 @@ func (c *GameController) PatchGame() {
 		c.ServeJSON()
 	})
 }
-func (c *GameController) UpdateGame() {
+func (c *Controller) UpdateGame() {
 	c.WithErrorContext(func() {
 		updateView := api.UpdateView{
 			Controller: &c.ApiController,
@@ -416,7 +433,8 @@ func (c *GameController) UpdateGame() {
 		}
 	})
 }
-func (c *GameController) GetGame() {
+
+func (c *Controller) GetGame() {
 	c.WithErrorContext(func() {
 
 		claims, err := c.GetAuth()
@@ -456,25 +474,7 @@ func (c *GameController) GetGame() {
 	})
 }
 
-func (c *GameController) GetGameBand() {
-	c.WithErrorContext(func() {
-		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-		if err != nil {
-			panic(err)
-		}
-		imageType := c.GetString("type", "desktop")
-		image, err := service.GetGameBand(gameId, imageType)
-		if err != nil {
-			panic(err)
-		}
-		template := serializer.ImageTemplate{}
-		template.Serialize(image, map[string]interface{}{})
-		c.Data["json"] = template
-		c.ServeJSON()
-	})
-}
-
-func (c *GameController) GetGamePreview() {
+func (c *Controller) GetGamePreview() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{
 			Controller:    &c.ApiController,
@@ -507,7 +507,7 @@ func (c *GameController) GetGamePreview() {
 	})
 }
 
-func (c *GameController) GetTags() {
+func (c *Controller) GetTags() {
 	c.WithErrorContext(func() {
 		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
 		if err != nil {
@@ -526,7 +526,7 @@ func (c *GameController) GetTags() {
 	})
 }
 
-func (c *GameController) GetGameList() {
+func (c *Controller) GetGameList() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{
 			Controller:    &c.ApiController,

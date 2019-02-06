@@ -4,11 +4,15 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
+	"time"
 	_ "yougame.com/yougame-server/database"
+	"yougame.com/yougame-server/log"
+	_ "yougame.com/yougame-server/log"
 	_ "yougame.com/yougame-server/mail"
 	_ "yougame.com/yougame-server/models"
 	_ "yougame.com/yougame-server/routers"
 	_ "yougame.com/yougame-server/security"
+	_ "yougame.com/yougame-server/transaction"
 )
 
 func main() {
@@ -21,8 +25,11 @@ func main() {
 		AllowCredentials: true,
 	}))
 	orm.Debug = true
-
-
+	log.LogClient.Channel <- &log.LogPayload{
+		Message: "repository starting",
+		Level:   "info",
+		Time:    time.Now(),
+	}
 	beego.Run()
 
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"yougame.com/yougame-server/mail"
 	"yougame.com/yougame-server/models"
+	TransactionSDK "yougame.com/yougame-server/transaction"
 )
 
 var (
@@ -101,6 +102,24 @@ func PayOrder(order models.Order) error {
 			return nil, nil, nil, nil, err
 		}
 
+		// create transaction
+		err = TransactionSDK.TransactionServiceClient.NewTransaction(&TransactionSDK.TransactionPayload{
+			Debit:           totalPrice,
+			DebitType:       "user_wallet",
+			Credit:          totalPrice,
+			CreditType:      "fund",
+			TransactionType: "pay_order",
+			TransactionTime: transaction.Created,
+			Extra: map[string]interface{}{
+				"orderId":       order.Id,
+				"userId":        user.Id,
+				"transactionId": transaction.Id,
+			},
+		})
+		if err != nil {
+			return nil, nil, nil, nil, err
+		}
+
 		return user, &transaction, &order, orderGoodList, nil
 	}
 
@@ -108,6 +127,7 @@ func PayOrder(order models.Order) error {
 	if err != nil {
 		return err
 	}
+
 	err = o.Commit()
 	if err != nil {
 		return err

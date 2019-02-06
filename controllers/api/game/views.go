@@ -10,7 +10,7 @@ import (
 )
 
 type AdminGetGameView struct {
-	Controller *GameController
+	Controller *Controller
 }
 
 func (v *AdminGetGameView) Render() interface{} {
@@ -47,7 +47,7 @@ func (v *AdminGetGameView) Render() interface{} {
 }
 
 type DefaultGetGameView struct {
-	Controller *GameController
+	Controller *Controller
 }
 
 func (v *DefaultGetGameView) Render() interface{} {
