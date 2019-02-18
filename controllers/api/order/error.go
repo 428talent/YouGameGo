@@ -3,7 +3,16 @@ package order
 import (
 	"net/http"
 	ApiError "yougame.com/yougame-server/application"
+	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/service"
 )
+
+func init() {
+	api.RegisterErrors(map[error]*ApiError.APIErrorResponse{
+		service.WrongOrderStateError:    WrongOrderState,
+		service.NotSufficientFundsError: NotSufficientFunds,
+	})
+}
 
 var (
 	NotSufficientFunds = ApiError.NewApiError(ApiError.APIError{

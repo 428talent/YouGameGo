@@ -12,7 +12,7 @@ var TransactionServiceClient *TransactionClient
 func init() {
 	appConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
 	if err != nil {
-		log.LogClient.Channel <- &log.LogPayload{
+		log.LogClient.Channel <- &log.Payload{
 			Message: err.Error(),
 			Level:   "error",
 			Time:    time.Now(),
@@ -23,14 +23,14 @@ func init() {
 	err = client.Connect(ClientConfig{Address: mqAddress})
 	if err != nil {
 		beego.Error(err)
-		log.LogClient.Channel <- &log.LogPayload{
+		log.LogClient.Channel <- &log.Payload{
 			Message: err.Error(),
 			Level:   "error",
 			Time:    time.Now(),
 		}
 		return
 	}
-	log.LogClient.Channel <- &log.LogPayload{
+	log.LogClient.Channel <- &log.Payload{
 		Message: "success connect to transaction service",
 		Level:   "info",
 		Time:    time.Now(),

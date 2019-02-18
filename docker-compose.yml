@@ -1,9 +1,0 @@
-version: '3'
-services:
-  yougame-api:
-    build: .
-    ports:
-      - 8004:8888
-      - 3306
-    volumes:
-      - .:/app

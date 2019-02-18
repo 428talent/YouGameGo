@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
 	"time"
+	_ "yougame.com/yougame-server/controllers/api"
 	_ "yougame.com/yougame-server/database"
 	"yougame.com/yougame-server/log"
 	_ "yougame.com/yougame-server/log"
@@ -25,7 +26,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 	orm.Debug = true
-	log.LogClient.Channel <- &log.LogPayload{
+	log.LogClient.Channel <- &log.Payload{
 		Message: "repository starting",
 		Level:   "info",
 		Time:    time.Now(),

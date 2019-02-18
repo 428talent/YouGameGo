@@ -1,7 +1,6 @@
 package order
 
 import (
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
@@ -11,6 +10,7 @@ import (
 	"yougame.com/yougame-server/service"
 	"yougame.com/yougame-server/util"
 )
+
 
 type ApiOrderController struct {
 	api.ApiController
@@ -157,15 +157,8 @@ func (c *ApiOrderController) GetOrderGoods() {
 			QueryBuilder:  &service.OrderGoodQueryBuilder{},
 			ModelTemplate: serializer.NewOrderGoodTemplate(serializer.DefaultOrderGoodTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
-				orderGoodQueryBuilder := builder.(*service.OrderGoodQueryBuilder)
-				orderIdParams := c.GetStrings("orderId")
-				for _, orderIdParam := range orderIdParams {
-					orderId, err := strconv.Atoi(orderIdParam)
-					if err != nil {
-						panic(err)
-					}
-					orderGoodQueryBuilder.WishOrderId(orderId)
-				}
+				util.FilterByParam(&c.Controller,"orderId",builder,"WithOrderId",false)
+
 			},
 		}
 		err := listView.Exec()
@@ -175,44 +168,47 @@ func (c *ApiOrderController) GetOrderGoods() {
 	})
 }
 func (c *ApiOrderController) PayOrder() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(e)
-		switch e {
-		case service.NotSufficientFundsError:
-			NotSufficientFunds.ServerError(c.Controller)
-			return
-		case service.WrongOrderStateError:
-			WrongOrderState.ServerError(c.Controller)
-			return
-		default:
-			api.HandleApiError(c.Controller, e)
-			return
+	c.WithErrorContext(func() {
+		claims, err := security.ParseAuthHeader(c.Controller)
+		if err != nil {
+			panic(err)
+
 		}
+		if claims == nil {
+			panic(service.NoAuthError)
+		}
+		orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		order := models.Order{Id: orderId}
+		if err = order.QueryById(); err != nil {
+			panic(err)
+		}
+		err = service.PayOrder(order)
+		if err != nil {
+			panic(err)
+		}
+
+		c.Data["json"] = &serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.ServeJSON()
 	})
-	claims, err := security.ParseAuthHeader(c.Controller)
-	if err != nil {
-		panic(err)
+	//var err error
+	//defer api.CheckError(func(e error) {
+	//	logrus.Error(e)
+	//	switch e {
+	//	case service.NotSufficientFundsError:
+	//		NotSufficientFunds.ServerError(c.Controller)
+	//		return
+	//	case service.WrongOrderStateError:
+	//		WrongOrderState.ServerError(c.Controller)
+	//		return
+	//	default:
+	//		api.HandleApiError(c.Controller, e)
+	//		return
+	//	}
+	//})
 
-	}
-	if claims == nil {
-		panic(service.NoAuthError)
-	}
-	orderId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	if err != nil {
-		panic(err)
-	}
-	order := models.Order{Id: orderId}
-	if err = order.QueryById(); err != nil {
-		panic(err)
-	}
-	err = service.PayOrder(order)
-	if err != nil {
-		panic(err)
-	}
-
-	c.Data["json"] = &serializer.CommonApiResponseBody{
-		Success: true,
-	}
-	c.ServeJSON()
 }

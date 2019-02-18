@@ -11,12 +11,16 @@ type Client struct {
 	application string
 	instance    string
 	address     string
-	Channel     chan *LogPayload
+	Channel     chan *Payload
 }
 
 func NewClient(application string, instance string, address string) *Client {
-	client := &Client{application: application, instance: instance, address: address}
-	client.Channel = make(chan *LogPayload)
+	client := &Client{
+		application: application,
+		instance:    instance,
+		address:     address,
+	}
+	client.Channel = make(chan *Payload)
 	go func() {
 		for true {
 			message := <-client.Channel
@@ -28,7 +32,9 @@ func NewClient(application string, instance string, address string) *Client {
 	}()
 	return client
 }
-func (c *Client) SendLog(payload *LogPayload) error {
+func (c *Client) SendLog(payload *Payload) error {
+	payload.Application = c.application
+	payload.Instance = c.instance
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(*payload)
 	if err != nil {

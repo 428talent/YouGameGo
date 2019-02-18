@@ -1,7 +1,15 @@
 FROM golang:latest
-ENV GOPROXY=https://goproxy.io
-RUN mkdir /app
-ADD . /app
-WORKDIR /app
+COPY docker/start.sh /
+ENV  GOPROXY=https://goproxy.io
+ENV  APPLICATION_MYSQL_HOST='mariadb'
+ENV  APPLICATION_MYSQL_PORT="3306"
+ENV  APPLICATION_MYSQL_USERNAME="root"
+ENV  APPLICATION_MYSQL_PASSWORD=""
+ENV  APPLICATION_REDIS_HOST="redis:6379"
+ENV  APPLICATION_REDIS_PASSWORD=""
+EXPOSE 8888 8888
+RUN mkdir /go/app
+ADD . /go/app
+WORKDIR /go/app
 RUN go build -o main .
-CMD ["/app/main"]
+ENTRYPOINT ["sh","/start.sh"]

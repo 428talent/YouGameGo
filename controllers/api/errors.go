@@ -62,32 +62,35 @@ var (
 	InvalidateError        = errors.New("invalidate request data")
 )
 
+var errorMapping map[error]*ApiError.APIErrorResponse
+
+func init() {
+	errorMapping = map[error]*ApiError.APIErrorResponse{
+		service.NoAuthError:AuthFailedError,
+		ParseJsonDataError:ParseRequestDataError,
+		security.ReadAuthorizationFailed:AuthFailedError,
+		PermissionDeniedError:PermissionNotAllowError,
+		orm.ErrNoRows:ResourceNoFoundError,
+		ResourceNotFoundError:ResourceNoFoundError,
+		DuplicateResourceError:DuplicateResourceApiError,
+		InvalidateError:InvalidateApiError,
+	}
+
+}
+func RegisterError(err error, errorResponse *ApiError.APIErrorResponse) {
+	errorMapping[err] = errorResponse
+}
+func RegisterErrors(mapping map[error]*ApiError.APIErrorResponse) {
+	for err, response := range mapping {
+		errorMapping[err] = response
+	}
+}
+
 func HandleApiError(controller beego.Controller, err error) {
 
-	switch err {
-	case service.NoAuthError:
-		AuthFailedError.ServerError(controller)
-		return
-	case ParseJsonDataError:
-		ParseRequestDataError.ServerError(controller)
-		return
-	case security.ReadAuthorizationFailed:
-		AuthFailedError.ServerError(controller)
-		return
-	case PermissionDeniedError:
-		PermissionNotAllowError.ServerError(controller)
-		return
-	case orm.ErrNoRows:
-		ResourceNoFoundError.ServerError(controller)
-		return
-	case ResourceNotFoundError:
-		ResourceNoFoundError.ServerError(controller)
-		return
-	case DuplicateResourceError:
-		DuplicateResourceApiError.ServerError(controller)
-		return
-	case InvalidateError:
-		InvalidateApiError.ServerError(controller)
+	response := errorMapping[err]
+	if response != nil {
+		response.ServerError(controller)
 		return
 	}
 
@@ -103,6 +106,7 @@ func HandleApiError(controller beego.Controller, err error) {
 		}, http.StatusBadRequest).ServerError(controller)
 		return
 	}
+
 	ServerError.ServerError(controller)
 }
 func CheckError(errorHandle func(error)) {

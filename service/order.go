@@ -65,7 +65,7 @@ func (builder *OrderGoodQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return builder.Query()
 
 }
-func (builder *OrderGoodQueryBuilder) WishOrderId(orderId ...interface{}) {
+func (builder *OrderGoodQueryBuilder) WithOrderId(orderId ...interface{}) {
 	builder.orderIds = append(builder.orderIds, orderId...)
 }
 

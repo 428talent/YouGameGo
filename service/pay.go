@@ -36,7 +36,7 @@ func PayOrder(order models.Order) error {
 		}
 
 		orderGoodQueryBuilder := OrderGoodQueryBuilder{}
-		orderGoodQueryBuilder.WishOrderId(order.Id)
+		orderGoodQueryBuilder.WithOrderId(order.Id)
 		_, orderGoodList, err := orderGoodQueryBuilder.Query()
 		if err != nil {
 			return nil, nil, nil, nil, err

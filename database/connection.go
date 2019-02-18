@@ -6,18 +6,32 @@ import (
 	"github.com/astaxie/beego/config"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"os"
 	"yougame.com/yougame-server/models"
 )
 
 func init() {
-	appConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
+	appLocalConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
 	if err != nil {
 		beego.Error(err)
 	}
-	mysqlUsername := appConfig.DefaultString("mysql_username", "root")
-	mysqlPassword := appConfig.DefaultString("mysql_password", "root")
-	mysqlAddress := appConfig.DefaultString("mysql_address", "0.0.0.0")
-	mysqlPort := appConfig.DefaultString("mysql_port", "3306")
+
+	mysqlAddress := os.Getenv("APPLICATION_MYSQL_HOST")
+	if len(mysqlAddress) == 0{
+		mysqlAddress = appLocalConfig.DefaultString("mysql_address", "0.0.0.0")
+	}
+	mysqlUsername := os.Getenv("APPLICATION_MYSQL_USERNAME")
+	if len(mysqlUsername) == 0{
+		mysqlUsername = appLocalConfig.DefaultString("mysql_username", "root")
+	}
+	mysqlPassword := os.Getenv("APPLICATION_MYSQL_PASSWORD")
+	if len(mysqlPassword) == 0{
+		mysqlPassword = appLocalConfig.DefaultString("mysql_password", "root")
+	}
+	mysqlPort := os.Getenv("APPLICATION_MYSQL_PORT")
+	if len(mysqlPort) == 0{
+		mysqlPort = appLocalConfig.DefaultString("mysql_port", "3306")
+	}
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/you_game?charset=utf8", mysqlUsername, mysqlPassword, mysqlAddress, mysqlPort)
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", connectString)
