@@ -21,16 +21,6 @@ type ApiUserController struct {
 	api.ApiController
 }
 
-func RegisterUserApiRouter() {
-	beego.Router("/api/users", &ApiUserController{}, "post:CreateUser")
-	beego.Router("/api/user/auth", &ApiUserController{}, "post:UserLogin")
-}
-
-type CreateUserResponsePayload struct {
-	Username string `json:"username"`
-	Id       int64  `json:"id"`
-}
-
 func (c *ApiUserController) CreateUser() {
 	c.WithErrorContext(func() {
 		var requestBody parser.CreateUserRequestStruct

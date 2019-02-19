@@ -1,0 +1,15 @@
+version: '2'
+services:
+  yougame-repository:
+    build:
+      context: .
+    ports:
+      - "8888:8888"
+    networks:
+      - docker-elk_elk
+      - yougame-server_application
+networks:
+  docker-elk_elk:
+    external: true
+  yougame-server_application:
+    driver: bridge

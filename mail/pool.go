@@ -6,6 +6,7 @@ import (
 	"github.com/jordan-wright/email"
 	"net/smtp"
 	"time"
+	"yougame.com/yougame-server/util"
 )
 
 var mailClient *email.Pool
@@ -16,10 +17,15 @@ func init() {
 		beego.Error(err)
 	}
 
+	username := util.GetConfigItem("APPLICATION_MAIL_USERNAME","mail.username",appConfig,"")
+	password := util.GetConfigItem("APPLICATION_MAIL_PASSWORD","mail.password",appConfig,"")
+	host := util.GetConfigItem("APPLICATION_MAIL_HOST","mail.host",appConfig,"")
+	address := util.GetConfigItem("APPLICATION_MAIL_ADDRESS","mail.address",appConfig,"")
+
 	p, err := email.NewPool(
-		appConfig.String("mail.address"),
+		address,
 		4,
-		smtp.PlainAuth("", appConfig.String("mail.username"), appConfig.String("mail.password"), appConfig.String("mail.host")),
+		smtp.PlainAuth("", username, password, host),
 	)
 	if err != nil {
 		beego.Error(err)

@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/config"
 	"time"
 	"yougame.com/yougame-server/log"
+	"yougame.com/yougame-server/util"
 )
 
 var TransactionServiceClient *TransactionClient
@@ -18,7 +19,7 @@ func init() {
 			Time:    time.Now(),
 		}
 	}
-	mqAddress := appConfig.DefaultString("rbq.address", "amqp://localhost:5672/")
+	mqAddress := util.GetConfigItem("APPLICATION_MQ_URL","rbq.address",appConfig,"amqp://localhost:5672/")
 	client := TransactionClient{}
 	err = client.Connect(ClientConfig{Address: mqAddress})
 	if err != nil {

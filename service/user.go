@@ -13,6 +13,7 @@ import (
 
 var (
 	UserExistError       = errors.New("user already exist")
+	EmailAlreadyExist    = errors.New("email already exist")
 	LoginUserFailed      = errors.New("user login failed")
 	VerifyCodeInvalidate = errors.New("verify code invalidate")
 )
@@ -20,7 +21,10 @@ var (
 func CreateUserAccount(username string, password string, email string) (*models.User, error) {
 	o := orm.NewOrm()
 	if o.QueryTable("auth_user").Filter("UserName", username).Exist() {
-		return nil, errors.New("user exist !")
+		return nil, UserExistError
+	}
+	if o.QueryTable("profile").Filter("email", email).Exist() {
+		return nil, EmailAlreadyExist
 	}
 	encryptPassword, err := util.EncryptSha1WithSalt(password)
 	if err != nil {
@@ -53,6 +57,11 @@ func CreateUserAccount(username string, password string, email string) (*models.
 			},
 		}
 		_, err = o.Insert(user)
+		if err != nil {
+			return nil, err
+		}
+		wallet := &models.Wallet{User: user, Balance: 0}
+		_, err = o.Insert(wallet)
 		if err != nil {
 			return nil, err
 		}
