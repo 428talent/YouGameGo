@@ -3,8 +3,8 @@ package security
 import "yougame.com/yougame-server/models"
 
 const (
-	UserGroupAdmin = "Admin"
-	Anonymous      = "Anonymous"
+	UserGroupAdmin = "admin"
+	Anonymous      = "anonymous"
 )
 
 func CheckUserGroup(user *models.User, expect string) bool {

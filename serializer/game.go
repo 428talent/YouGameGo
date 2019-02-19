@@ -89,7 +89,6 @@ func (t *GameTemplate) Serialize(model interface{}, context map[string]interface
 
 type AdminGameTemplate struct {
 	Id          int        `json:"id"  source_type:"int"`
-	Band        string     `json:"band" source:"Band.Path" source_type:"string"`
 	Name        string     `json:"name" source_type:"string"`
 	ReleaseTime string     `json:"release_time" source:"ReleaseTime" source_type:"string" converter:"date"`
 	Publisher   string     `json:"publisher" source_type:"string"`
