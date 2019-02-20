@@ -5,23 +5,6 @@ import (
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/security"
 )
-
-func GetGoodById(goodId int) (*models.Good, error) {
-	good := models.Good{Id: goodId}
-	err := good.QueryById()
-	return &good, err
-
-}
-
-func UpdateGood(good *models.Good, fields ...string) error {
-	o := orm.NewOrm()
-	err := good.Update(int64(good.Id), o, fields...)
-	if err != nil {
-		return err
-	}
-	err = good.QueryById()
-	return err
-}
 func CreateGoodComment(user models.User, content string, goodId int, evaluation string) (*models.Good, *models.Comment, error) {
 	err := security.CheckUserPermission(user, "CreateComment")
 	if err != nil {
@@ -89,12 +72,17 @@ func (q *GoodQueryBuilder) WithGameCommentGood(gameId ...interface{}) {
 	q.gameCommentIds = append(q.gameCommentIds, gameId...)
 }
 
-func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
+func (q *GoodQueryBuilder) buildCondition() *orm.Condition {
 	condition := q.build()
 
 	if len(q.gameIds) > 0 {
 		condition = condition.And("game_id__in", q.gameIds...)
 	}
+	return condition
+}
+
+func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
+	condition := q.buildCondition()
 	if len(q.gameCommentIds) > 0 {
 		commentQuery := CommentQueryBuilder{}
 		commentQuery.SetGame(q.gameCommentIds...)
@@ -116,3 +104,11 @@ func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 		return setter
 	})
 }
+
+func (q *GoodQueryBuilder) Delete() error {
+	condition := q.buildCondition()
+	return models.DeleteGoodMultiple(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.SetCond(condition)
+	})
+}
+

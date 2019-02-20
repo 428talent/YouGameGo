@@ -29,6 +29,10 @@ type ApiQueryBuilder interface {
 	SetPage(page int64, pageSize int64)
 }
 
+type ApiOperationBuilder interface {
+	Delete () error
+}
+
 func DeleteData(model models.DataModel) error {
 	o := orm.NewOrm()
 	return model.Delete(o)

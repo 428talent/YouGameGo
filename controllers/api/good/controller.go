@@ -1,6 +1,7 @@
 package good
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego"
 	"strconv"
 	"yougame.com/yougame-server/controllers/api"
@@ -177,8 +178,40 @@ func (c *Controller) DeleteBulkGood() {
 			Permissions: []api.PermissionInterface{
 				&DeleteGoodPermission{},
 			},
+			Builder: &service.GoodQueryBuilder{},
+			SetFilter: func(v *api.DeleteMultipleView) {
+				builder := v.Builder.(*service.GoodQueryBuilder)
+				type deleteDatasRequestBody struct {
+					Ids []interface{} `json:"ids"`
+				}
+				requestBody := &deleteDatasRequestBody{}
+
+				err := json.Unmarshal(v.Controller.Ctx.Input.RequestBody, requestBody)
+				if err != nil {
+					panic(api.ParseJsonDataError)
+				}
+				builder.InId(requestBody.Ids...)
+			},
 		}
 		err := deleteView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+
+func (c *Controller) UpdateBulkGood() {
+	c.WithErrorContext(func() {
+		updateView := api.UpdateMultipleView{
+			Controller: &c.ApiController,
+			Parser:     &parser.UpdateGoodRequestBody{},
+			Model:      &models.Good{},
+			Permissions: []api.PermissionInterface{
+				&UpdateGoodPermission{},
+			},
+
+		}
+		err := updateView.Exec()
 		if err != nil {
 			panic(err)
 		}

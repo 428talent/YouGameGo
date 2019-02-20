@@ -7,15 +7,22 @@ import (
 
 type Good struct {
 	Id             int
-	Name           string
-	Price          float64
-	Enable         bool
+	Name           string           `mapstructure:"name"`
+	Price          float64          `mapstructure:"name"`
+	Enable         bool             `mapstructure:"enable"`
 	Users          []*User          `orm:"reverse(many)"`
 	InventoryItems []*InventoryItem `orm:"reverse(many)"`
 	Comments       []*Comment       `orm:"reverse(many)"`
 	Game           *Game            `orm:"rel(fk)"`
 	Created        time.Time        `orm:"auto_now_add;type(datetime)"`
 	Updated        time.Time        `orm:"auto_now;type(datetime)"`
+}
+
+func (g *Good) UpdateMultiple(o orm.Ormer, ids []interface{}, values map[string]interface{}) error {
+	condition := orm.NewCondition()
+	condition = condition.And("id__in", ids...)
+	_, err := o.QueryTable("good").SetCond(condition).Update(values)
+	return err
 }
 
 func (g *Good) DeleteMultiple(o orm.Ormer, ids []interface{}) error {
@@ -73,6 +80,15 @@ func GetGoodList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Good,
 	}
 	count, err := setter.Count()
 	return &count, goodList, nil
+}
+
+func DeleteGoodMultiple(filter func(o orm.QuerySeter) orm.QuerySeter) error {
+	o := orm.NewOrm()
+	setter := filter(o.QueryTable("good"))
+	_, err := setter.Update(orm.Params{
+		"enable": false,
+	})
+	return err
 }
 
 //func (g *Good) Update(o orm.Ormer, fields ...string) error {

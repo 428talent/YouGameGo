@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/astaxie/beego/orm"
 	"github.com/jinzhu/copier"
+	"github.com/mitchellh/mapstructure"
 	"reflect"
 	"strconv"
 	"yougame.com/yougame-server/models"
@@ -171,7 +173,9 @@ func (v *DeleteView) Exec() error {
 type DeleteMultipleView struct {
 	Controller           *ApiController
 	Init                 func()
+	Builder              service.ApiOperationBuilder
 	Model                models.DataBulkModel
+	SetFilter            func(v *DeleteMultipleView)
 	Permissions          []PermissionInterface
 	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
 }
@@ -195,18 +199,11 @@ func (v *DeleteMultipleView) Exec() error {
 		return PermissionDeniedError
 	}
 
-	type deleteDatasRequestBody struct {
-		Ids []interface{} `json:"ids"`
-	}
-	requestBody := &deleteDatasRequestBody{}
-
-	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody,requestBody)
-	if err != nil {
-		return ParseJsonDataError
+	if v.SetFilter != nil{
+		v.SetFilter(v)
 	}
 
-
-	err = service.DeleteMultiple(v.Model,requestBody.Ids)
+	err = v.Builder.Delete()
 	if err != nil {
 		return err
 	}
@@ -288,6 +285,82 @@ func (v *UpdateView) Exec() error {
 	})
 
 	v.Controller.Data["json"] = v.ModelTemplate
+	v.Controller.ServeJSON()
+	return nil
+}
+
+type UpdateMultipleView struct {
+	Controller           *ApiController
+	Init                 func()
+	Parser               interface{}
+	Model                models.DataModel
+	AllowFields          []string
+	Permissions          []PermissionInterface
+	ModelTemplate        serializer.Template
+	GetTemplate          func() serializer.Template
+	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+}
+
+func (v *UpdateMultipleView) Exec() error {
+	claims, err := v.Controller.GetAuth()
+	if err != nil {
+		return ClaimsNoFoundError
+	}
+	if claims == nil {
+		return ClaimsNoFoundError
+	}
+	permissionContext := map[string]interface{}{
+		"claims": claims,
+	}
+	if v.GetPermissionContext != nil {
+		v.GetPermissionContext(&permissionContext)
+	}
+	err = v.Controller.CheckPermission(v.Permissions, permissionContext)
+	if err != nil {
+		return PermissionDeniedError
+	}
+
+	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody, v.Parser)
+	if err != nil {
+		return ParseJsonDataError
+	}
+
+	type requestBody struct {
+		List []map[string]interface{}
+	}
+
+	updateList := &requestBody{}
+	err = json.Unmarshal([]byte(v.Controller.Ctx.Input.RequestBody), updateList)
+	if err != nil {
+		return ParseJsonDataError
+	}
+	for _, updateItem := range updateList.List {
+		newInstance := reflect.New(reflect.ValueOf(v.Model).Elem().Type()).Interface().(models.DataModel)
+		updateFields := make([]string, 0)
+		for field := range updateItem {
+			updateFields = append(updateFields, field)
+		}
+
+		err = mapstructure.Decode(updateItem,newInstance)
+		if err != nil {
+			return err
+		}
+
+		id := updateItem["id"].(float64)
+
+		err = newInstance.Update(int64(id),orm.NewOrm(),updateFields...)
+		if err != nil {
+			return err
+		}
+
+
+	}
+
+	response := serializer.CommonApiResponseBody{
+		Success:true,
+	}
+
+	v.Controller.Data["json"] = response
 	v.Controller.ServeJSON()
 	return nil
 }

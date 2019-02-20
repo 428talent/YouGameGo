@@ -1,9 +1,9 @@
 package parser
 
 type UpdateGoodRequestBody struct {
-	Name   string  `field:"name"`
-	Price  float64 `field:"price"`
-	Enable bool
+	Name   string  `field:"name" mapstructure:"name"`
+	Price  float64 `field:"price" mapstructure:"price"`
+	Enable bool    `field:"enable" mapstructure:"enable"`
 }
 
 type CreateGoodRequestBody struct {
