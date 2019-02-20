@@ -108,3 +108,7 @@ func (builder *NameOption) WithName(name ...interface{}) {
 	builder.names = append(builder.names, name...)
 }
 
+func DeleteMultiple(deleteModel models.DataBulkModel, ids []interface{}) error {
+	o := orm.NewOrm()
+	return deleteModel.DeleteMultiple(o,ids)
+}

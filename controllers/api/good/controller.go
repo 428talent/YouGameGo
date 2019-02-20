@@ -168,3 +168,19 @@ func (c *Controller) DeleteGood() {
 		}
 	})
 }
+
+func (c *Controller) DeleteBulkGood() {
+	c.WithErrorContext(func() {
+		deleteView := api.DeleteMultipleView{
+			Controller: &c.ApiController,
+			Model:      &models.Good{},
+			Permissions: []api.PermissionInterface{
+				&DeleteGoodPermission{},
+			},
+		}
+		err := deleteView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}

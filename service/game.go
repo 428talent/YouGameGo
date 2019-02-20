@@ -91,7 +91,7 @@ func GetGameBand(gameId int, imageType string) (*models.Image, error) {
 		panic(err)
 	}
 	if *count == 0 {
-		panic(NotFound)
+		return nil,NotFound
 	}
 	return imageList[0], nil
 }

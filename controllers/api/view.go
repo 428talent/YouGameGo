@@ -168,6 +168,53 @@ func (v *DeleteView) Exec() error {
 	return nil
 }
 
+type DeleteMultipleView struct {
+	Controller           *ApiController
+	Init                 func()
+	Model                models.DataBulkModel
+	Permissions          []PermissionInterface
+	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+}
+
+func (v *DeleteMultipleView) Exec() error {
+	claims, err := v.Controller.GetAuth()
+	if err != nil {
+		return ClaimsNoFoundError
+	}
+	if claims == nil {
+		return ClaimsNoFoundError
+	}
+	permissionContext := map[string]interface{}{
+		"claims": claims,
+	}
+	if v.GetPermissionContext != nil {
+		v.GetPermissionContext(&permissionContext)
+	}
+	err = v.Controller.CheckPermission(v.Permissions, permissionContext)
+	if err != nil {
+		return PermissionDeniedError
+	}
+
+	type deleteDatasRequestBody struct {
+		Ids []interface{} `json:"ids"`
+	}
+	requestBody := &deleteDatasRequestBody{}
+
+	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody,requestBody)
+	if err != nil {
+		return ParseJsonDataError
+	}
+
+
+	err = service.DeleteMultiple(v.Model,requestBody.Ids)
+	if err != nil {
+		return err
+	}
+
+	v.Controller.ResponseWithSuccess()
+	return nil
+}
+
 type UpdateView struct {
 	Controller           *ApiController
 	Init                 func()

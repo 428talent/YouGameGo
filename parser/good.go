@@ -11,3 +11,7 @@ type CreateGoodRequestBody struct {
 	Price  float64 `json:"price"`
 	GameId int64   `json:"game_id"`
 }
+
+type DeleteGoodRequestBody struct {
+	Ids []int64 `json:"ids"`
+}

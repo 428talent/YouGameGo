@@ -12,3 +12,7 @@ type DataModel interface {
 	Delete(o orm.Ormer) error
 	Update(id int64, o orm.Ormer, fields ...string) error
 }
+
+type DataBulkModel interface {
+	DeleteMultiple(o orm.Ormer,ids []interface{}) error
+}

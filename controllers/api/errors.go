@@ -74,6 +74,7 @@ func init() {
 		ResourceNotFoundError:ResourceNoFoundError,
 		DuplicateResourceError:DuplicateResourceApiError,
 		InvalidateError:InvalidateApiError,
+		service.NotFound:ResourceNoFoundError,
 	}
 
 }
