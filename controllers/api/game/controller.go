@@ -118,7 +118,7 @@ func (c *Controller) UploadGameBand() {
 		if err != nil {
 			panic(err)
 		}
-		imageTemplate := serializer.ImageTemplate{}
+		imageTemplate := serializer.AdminGameTemplate{}
 		imageTemplate.Serialize(image, map[string]interface{}{})
 		c.Data["json"] = imageTemplate
 		c.ServeJSON()
@@ -156,8 +156,10 @@ func (c *Controller) UploadGamePreviewImage() {
 	if err != nil {
 		panic(err)
 	}
-	err = game.SavePreviewImage(path)
-	c.Data["json"] = game
+	image,err := game.SavePreviewImage(path)
+	template := serializer.ImageAdminTemplate{}
+	template.Serialize(image, map[string]interface{}{})
+	c.Data["json"] = template
 	c.ServeJSON()
 }
 

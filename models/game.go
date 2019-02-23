@@ -75,7 +75,7 @@ func (g *Game) ReadGameBand() (err error) {
 	return err
 }
 
-func (g *Game) SavePreviewImage(path string) error {
+func (g *Game) SavePreviewImage(path string) (*Image,error) {
 	o := orm.NewOrm()
 	image := Image{
 		Type: "Preview",
@@ -84,12 +84,12 @@ func (g *Game) SavePreviewImage(path string) error {
 	}
 	imageId, err := o.Insert(&image)
 	if err != nil {
-		return err
+		return nil,err
 	}
 	image.Id = int(imageId)
 	m2m := o.QueryM2M(g, "PreviewImages")
 	_, err = m2m.Add(image)
-	return err
+	return &image,err
 }
 
 func (g *Game) ReadGamePreviewImage() error {
