@@ -17,3 +17,9 @@ func (r *AddGameRequestBody) Parse(body []byte) error {
 	return err
 }
 
+
+type UpdateGameCollectionRequestBody struct {
+	Name   string `json:"name"`
+	Title  string `json:"title"`
+	Enable bool   `json:"enable"`
+}

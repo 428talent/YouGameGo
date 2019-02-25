@@ -5,6 +5,7 @@ import (
 	"yougame.com/yougame-server/controllers/api"
 	"yougame.com/yougame-server/models"
 	"yougame.com/yougame-server/parser"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 )
@@ -31,6 +32,9 @@ func (c *Controller) GetGameCollectionList() {
 		listView := api.ListView{
 			Controller:    &c.ApiController,
 			QueryBuilder:  &service.GameCollectionQueryBuilder{},
+			Init: func() {
+				c.GetAuth()
+			},
 			ModelTemplate: serializer.NewGameCollectionTemplate(serializer.DefaultGameCollectionTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				gameCollectionQueryBuilder := builder.(*service.GameCollectionQueryBuilder)
@@ -40,6 +44,12 @@ func (c *Controller) GetGameCollectionList() {
 				for _, nameParam := range c.GetStrings("name") {
 					gameCollectionQueryBuilder.WithName(nameParam)
 				}
+				enable := "visit"
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					enable = c.GetString("enable", "visit")
+
+				}
+				gameCollectionQueryBuilder.WithEnable(enable)
 			},
 		}
 		err := listView.Exec()
@@ -137,4 +147,18 @@ func (c *Controller) DeleteGame() {
 	}
 	c.Data["json"] = responseBody
 	c.ServeJSON()
+}
+
+func (c *Controller) UpdateBulkCollection() {
+	c.WithErrorContext(func() {
+		updateView := api.UpdateMultipleView{
+			Controller: &c.ApiController,
+			Parser:     &parser.UpdateGameCollectionRequestBody{},
+			Model:      &models.GameCollection{},
+		}
+		err := updateView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
 }

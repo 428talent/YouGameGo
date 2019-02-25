@@ -76,7 +76,7 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/collections",
-			beego.NSRouter("/", &collection.Controller{}, "get:GetGameCollectionList;post:Create"),
+			beego.NSRouter("/", &collection.Controller{}, "get:GetGameCollectionList;post:Create;put:UpdateBulkCollection"),
 		),
 		beego.NSNamespace("/collection",
 			beego.NSNamespace("/:id",
