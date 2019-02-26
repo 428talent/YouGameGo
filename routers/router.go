@@ -10,6 +10,7 @@ import (
 	"yougame.com/yougame-server/controllers/api/image"
 	"yougame.com/yougame-server/controllers/api/inventory"
 	"yougame.com/yougame-server/controllers/api/order"
+	"yougame.com/yougame-server/controllers/api/permission"
 	"yougame.com/yougame-server/controllers/api/profile"
 	"yougame.com/yougame-server/controllers/api/tag"
 	"yougame.com/yougame-server/controllers/api/transaction"
@@ -70,6 +71,8 @@ func init() {
 		),
 		beego.NSNamespace("tags",
 			beego.NSRouter("/", &tag.Controller{}, "post:CreateTag;get:List"),
+		),beego.NSNamespace("permissions",
+			beego.NSRouter("/", &permission.Controller{}, "get:List"),
 		),
 		beego.NSNamespace("tag",
 			beego.NSNamespace("/:id",
