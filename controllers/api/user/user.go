@@ -414,3 +414,30 @@ func (c *ApiUserController) UserGroupList() {
 		}
 	})
 }
+
+func (c *ApiUserController) UserGroup() {
+	objectView := api.ObjectView{
+		Controller:    &c.ApiController,
+		QueryBuilder:  &service.UserGroupQueryBuilder{},
+		ModelTemplate: serializer.NewUserGroupTemplate(serializer.DefaultUserGroupTemplateType),
+	}
+	err := objectView.Exec()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (c *ApiUserController) CreateUserGroup() {
+	c.WithErrorContext(func() {
+		createView := api.CreateView{
+			Controller:    &c.ApiController,
+			Parser:        &parser.CreateUserGroupRequestBody{},
+			ModelTemplate: serializer.NewUserGroupTemplate(serializer.DefaultUserGroupTemplateType),
+			Model:         &models.UserGroup{},
+		}
+		err := createView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
