@@ -386,3 +386,31 @@ func (c *ApiUserController) GetInventoryGame() {
 		c.ServeJSON()
 	})
 }
+
+func (c *ApiUserController) List() {
+	c.WithErrorContext(func() {
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.UserQueryBuilder{},
+			ModelTemplate: serializer.NewUserTemplate(serializer.DefaultUserTemplateType),
+		}
+		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+
+func (c *ApiUserController) UserGroupList() {
+	c.WithErrorContext(func() {
+		listView := api.ListView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.UserGroupQueryBuilder{},
+			ModelTemplate: serializer.NewUserGroupTemplate(serializer.DefaultUserGroupTemplateType),
+		}
+		err := listView.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}

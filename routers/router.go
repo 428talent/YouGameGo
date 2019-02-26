@@ -20,7 +20,8 @@ import (
 
 func init() {
 	beego.AddNamespace(beego.NewNamespace("/api",
-		beego.NSRouter("users", &user.ApiUserController{}, "post:CreateUser"),
+		beego.NSRouter("users", &user.ApiUserController{}, "post:CreateUser;get:List"),
+		beego.NSRouter("usergroups", &user.ApiUserController{}, "get:UserGroupList"),
 		beego.NSNamespace("/user",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &user.ApiUserController{}, "get:GetUser"),

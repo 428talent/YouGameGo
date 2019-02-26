@@ -67,10 +67,11 @@ func (p *UserLoginResponseBody) Serialize(sign string, user models.User) CommonA
 }
 
 type UserSerializerModel struct {
-	Id        int        `json:"id"`
-	Username  string     `json:"username"`
-	LastLogin int64      `json:"last_login"`
-	CreateAt  int64      `json:"create_at"`
+	Id        int        `json:"id" source_type:"int"`
+	Username  string     `json:"username" source_type:"string"`
+	LastLogin int64      `json:"last_login" source_type:"string" converter:"time"`
+	CreateAt  int64      `json:"create_at" source_type:"string" converter:"time"`
+	Enable    bool       `json:"enable" source_type:"bool"`
 	Link      []*ApiLink `json:"link"`
 }
 
@@ -112,6 +113,7 @@ type UserTemplate struct {
 	Username  string     `json:"username" source:"Username" source_type:"string"`
 	LastLogin string     `json:"last_login" source:"LastLogin" source_type:"string" converter:"time"`
 	CreateAt  string     `json:"create_at" source:"Created" source_type:"string" converter:"time"`
+	Enable    bool       `json:"enable" source_type:"bool"`
 	Link      []*ApiLink `json:"link"`
 }
 
@@ -147,3 +149,21 @@ type UserProfileTemplate struct {
 func (t *UserProfileTemplate) Serialize(model interface{}, context map[string]interface{}) {
 	SerializeModelData(model, t)
 }
+
+var (
+	DefaultUserGroupTemplateType = "DefaultUserGroupTemplateType"
+)
+func NewUserGroupTemplate(templateType string) Template {
+	return &UserGroupTemplate{}
+}
+type UserGroupTemplate struct {
+	Id     int    `json:"id" source:"Id" source_type:"int"`
+	Name   string `json:"name" source:"Name" source_type:"string"`
+	Enable bool   `json:"enable" source_type:"bool"`
+}
+
+func (t *UserGroupTemplate) Serialize(model interface{}, context map[string]interface{}) {
+	SerializeModelData(model, t)
+}
+
+

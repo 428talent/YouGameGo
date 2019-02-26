@@ -30,8 +30,6 @@ func (u *User) TableName() string {
 	return "auth_user"
 }
 
-
-
 func GetUserById(userId int) (*User, error) {
 	o := orm.NewOrm()
 	user := &User{Id: userId}
@@ -97,4 +95,13 @@ func (u *User) ReadUserGroup() error {
 	o := orm.NewOrm()
 	_, err := o.LoadRelated(u, "UserGroups")
 	return err
+}
+
+func GetUserList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*User, error) {
+	o := orm.NewOrm()
+	var userList []*User
+	seter := o.QueryTable("auth_user")
+	_, err := filter(seter).All(&userList)
+	count, err := filter(seter).Count()
+	return count, userList, err
 }

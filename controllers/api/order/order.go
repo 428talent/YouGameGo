@@ -11,7 +11,6 @@ import (
 	"yougame.com/yougame-server/util"
 )
 
-
 type ApiOrderController struct {
 	api.ApiController
 }
@@ -64,12 +63,15 @@ func (c *ApiOrderController) GetOrderList() {
 			},
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				orderQueryBuilder := builder.(*service.OrderQueryBuilder)
-				orderQueryBuilder.InUser(c.User.Id)
-				orderQueryBuilder.WithEnable("visit")
-				orderQueryBuilder.ByOrder("-id")
-				for _, state := range c.GetStrings("state") {
-					orderQueryBuilder.SetState(state)
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					util.FilterByParam(&c.Controller, "user", builder, "InUser", false)
+					util.FilterByParam(&c.Controller, "enable", builder, "WithEnable", true)
+				} else {
+					orderQueryBuilder.InUser(c.User.Id)
+					orderQueryBuilder.WithEnable("visit")
 				}
+				util.FilterByParam(&c.Controller, "order", builder, "ByOrder", false)
+				util.FilterByParam(&c.Controller, "state", builder, "SetState", false)
 				util.FilterByParam(&c.Controller, "id", builder, "InId", false)
 			},
 		}
@@ -157,7 +159,7 @@ func (c *ApiOrderController) GetOrderGoods() {
 			QueryBuilder:  &service.OrderGoodQueryBuilder{},
 			ModelTemplate: serializer.NewOrderGoodTemplate(serializer.DefaultOrderGoodTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
-				util.FilterByParam(&c.Controller,"orderId",builder,"WithOrderId",false)
+				util.FilterByParam(&c.Controller, "orderId", builder, "WithOrderId", false)
 
 			},
 		}

@@ -208,3 +208,23 @@ func UpdatePassword(code int, rawPassword string) error {
 	return err
 
 }
+
+type UserQueryBuilder struct {
+	ResourceQueryBuilder
+}
+
+func (b *UserQueryBuilder) Query() (*int64, []*models.User, error) {
+	condition := b.build()
+	count, users, err := models.GetUserList(func(o orm.QuerySeter) orm.QuerySeter {
+		querySetter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())
+		if len(b.orders) > 0 {
+			querySetter = querySetter.OrderBy(b.orders...)
+		}
+		return querySetter
+	})
+	return &count, users, err
+}
+
+func (b *UserQueryBuilder) ApiQuery() (*int64, interface{}, error) {
+	return b.Query()
+}

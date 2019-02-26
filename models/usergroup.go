@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"github.com/astaxie/beego/orm"
+	"time"
+)
 
 type UserGroup struct {
 	Id          int
@@ -9,4 +12,12 @@ type UserGroup struct {
 	Users       []*User       `orm:"reverse(many)"`
 	Created     time.Time     `orm:"auto_now_add;type(datetime)"`
 	Enable      bool
+}
+func GetUserGroupList(filter func(o orm.QuerySeter) orm.QuerySeter) (int64, []*UserGroup, error) {
+	o := orm.NewOrm()
+	var userGroupList []*UserGroup
+	seter := o.QueryTable("user_group")
+	_, err := filter(seter).All(&userGroupList)
+	count, err := filter(seter).Count()
+	return count, userGroupList, err
 }
