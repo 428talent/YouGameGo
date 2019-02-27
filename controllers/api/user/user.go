@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/sirupsen/logrus"
@@ -439,5 +440,28 @@ func (c *ApiUserController) CreateUserGroup() {
 		if err != nil {
 			panic(err)
 		}
+	})
+}
+
+func (c *ApiUserController) AddPermission() {
+	c.WithErrorContext(func() {
+		groupId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := &parser.AddPermissionRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.AddUserGroupPermission(groupId,requestBody.Ids)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
 	})
 }
