@@ -394,6 +394,10 @@ func (c *ApiUserController) List() {
 			Controller:    &c.ApiController,
 			QueryBuilder:  &service.UserQueryBuilder{},
 			ModelTemplate: serializer.NewUserTemplate(serializer.DefaultUserTemplateType),
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				util.FilterByParam(&c.Controller,"userGroup",builder,"InGroup",false)
+			},
+
 		}
 		err := listView.Exec()
 		if err != nil {
@@ -465,3 +469,27 @@ func (c *ApiUserController) AddPermission() {
 		c.ServeJSON()
 	})
 }
+
+func (c *ApiUserController) RemovePermission() {
+	c.WithErrorContext(func() {
+		groupId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := &parser.AddPermissionRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.RemoveUserGroupPermission(groupId,requestBody.Ids)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
+	})
+}
+

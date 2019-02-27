@@ -57,7 +57,48 @@ func AddUserGroupPermission(groupId int, ids []int) error {
 			return roolErr
 		}
 		return err
-	}else{
+	} else {
+		err = o.Commit()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RemoveUserGroupPermission(groupId int, ids []int) error {
+	query := UserGroupQueryBuilder{}
+	query.InId(groupId)
+	count, result, err := query.Query()
+	if err != nil {
+		return err
+	}
+	if *count != 1 {
+		return NotFound
+	}
+	userGroup := result[0]
+	o := orm.NewOrm()
+	err = o.Begin()
+	if err != nil {
+		return err
+	}
+	transaction := func() error {
+		m2m := o.QueryM2M(userGroup, "Permissions")
+		permissions := make([]*models.Permission, 0)
+		for _, permissionId := range ids {
+			permissions = append(permissions, &models.Permission{Id: permissionId})
+		}
+		_, err := m2m.Remove(permissions)
+		return err
+	}
+	err = transaction()
+	if err != nil {
+		roolErr := o.Rollback()
+		if roolErr != nil {
+			return roolErr
+		}
+		return err
+	} else {
 		err = o.Commit()
 		if err != nil {
 			return err
