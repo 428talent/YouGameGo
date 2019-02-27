@@ -27,6 +27,7 @@ func init() {
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &user.ApiUserController{}, "get:UserGroup"),
 				beego.NSRouter("/permissions", &user.ApiUserController{}, "post:AddPermission;delete:RemovePermission"),
+				beego.NSRouter("/users", &user.ApiUserController{}, "post:AddUserGroupUser;delete:RemoveUserGroupUser"),
 			),
 		),
 		beego.NSNamespace("/user",

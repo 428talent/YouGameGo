@@ -211,16 +211,23 @@ func UpdatePassword(code int, rawPassword string) error {
 
 type UserQueryBuilder struct {
 	ResourceQueryBuilder
-	groupIds []interface{}
+	groupIds  []interface{}
+	username string
 }
 
 func (b *UserQueryBuilder) InGroup(ids ...interface{}) {
 	b.groupIds = append(b.groupIds, ids...)
 }
+func (b *UserQueryBuilder) InUsername(username string) {
+	b.username = username
+}
 func (b *UserQueryBuilder) Query() (*int64, []*models.User, error) {
 	condition := b.build()
 	if len(b.groupIds) > 0 {
 		condition = condition.And("UserGroups__user_group_id__in", b.groupIds...)
+	}
+	if len(b.username) > 0 {
+		condition = condition.And("username__icontains", b.username)
 	}
 	count, users, err := models.GetUserList(func(o orm.QuerySeter) orm.QuerySeter {
 		querySetter := o.SetCond(condition).Limit(b.pageOption.PageSize).Offset(b.pageOption.Offset())

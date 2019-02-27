@@ -106,3 +106,85 @@ func RemoveUserGroupPermission(groupId int, ids []int) error {
 	}
 	return nil
 }
+
+func AddUserGroupUsers(userGroupId int, ids []int) error {
+	query := UserGroupQueryBuilder{}
+	query.InId(userGroupId)
+	count, result, err := query.Query()
+	if err != nil {
+		return err
+	}
+	if *count != 1 {
+		return NotFound
+	}
+	userGroup := result[0]
+	o := orm.NewOrm()
+	err = o.Begin()
+	if err != nil {
+		return err
+	}
+	transaction := func() error {
+		m2m := o.QueryM2M(userGroup, "Users")
+		users := make([]*models.User, 0)
+		for _, userId := range ids {
+			users = append(users, &models.User{Id: userId})
+		}
+		_, err := m2m.Add(users)
+		return err
+	}
+	err = transaction()
+	if err != nil {
+		roolErr := o.Rollback()
+		if roolErr != nil {
+			return roolErr
+		}
+		return err
+	} else {
+		err = o.Commit()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RemoveUserGroupUsers(userGroupId int, ids []int) error {
+	query := UserGroupQueryBuilder{}
+	query.InId(userGroupId)
+	count, result, err := query.Query()
+	if err != nil {
+		return err
+	}
+	if *count != 1 {
+		return NotFound
+	}
+	userGroup := result[0]
+	o := orm.NewOrm()
+	err = o.Begin()
+	if err != nil {
+		return err
+	}
+	transaction := func() error {
+		m2m := o.QueryM2M(userGroup, "Users")
+		users := make([]*models.User, 0)
+		for _, userId := range ids {
+			users = append(users, &models.User{Id: userId})
+		}
+		_, err := m2m.Remove(users)
+		return err
+	}
+	err = transaction()
+	if err != nil {
+		roolErr := o.Rollback()
+		if roolErr != nil {
+			return roolErr
+		}
+		return err
+	} else {
+		err = o.Commit()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -396,8 +396,8 @@ func (c *ApiUserController) List() {
 			ModelTemplate: serializer.NewUserTemplate(serializer.DefaultUserTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				util.FilterByParam(&c.Controller,"userGroup",builder,"InGroup",false)
+				util.FilterByParam(&c.Controller,"username",builder,"InUsername",true)
 			},
-
 		}
 		err := listView.Exec()
 		if err != nil {
@@ -493,3 +493,48 @@ func (c *ApiUserController) RemovePermission() {
 	})
 }
 
+func (c *ApiUserController) AddUserGroupUser() {
+	c.WithErrorContext(func() {
+		groupId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := &parser.AddUserGroupUserRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.AddUserGroupUsers(groupId,requestBody.Ids)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
+	})
+}
+
+func (c *ApiUserController) RemoveUserGroupUser() {
+	c.WithErrorContext(func() {
+		groupId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		if err != nil {
+			panic(err)
+		}
+		requestBody := &parser.RemoveUserGroupUserRequestBody{}
+		err = json.Unmarshal(c.Ctx.Input.RequestBody, requestBody)
+		if err != nil {
+			panic(api.ParseJsonDataError)
+		}
+		err = service.RemoveUserGroupUsers(groupId,requestBody.Ids)
+		if err != nil {
+			panic(err)
+		}
+		responseBody := serializer.CommonApiResponseBody{
+			Success: true,
+		}
+		c.Data["json"] = responseBody
+		c.ServeJSON()
+	})
+}
