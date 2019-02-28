@@ -16,3 +16,8 @@ type UpdateCommentParser struct {
 	Content string `json:"content" valid:"Required;MinSize(15);MaxSize(500)"`
 	Rating  int64  `json:"rating"`
 }
+
+type UpdateCommentMultipleParser struct {
+	Id     int    `json:"id"`
+	Enable string `json:"enable"`
+}

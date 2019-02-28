@@ -146,7 +146,7 @@ func init() {
 			beego.NSRouter("/", &good.Controller{}, "get:GetGoods;post:CreateGood;delete:DeleteBulkGood;put:UpdateBulkGood"),
 		),
 		beego.NSRouter("/ordergood", &order.ApiOrderController{}, "get:GetOrderGoods"),
-		beego.NSRouter("/comments", &comment.ApiCommentController{}, "get:GetCommentList;post:CreateComment"),
+		beego.NSRouter("/comments", &comment.ApiCommentController{}, "get:GetCommentList;post:CreateComment;delete:DeleteComments;put:UpdateComments"),
 		beego.NSNamespace("/comment",
 			beego.NSNamespace("/:id",
 				beego.NSRouter("/", &comment.ApiCommentController{}, "put:Update;patch:Update")),

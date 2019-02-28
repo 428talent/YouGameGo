@@ -397,6 +397,7 @@ func (c *ApiUserController) List() {
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				util.FilterByParam(&c.Controller,"userGroup",builder,"InGroup",false)
 				util.FilterByParam(&c.Controller,"username",builder,"InUsername",true)
+				util.FilterByParam(&c.Controller,"id",builder,"InId",false)
 			},
 		}
 		err := listView.Exec()

@@ -74,7 +74,6 @@ func (q *GoodQueryBuilder) WithGameCommentGood(gameId ...interface{}) {
 
 func (q *GoodQueryBuilder) buildCondition() *orm.Condition {
 	condition := q.build()
-
 	if len(q.gameIds) > 0 {
 		condition = condition.And("game_id__in", q.gameIds...)
 	}
@@ -90,11 +89,14 @@ func (q *GoodQueryBuilder) Query() (*int64, []*models.Good, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		goodIds := make([]interface{}, 0)
-		for _, comment := range result {
-			goodIds = append(goodIds, comment.Good.Id)
+		if len(result)  != 0{
+			goodIds := make([]interface{}, 0)
+			for _, comment := range result {
+				goodIds = append(goodIds, comment.Good.Id)
+			}
+			condition = condition.And("id__in", goodIds...)
 		}
-		condition = condition.And("id__in", goodIds...)
+
 	}
 	return models.GetGoodList(func(o orm.QuerySeter) orm.QuerySeter {
 		setter := o.SetCond(condition).Limit(q.pageOption.PageSize).Offset(q.pageOption.Offset())

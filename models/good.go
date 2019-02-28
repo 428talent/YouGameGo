@@ -18,12 +18,6 @@ type Good struct {
 	Updated        time.Time        `orm:"auto_now;type(datetime)"`
 }
 
-func (g *Good) UpdateMultiple(o orm.Ormer, ids []interface{}, values map[string]interface{}) error {
-	condition := orm.NewCondition()
-	condition = condition.And("id__in", ids...)
-	_, err := o.QueryTable("good").SetCond(condition).Update(values)
-	return err
-}
 
 func (g *Good) DeleteMultiple(o orm.Ormer, ids []interface{}) error {
 	condition := orm.NewCondition()

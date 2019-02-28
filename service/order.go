@@ -87,7 +87,7 @@ func (builder *OrderGoodQueryBuilder) Query() (*int64, []*models.OrderGood, erro
 func CreateOrder(order *models.Order, goods []int64) error {
 	o := orm.NewOrm()
 	order.Enable = true
-	order.State = "Create"
+	order.State = "Created"
 	transaction := func() error {
 		err := o.Begin()
 		if err != nil {

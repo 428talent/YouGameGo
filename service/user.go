@@ -65,6 +65,11 @@ func CreateUserAccount(username string, password string, email string) (*models.
 		if err != nil {
 			return nil, err
 		}
+		user.Wallet = wallet
+		_,err  = o.Update(user)
+		if err != nil {
+			return nil,err
+		}
 		return user, nil
 	}
 

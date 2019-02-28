@@ -16,10 +16,20 @@ type Comment struct {
 	User    *User `orm:"rel(fk)"`
 	Content string
 	Rating  int
-	Enable  bool
+	Enable  bool `mapstructure:"enable"`
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated time.Time `orm:"auto_now;type(datetime)"`
 }
+
+func DeleteCommentMultiple(filter func(o orm.QuerySeter) orm.QuerySeter) error {
+	o := orm.NewOrm()
+	setter := filter(o.QueryTable("comment"))
+	_, err := setter.Update(orm.Params{
+		"enable": false,
+	})
+	return err
+}
+
 
 func (comment *Comment) Query(id int64) error {
 	comment.Id = int(id)

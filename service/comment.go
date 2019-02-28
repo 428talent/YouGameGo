@@ -39,6 +39,13 @@ type CommentQueryBuilder struct {
 	ratings []interface{}
 }
 
+func (builder *CommentQueryBuilder) Delete() error {
+	condition := builder.build()
+	return models.DeleteCommentMultiple(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.SetCond(condition)
+	})
+}
+
 func (builder *CommentQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return builder.Query()
 }

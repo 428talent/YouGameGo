@@ -15,5 +15,4 @@ type DataModel interface {
 
 type DataBulkModel interface {
 	DeleteMultiple(o orm.Ormer,ids []interface{}) error
-	UpdateMultiple(o orm.Ormer,ids []interface{},values map[string]interface{}) error
 }

@@ -319,14 +319,10 @@ func (v *UpdateMultipleView) Exec() error {
 	if err != nil {
 		return PermissionDeniedError
 	}
-
-	err = json.Unmarshal(v.Controller.Ctx.Input.RequestBody, v.Parser)
-	if err != nil {
-		return ParseJsonDataError
-	}
+	
 
 	type requestBody struct {
-		List []map[string]interface{}
+		List []map[string]interface{} `json:"list"`
 	}
 
 	updateList := &requestBody{}
