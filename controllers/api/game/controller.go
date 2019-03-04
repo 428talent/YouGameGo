@@ -118,7 +118,7 @@ func (c *Controller) UploadGameBand() {
 		if err != nil {
 			panic(err)
 		}
-		imageTemplate := serializer.AdminGameTemplate{}
+		imageTemplate := serializer.ImageTemplate{}
 		imageTemplate.Serialize(image, map[string]interface{}{})
 		c.Data["json"] = imageTemplate
 		c.ServeJSON()
@@ -156,7 +156,7 @@ func (c *Controller) UploadGamePreviewImage() {
 	if err != nil {
 		panic(err)
 	}
-	image,err := game.SavePreviewImage(path)
+	image, err := game.SavePreviewImage(path)
 	template := serializer.ImageAdminTemplate{}
 	template.Serialize(image, map[string]interface{}{})
 	c.Data["json"] = template
@@ -547,18 +547,13 @@ func (c *Controller) GetGameList() {
 			},
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				gameQueryBuilder := builder.(*service.GameQueryBuilder)
-				orders := c.GetStrings("order")
-				if len(orders) > 0 {
-					gameQueryBuilder.ByOrder(orders...)
-				}
+				util.FilterByParam(&c.Controller, "order", builder, "ByOrder", false)
 				enable := "visit"
 				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
 					enable = c.GetString("enable", "visit")
 				}
 				gameQueryBuilder.WithEnable(enable)
-				if name := c.GetString("name"); len(name) > 0 {
-					gameQueryBuilder.SearchWithName(name)
-				}
+				util.FilterByParam(&c.Controller, "name", builder, "SearchWithName", true)
 				util.FilterByParam(&c.Controller, "id", gameQueryBuilder, "InId", false)
 				util.FilterByParam(&c.Controller, "collection", gameQueryBuilder, "InGameCollection", false)
 
@@ -591,4 +586,39 @@ func (c *Controller) GetGameList() {
 			panic(err)
 		}
 	})
+}
+
+func (c *Controller) DeleteGameMultiple() {
+	multipleView := api.DeleteMultipleView{
+		Controller: &c.ApiController,
+		Builder:    &service.GameQueryBuilder{},
+		SetFilter: func(v *api.DeleteMultipleView) {
+			builder := v.Builder.(*service.GameQueryBuilder)
+			type deleteDatasRequestBody struct {
+				Ids []interface{} `json:"ids"`
+			}
+			requestBody := &deleteDatasRequestBody{}
+
+			err := json.Unmarshal(v.Controller.Ctx.Input.RequestBody, requestBody)
+			if err != nil {
+				panic(api.ParseJsonDataError)
+			}
+			builder.InId(requestBody.Ids...)
+		},
+	}
+	err := multipleView.Exec()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (c *Controller) UpdateGameMultiple() {
+	multipleView := api.UpdateMultipleView{
+		Controller: &c.ApiController,
+		Model:      &models.Game{},
+	}
+	err := multipleView.Exec()
+	if err != nil {
+		panic(err)
+	}
 }

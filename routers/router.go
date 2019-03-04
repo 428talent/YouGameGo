@@ -96,7 +96,7 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/games",
-			beego.NSRouter("/", &game.Controller{}, "post:CreateGame;get:GetGameList"),
+			beego.NSRouter("/", &game.Controller{}, "post:CreateGame;get:GetGameList;delete:DeleteGameMultiple;put:UpdateGameMultiple"),
 		),
 		beego.NSNamespace("/profile",
 

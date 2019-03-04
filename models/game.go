@@ -183,3 +183,13 @@ func GetGameWithInventory(userId int, limit int, offset int) (int64, []*Game, er
 	count, err := strconv.Atoi(countValue)
 	return int64(count), resultSet, err
 }
+
+
+func DeleteGameMultiple(filter func(o orm.QuerySeter) orm.QuerySeter) error {
+	o := orm.NewOrm()
+	setter := filter(o.QueryTable("game"))
+	_, err := setter.Update(orm.Params{
+		"enable": false,
+	})
+	return err
+}

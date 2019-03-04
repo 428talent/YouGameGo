@@ -174,7 +174,6 @@ type DeleteMultipleView struct {
 	Controller           *ApiController
 	Init                 func()
 	Builder              service.ApiOperationBuilder
-	Model                models.DataBulkModel
 	SetFilter            func(v *DeleteMultipleView)
 	Permissions          []PermissionInterface
 	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
@@ -319,7 +318,7 @@ func (v *UpdateMultipleView) Exec() error {
 	if err != nil {
 		return PermissionDeniedError
 	}
-	
+
 
 	type requestBody struct {
 		List []map[string]interface{} `json:"list"`

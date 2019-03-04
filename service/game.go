@@ -10,11 +10,25 @@ import (
 type GameQueryBuilder struct {
 	ResourceQueryBuilder
 	searchName        string
+	goods             []interface{}
 	gameCollectionIds []interface{}
 	priceStart        *float64
 	priceEnd          *float64
 	releaseTimeStart  string
 	releaseTimeEnd    string
+}
+
+func (b *GameQueryBuilder) Delete() error {
+	condition := orm.NewCondition()
+	if len(b.ids) > 0 {
+		condition = condition.And("id__in", b.ids...)
+	} else {
+		return nil
+	}
+	err := models.DeleteGameMultiple(func(o orm.QuerySeter) orm.QuerySeter {
+		return o.SetCond(condition)
+	})
+	return err
 }
 
 func (b *GameQueryBuilder) InGameCollection(id ...interface{}) {
@@ -91,7 +105,7 @@ func GetGameBand(gameId int, imageType string) (*models.Image, error) {
 		panic(err)
 	}
 	if *count == 0 {
-		return nil,NotFound
+		return nil, NotFound
 	}
 	return imageList[0], nil
 }
