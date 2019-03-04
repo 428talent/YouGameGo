@@ -556,7 +556,7 @@ func (c *Controller) GetGameList() {
 				util.FilterByParam(&c.Controller, "name", builder, "SearchWithName", true)
 				util.FilterByParam(&c.Controller, "id", gameQueryBuilder, "InId", false)
 				util.FilterByParam(&c.Controller, "collection", gameQueryBuilder, "InGameCollection", false)
-
+				util.FilterByParam(&c.Controller, "good", gameQueryBuilder, "InGood", false)
 				priceStartParam := c.GetString("priceStart", "")
 				if len(priceStartParam) > 0 {
 					priceStart, err := strconv.ParseFloat(priceStartParam, 64)

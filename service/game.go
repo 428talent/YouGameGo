@@ -34,6 +34,9 @@ func (b *GameQueryBuilder) Delete() error {
 func (b *GameQueryBuilder) InGameCollection(id ...interface{}) {
 	b.gameCollectionIds = append(b.gameCollectionIds, id)
 }
+func (b *GameQueryBuilder) InGood(id ...interface{}) {
+	b.goods = append(b.goods, id)
+}
 func (b *GameQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return b.Query()
 }
@@ -59,6 +62,9 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 
 	if len(b.searchName) > 0 {
 		condition = condition.And("name__icontains", b.searchName)
+	}
+	if len(b.goods) > 0 {
+		condition = condition.And("Goods__id__in", b.goods)
 	}
 	if len(b.gameCollectionIds) > 0 {
 		condition = condition.And("Collections__game_collection_id__in", b.gameCollectionIds...)
