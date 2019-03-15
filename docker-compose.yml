@@ -4,12 +4,19 @@ services:
     build:
       context: .
     ports:
-      - "8888:8888"
+      - "6969:8888"
+    environment:
+      APPLICATION_MYSQL_HOST : yougame_db
+      APPLICATION_MYSQL_PORT : "3306"
+      APPLICATION_LOG_HOST: "http://logstash:6000"
     networks:
       - docker-elk_elk
-      - yougame-server_application
+      - database_default
+      - compose_api
 networks:
+  database_default:
+    external: true
   docker-elk_elk:
     external: true
-  yougame-server_application:
-    driver: bridge
+  compose_api:
+    external: true

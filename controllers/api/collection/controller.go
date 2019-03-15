@@ -8,6 +8,7 @@ import (
 	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
+	"yougame.com/yougame-server/util"
 )
 
 type Controller struct {
@@ -30,20 +31,17 @@ func (c *Controller) GetObject() {
 func (c *Controller) GetGameCollectionList() {
 	c.WithErrorContext(func() {
 		listView := api.ListView{
-			Controller:    &c.ApiController,
-			QueryBuilder:  &service.GameCollectionQueryBuilder{},
+			Controller:   &c.ApiController,
+			QueryBuilder: &service.GameCollectionQueryBuilder{},
 			Init: func() {
 				c.GetAuth()
 			},
 			ModelTemplate: serializer.NewGameCollectionTemplate(serializer.DefaultGameCollectionTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				gameCollectionQueryBuilder := builder.(*service.GameCollectionQueryBuilder)
-				for _, orderParam := range c.GetStrings("order") {
-					gameCollectionQueryBuilder.ByOrder(orderParam)
-				}
-				for _, nameParam := range c.GetStrings("name") {
-					gameCollectionQueryBuilder.WithName(nameParam)
-				}
+				util.FilterByParam(&c.Controller, "order", builder, "ByOrder", false)
+				util.FilterByParam(&c.Controller, "id", builder, "InId", false)
+				util.FilterByParam(&c.Controller, "name", builder, "WithName", false)
 				enable := "visit"
 				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
 					enable = c.GetString("enable", "visit")

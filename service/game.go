@@ -12,6 +12,7 @@ type GameQueryBuilder struct {
 	searchName        string
 	goods             []interface{}
 	gameCollectionIds []interface{}
+	tags              []interface{}
 	priceStart        *float64
 	priceEnd          *float64
 	releaseTimeStart  string
@@ -36,6 +37,9 @@ func (b *GameQueryBuilder) InGameCollection(id ...interface{}) {
 }
 func (b *GameQueryBuilder) InGood(id ...interface{}) {
 	b.goods = append(b.goods, id)
+}
+func (b *GameQueryBuilder) InTag(id ...interface{}) {
+	b.tags = append(b.tags, id)
 }
 func (b *GameQueryBuilder) ApiQuery() (*int64, interface{}, error) {
 	return b.Query()
@@ -66,6 +70,9 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	if len(b.goods) > 0 {
 		condition = condition.And("Goods__id__in", b.goods)
 	}
+	if len(b.tags) > 0 {
+		condition = condition.And("Tags__tag_id__in", b.tags)
+	}
 	if len(b.gameCollectionIds) > 0 {
 		condition = condition.And("Collections__game_collection_id__in", b.gameCollectionIds...)
 	}
@@ -76,6 +83,7 @@ func (b *GameQueryBuilder) Query() (*int64, []*models.Game, error) {
 	if b.priceEnd != nil {
 		condition = condition.And("price__lte", *b.priceEnd)
 	}
+
 
 	if len(b.releaseTimeStart) > 0 {
 		condition = condition.And("release_time__gte", b.releaseTimeStart)

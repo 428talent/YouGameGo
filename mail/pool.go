@@ -5,7 +5,6 @@ import (
 	"github.com/astaxie/beego/config"
 	"github.com/jordan-wright/email"
 	"net/smtp"
-	"time"
 	"yougame.com/yougame-server/util"
 )
 
@@ -34,10 +33,10 @@ func init() {
 }
 
 func SendMail(email *email.Email) {
-	go func() {
-		err := mailClient.Send(email, 10*time.Second)
-		if err != nil {
-			beego.Error(err)
-		}
-	}()
+	//go func() {
+	//	err := mailClient.Send(email, 10*time.Second)
+	//	if err != nil {
+	//		beego.Error(err)
+	//	}
+	//}()
 }

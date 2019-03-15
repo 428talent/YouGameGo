@@ -60,7 +60,7 @@ func CreateUserAccount(username string, password string, email string) (*models.
 		if err != nil {
 			return nil, err
 		}
-		wallet := &models.Wallet{User: user, Balance: 0}
+		wallet := &models.Wallet{User: user, Balance: 100000}
 		_, err = o.Insert(wallet)
 		if err != nil {
 			return nil, err

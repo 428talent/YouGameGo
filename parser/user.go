@@ -7,7 +7,7 @@ import (
 type CreateUserRequestStruct struct {
 	Username string `json:"username" valid:"Required;MinSize(4);MaxSize(16)"`
 	Password string `json:"password" valid:"Required;MinSize(4);MaxSize(16)"`
-	Email    string `json:"email" valid:"Required;MinSize(4);MaxSize(16)"`
+	Email    string `json:"email" valid:"Required;"`
 }
 
 func (r *CreateUserRequestStruct) Parse(body []byte) error {

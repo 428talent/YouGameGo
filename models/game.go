@@ -56,7 +56,6 @@ func (g *Game) QueryById() error {
 
 }
 
-
 func GetGameList(filter func(o orm.QuerySeter) orm.QuerySeter) (*int64, []*Game, error) {
 	o := orm.NewOrm()
 	var gameList []*Game
@@ -75,7 +74,7 @@ func (g *Game) ReadGameBand() (err error) {
 	return err
 }
 
-func (g *Game) SavePreviewImage(path string) (*Image,error) {
+func (g *Game) SavePreviewImage(path string) (*Image, error) {
 	o := orm.NewOrm()
 	image := Image{
 		Type: "Preview",
@@ -84,12 +83,12 @@ func (g *Game) SavePreviewImage(path string) (*Image,error) {
 	}
 	imageId, err := o.Insert(&image)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	image.Id = int(imageId)
 	m2m := o.QueryM2M(g, "PreviewImages")
 	_, err = m2m.Add(image)
-	return &image,err
+	return &image, err
 }
 
 func (g *Game) ReadGamePreviewImage() error {
@@ -183,7 +182,6 @@ func GetGameWithInventory(userId int, limit int, offset int) (int64, []*Game, er
 	count, err := strconv.Atoi(countValue)
 	return int64(count), resultSet, err
 }
-
 
 func DeleteGameMultiple(filter func(o orm.QuerySeter) orm.QuerySeter) error {
 	o := orm.NewOrm()
