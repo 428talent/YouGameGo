@@ -20,6 +20,9 @@ func (c *Controller) CreateTag() {
 			Parser:        &parser.CreateTagRequestBody{},
 			ModelTemplate: serializer.NewTagTemplate(serializer.DefaultTagTemplateType),
 			Model:         &models.Tag{},
+			Permissions: []api.PermissionInterface{
+				&CreateTagPermission{},
+			},
 		}
 		err := view.Exec()
 		if err != nil {
@@ -47,7 +50,7 @@ func (c *Controller) List() {
 		}
 	})
 }
-func (c *Controller)GetTag() {
+func (c *Controller) GetTag() {
 	c.WithErrorContext(func() {
 		view := api.ObjectView{
 			Controller:    &c.ApiController,
@@ -67,6 +70,9 @@ func (c *Controller) Update() {
 			ModelTemplate: serializer.NewTagTemplate(serializer.DefaultTagTemplateType),
 			Parser:        &parser.CreateTagRequestBody{},
 			Model:         &models.Tag{},
+			Permissions: []api.PermissionInterface{
+				&UpdateTagPermission{},
+			},
 		}
 		err := view.Exec()
 		if err != nil {
@@ -80,6 +86,9 @@ func (c *Controller) DeleteTag() {
 		view := api.DeleteView{
 			Controller: &c.ApiController,
 			Model:      &models.Tag{},
+			Permissions: []api.PermissionInterface{
+				&DeleteTagPermission{},
+			},
 		}
 		err := view.Exec()
 		if err != nil {

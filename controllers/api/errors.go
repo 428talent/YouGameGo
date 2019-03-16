@@ -66,15 +66,16 @@ var errorMapping map[error]*ApiError.APIErrorResponse
 
 func init() {
 	errorMapping = map[error]*ApiError.APIErrorResponse{
-		service.NoAuthError:AuthFailedError,
-		ParseJsonDataError:ParseRequestDataError,
-		security.ReadAuthorizationFailed:AuthFailedError,
-		PermissionDeniedError:PermissionNotAllowError,
-		orm.ErrNoRows:ResourceNoFoundError,
-		ResourceNotFoundError:ResourceNoFoundError,
-		DuplicateResourceError:DuplicateResourceApiError,
-		InvalidateError:InvalidateApiError,
-		service.NotFound:ResourceNoFoundError,
+		service.NoAuthError:              AuthFailedError,
+		ParseJsonDataError:               ParseRequestDataError,
+		security.ReadAuthorizationFailed: AuthFailedError,
+		PermissionDeniedError:            PermissionNotAllowError,
+		orm.ErrNoRows:                    ResourceNoFoundError,
+		ResourceNotFoundError:            ResourceNoFoundError,
+		DuplicateResourceError:           DuplicateResourceApiError,
+		InvalidateError:                  InvalidateApiError,
+		service.NotFound:                 ResourceNoFoundError,
+		ClaimsNoFoundError:               AuthFailedError,
 	}
 
 }
