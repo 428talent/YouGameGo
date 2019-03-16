@@ -47,7 +47,19 @@ func (c *Controller) List() {
 		}
 	})
 }
-
+func (c *Controller)GetTag() {
+	c.WithErrorContext(func() {
+		view := api.ObjectView{
+			Controller:    &c.ApiController,
+			QueryBuilder:  &service.TagQueryBuilder{},
+			ModelTemplate: serializer.NewTagTemplate(serializer.DefaultTagTemplateType),
+		}
+		err := view.Exec()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
 func (c *Controller) Update() {
 	c.WithErrorContext(func() {
 		view := api.UpdateView{

@@ -83,7 +83,7 @@ func init() {
 		),
 		beego.NSNamespace("tag",
 			beego.NSNamespace("/:id",
-				beego.NSRouter("/", &tag.Controller{}, "patch:Update;put:Update;delete:DeleteTag"),
+				beego.NSRouter("/", &tag.Controller{}, "patch:Update;put:Update;delete:DeleteTag;get:GetTag"),
 			),
 		),
 		beego.NSNamespace("/collections",
