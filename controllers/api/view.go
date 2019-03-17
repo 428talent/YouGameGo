@@ -198,7 +198,7 @@ func (v *DeleteMultipleView) Exec() error {
 		return PermissionDeniedError
 	}
 
-	if v.SetFilter != nil{
+	if v.SetFilter != nil {
 		v.SetFilter(v)
 	}
 
@@ -319,7 +319,6 @@ func (v *UpdateMultipleView) Exec() error {
 		return PermissionDeniedError
 	}
 
-
 	type requestBody struct {
 		List []map[string]interface{} `json:"list"`
 	}
@@ -336,23 +335,22 @@ func (v *UpdateMultipleView) Exec() error {
 			updateFields = append(updateFields, field)
 		}
 
-		err = mapstructure.Decode(updateItem,newInstance)
+		err = mapstructure.Decode(updateItem, newInstance)
 		if err != nil {
 			return err
 		}
 
 		id := updateItem["id"].(float64)
 
-		err = newInstance.Update(int64(id),orm.NewOrm(),updateFields...)
+		err = newInstance.Update(int64(id), orm.NewOrm(), updateFields...)
 		if err != nil {
 			return err
 		}
 
-
 	}
 
 	response := serializer.CommonApiResponseBody{
-		Success:true,
+		Success: true,
 	}
 
 	v.Controller.Data["json"] = response
@@ -368,12 +366,15 @@ type CreateView struct {
 	ModelTemplate        serializer.Template
 	GetTemplate          func() serializer.Template
 	GetPermissionContext func(permissionContext *map[string]interface{}) *map[string]interface{}
+	Context       map[string]interface{}
 	OnPrepareSave func(c *CreateView)
 	Validate      func(v *CreateView)
+	Validators    []RequestValidator
 	OnSave        func(v *CreateView) error
 }
 
 func (v *CreateView) Exec() error {
+	v.Context = make(map[string]interface{})
 	claims, err := v.Controller.GetAuth()
 	if err != nil {
 		return ClaimsNoFoundError
@@ -396,15 +397,26 @@ func (v *CreateView) Exec() error {
 	if err != nil {
 		return ParseJsonDataError
 	}
+	v.Context["parser"] = v.Parser
 
 	if v.Validate != nil {
 		v.Validate(v)
+	}
+
+	if len(v.Validators) != 0 {
+		for _, validator := range v.Validators {
+			isValidate := validator.Check(v.Context)
+			if !isValidate {
+				return InvalidateError
+			}
+		}
 	}
 
 	err = copier.Copy(v.Model, v.Parser)
 	if err != nil {
 		return err
 	}
+	v.Context["model"] = v.Model
 
 	if v.OnPrepareSave != nil {
 		v.OnPrepareSave(v)

@@ -20,6 +20,9 @@ func (c *Controller) CreateTag() {
 			Parser:        &parser.CreateTagRequestBody{},
 			ModelTemplate: serializer.NewTagTemplate(serializer.DefaultTagTemplateType),
 			Model:         &models.Tag{},
+			Validators: []api.RequestValidator{
+				&DuplicateTagValidator{},
+			},
 			Permissions: []api.PermissionInterface{
 				&CreateTagPermission{},
 			},
