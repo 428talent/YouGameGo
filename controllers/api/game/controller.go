@@ -21,73 +21,50 @@ type Controller struct {
 }
 
 func (c *Controller) CreateGame() {
-	var err error
-	defer api.CheckError(func(e error) {
-		logrus.Error(e)
-		api.HandleApiError(c.Controller, err)
+	c.WithErrorContext(func() {
+		view := api.CreateView{
+			Controller: &c.ApiController,
+			Parser:     &parser.CreateGameRequestBody{},
+			Permissions: []api.PermissionInterface{
+				CreateGamePermission{},
+			},
+			Model:         &models.Game{},
+			ModelTemplate: serializer.NewGameTemplate(serializer.AdminGameTemplateType),
+			OnPrepareSave: func(c *api.CreateView) {
+				model := c.Model.(*models.Game)
+				requestParser := c.Parser.(*parser.CreateGameRequestBody)
+				releaseTime, err := time.Parse("2006/1/2", requestParser.ReleaseTime)
+				if err != nil {
+					panic(api.ParseJsonDataError)
+				}
+				model.ReleaseTime = releaseTime
+			},
+		}
+		err := view.Exec()
+		if err != nil {
+			panic(err)
+		}
 	})
-	// read authentic
-	claims, err := c.GetAuth()
-	if err != nil {
-		panic(security.ReadAuthorizationFailed)
-	}
-
-	//check permission
-	permissionContext := map[string]interface{}{
-		"claims": *claims,
-	}
-	permission := []api.PermissionInterface{
-		CreateGamePermission{},
-	}
-	err = c.CheckPermission(permission, permissionContext)
-	if err != nil {
-		panic(err)
-	}
-	//parse request body
-	requestBodyStruct := parser.CreateGameRequestBody{}
-	if err = requestBodyStruct.Parse(c.Ctx.Input.RequestBody); err != nil {
-		panic(api.ParseJsonDataError)
-	}
-	releaseTime, err := time.Parse("2006/1/2", requestBodyStruct.ReleaseTime)
-	if err != nil {
-		panic(api.ParseJsonDataError)
-	}
-	//handle
-	game, err := service.CreateNewGame(
-		requestBodyStruct.Name,
-		requestBodyStruct.Price,
-		requestBodyStruct.Intro,
-		requestBodyStruct.Publisher,
-		releaseTime,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	template := serializer.GameTemplate{}
-	template.Serialize(game, map[string]interface{}{
-		"site": util.GetSiteAndPortUrl(c.Controller),
-	})
-	c.Data["json"] = template
-	c.ServeJSON()
-
 }
 
 func (c *Controller) GetGameBand() {
+	imageQueryBuilder := service.ImageQueryBuilder{}
 	c.WithErrorContext(func() {
-		gameId, err := strconv.Atoi(c.Ctx.Input.Param(":id"))
+		listView := api.ObjectView{
+			Controller:    &c.ApiController,
+			LookUpField:   "-",
+			QueryBuilder:  &imageQueryBuilder,
+			ModelTemplate: &serializer.ImageAdminTemplate{},
+			SetFilter: func(builder service.ApiQueryBuilder) {
+				gameIdParam := c.Controller.Ctx.Input.Param(":id")
+				imageQueryBuilder.WithName("band:" + gameIdParam)
+
+			},
+		}
+		err := listView.Exec()
 		if err != nil {
 			panic(err)
 		}
-		imageType := c.GetString("type", "desktop")
-		image, err := service.GetGameBand(gameId, imageType)
-		if err != nil {
-			panic(err)
-		}
-		template := serializer.ImageTemplate{}
-		template.Serialize(image, map[string]interface{}{})
-		c.Data["json"] = template
-		c.ServeJSON()
 	})
 }
 
