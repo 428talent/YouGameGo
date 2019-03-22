@@ -57,8 +57,8 @@ func (c *ApiUserController) UserLogin() {
 		}
 		api.HandleApiError(c.Controller, err)
 	})
-	var requestStruct = parser.GetTokenRequestStruct{}
-	requestData, err := requestStruct.ParseGetTokenRequestBody(c.Ctx.Input.RequestBody)
+	var requestBody = parser.AuthTokenRequestBody{}
+	requestData, err := requestBody.ParseGetTokenRequestBody(c.Ctx.Input.RequestBody)
 	if err != nil {
 		panic(err)
 	}
@@ -325,7 +325,6 @@ func (c *ApiUserController) GetUserProfile() {
 			OnGetResult: func(i interface{}) {
 				profile := i.(*models.Profile)
 				profile.ReadUser()
-
 			},
 		}
 		err := objectView.Exec()
@@ -395,9 +394,9 @@ func (c *ApiUserController) List() {
 			QueryBuilder:  &service.UserQueryBuilder{},
 			ModelTemplate: serializer.NewUserTemplate(serializer.DefaultUserTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
-				util.FilterByParam(&c.Controller,"userGroup",builder,"InGroup",false)
-				util.FilterByParam(&c.Controller,"username",builder,"InUsername",true)
-				util.FilterByParam(&c.Controller,"id",builder,"InId",false)
+				util.FilterByParam(&c.Controller, "userGroup", builder, "InGroup", false)
+				util.FilterByParam(&c.Controller, "username", builder, "InUsername", true)
+				util.FilterByParam(&c.Controller, "id", builder, "InId", false)
 			},
 		}
 		err := listView.Exec()
@@ -459,7 +458,7 @@ func (c *ApiUserController) AddPermission() {
 		if err != nil {
 			panic(api.ParseJsonDataError)
 		}
-		err = service.AddUserGroupPermission(groupId,requestBody.Ids)
+		err = service.AddUserGroupPermission(groupId, requestBody.Ids)
 		if err != nil {
 			panic(err)
 		}
@@ -482,7 +481,7 @@ func (c *ApiUserController) RemovePermission() {
 		if err != nil {
 			panic(api.ParseJsonDataError)
 		}
-		err = service.RemoveUserGroupPermission(groupId,requestBody.Ids)
+		err = service.RemoveUserGroupPermission(groupId, requestBody.Ids)
 		if err != nil {
 			panic(err)
 		}
@@ -505,7 +504,7 @@ func (c *ApiUserController) AddUserGroupUser() {
 		if err != nil {
 			panic(api.ParseJsonDataError)
 		}
-		err = service.AddUserGroupUsers(groupId,requestBody.Ids)
+		err = service.AddUserGroupUsers(groupId, requestBody.Ids)
 		if err != nil {
 			panic(err)
 		}
@@ -528,7 +527,7 @@ func (c *ApiUserController) RemoveUserGroupUser() {
 		if err != nil {
 			panic(api.ParseJsonDataError)
 		}
-		err = service.RemoveUserGroupUsers(groupId,requestBody.Ids)
+		err = service.RemoveUserGroupUsers(groupId, requestBody.Ids)
 		if err != nil {
 			panic(err)
 		}

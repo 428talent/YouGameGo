@@ -15,13 +15,13 @@ func (r *CreateUserRequestStruct) Parse(body []byte) error {
 	return err
 }
 
-type GetTokenRequestStruct struct {
+type AuthTokenRequestBody struct {
 	LoginName string `json:"login_name"`
 	Password  string `json:"password"`
 }
 
-func (r *GetTokenRequestStruct) ParseGetTokenRequestBody(body []byte) (*GetTokenRequestStruct, error) {
-	var result GetTokenRequestStruct
+func (r *AuthTokenRequestBody) ParseGetTokenRequestBody(body []byte) (*AuthTokenRequestBody, error) {
+	var result AuthTokenRequestBody
 	err := json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err

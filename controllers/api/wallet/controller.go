@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"yougame.com/yougame-server/controllers/api"
+	"yougame.com/yougame-server/security"
 	"yougame.com/yougame-server/serializer"
 	"yougame.com/yougame-server/service"
 )
@@ -19,7 +20,12 @@ func (c *Controller) GetWallet() {
 			LookUpField:   "-",
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				walletQueryBuilder := builder.(*service.WalletQueryBuilder)
-				walletQueryBuilder.InUser(c.User.Id)
+				if security.CheckUserGroup(c.User, security.UserGroupAdmin) {
+					walletQueryBuilder.InUser(c.Ctx.Input.Param(":id"))
+				}else{
+					walletQueryBuilder.InUser(c.User.Id)
+				}
+
 			},
 		}
 		err := objectView.Exec()

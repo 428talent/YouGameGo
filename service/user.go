@@ -66,9 +66,9 @@ func CreateUserAccount(username string, password string, email string) (*models.
 			return nil, err
 		}
 		user.Wallet = wallet
-		_,err  = o.Update(user)
+		_, err = o.Update(user)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		return user, nil
 	}
@@ -111,11 +111,19 @@ func UserLogin(username string, password string) (string, *models.User, error) {
 		Username: username,
 		Password: password,
 	}
+	// check password
 	if !models.CheckUserValidate(&user) {
 		return "", nil, LoginUserFailed
 	}
+
+	//check permission
+	err := security.CheckUserPermission(user, "GetAuth")
+	if err != nil {
+		return "", nil, PermissionNotAccess
+	}
+
 	user.LastLogin = time.Now()
-	_, err := o.Update(&user, "LastLogin")
+	_, err = o.Update(&user, "LastLogin")
 	if err != nil {
 		return "", nil, err
 	}
@@ -216,7 +224,7 @@ func UpdatePassword(code int, rawPassword string) error {
 
 type UserQueryBuilder struct {
 	ResourceQueryBuilder
-	groupIds  []interface{}
+	groupIds []interface{}
 	username string
 }
 

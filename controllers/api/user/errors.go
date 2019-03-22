@@ -11,6 +11,7 @@ func init() {
 	api.RegisterErrors(map[error]*ApiError.APIErrorResponse{
 		service.UserExistError:    ExistError,
 		service.EmailAlreadyExist: EmailExistError,
+		service.PermissionNotAccess: api.PermissionNotAllowError,
 	})
 }
 
