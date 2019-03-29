@@ -5,6 +5,7 @@ import (
 	"yougame.com/yougame-server/controllers/api/cart"
 	"yougame.com/yougame-server/controllers/api/collection"
 	"yougame.com/yougame-server/controllers/api/comment"
+	"yougame.com/yougame-server/controllers/api/follow"
 	"yougame.com/yougame-server/controllers/api/game"
 	"yougame.com/yougame-server/controllers/api/good"
 	"yougame.com/yougame-server/controllers/api/image"
@@ -124,6 +125,12 @@ func init() {
 				beego.NSRouter("/", &order.ApiOrderController{}, "get:GetOrder"),
 				beego.NSRouter("/pay", &order.ApiOrderController{}, "post:PayOrder"),
 			),
+		),
+		beego.NSNamespace("/follows",
+			beego.NSRouter("/", &follow.Controller{}, "post:Create;get:List"),
+		),
+		beego.NSNamespace("/follow",
+			beego.NSRouter("/:id", &follow.Controller{}, "delete:Delete"),
 		),
 		beego.NSNamespace("good",
 			beego.NSNamespace("/:id",

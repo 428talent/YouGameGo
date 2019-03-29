@@ -53,6 +53,7 @@ func init() {
 		new(models.Comment),
 		new(models.InventoryItem),
 		new(models.GameCollection),
+		new(models.Follow),
 	)
 	orm.RunSyncdb("default", false, true)
 
