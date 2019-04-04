@@ -22,8 +22,11 @@ func (c *Controller) GetInventoryList() {
 			ModelTemplate: serializer.NewInventoryTemplate(serializer.DefaultInventoryTemplateType),
 			SetFilter: func(builder service.ApiQueryBuilder) {
 				inventoryQueryBuilder := builder.(*service.InventoryQueryBuilder)
-				inventoryQueryBuilder.BelongUser(c.User.Id)
-
+				if len(c.Controller.Ctx.Input.Param("user")) > 0 {
+					util.FilterByParam(&c.Controller, "good", builder, "BelongUser", false)
+				} else {
+					inventoryQueryBuilder.BelongUser(c.User.Id)
+				}
 				util.FilterByParam(&c.Controller, "good", builder, "InGood", false)
 				util.FilterByParam(&c.Controller, "game", builder, "InGame", false)
 			},

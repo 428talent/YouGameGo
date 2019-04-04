@@ -16,10 +16,13 @@ require (
 	github.com/jinzhu/copier v0.0.0-20180308034124-7e38e58719c3
 	github.com/jordan-wright/email v0.0.0-20181206031209-52b567308cb0
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
+	github.com/keegancsmith/rpc v1.1.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/lukehoban/go-outline v0.0.0-20161011150102-e78556874252 // indirect
 	github.com/matcornic/hermes v1.2.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
+	github.com/newhook/go-symbols v0.0.0-20151212134530-b75dfefa0d23 // indirect
 	github.com/olekukonko/tablewriter v0.0.1 // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
@@ -30,8 +33,10 @@ require (
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
 	github.com/stretchr/testify v1.3.0 // indirect
-	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
-	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
+	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a // indirect
+	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53 // indirect
+	golang.org/x/sys v0.0.0-20190318195719-6c81ef8f67ca // indirect
+	golang.org/x/tools v0.0.0-20190319232107-3f1ed9edd1b4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/russross/blackfriday.v2 v2.0.0+incompatible // indirect

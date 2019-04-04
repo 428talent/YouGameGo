@@ -8,14 +8,14 @@ import (
 )
 
 type Game struct {
-	Id            int       `json:"id"`
-	Name          string    `json:"name"`
-	Price         float32   `json:"price"`
-	ReleaseTime   time.Time `json:"release_time"`
-	Publisher     string    `json:"publisher"`
-	Enable        bool      `json:"enable"`
-	Band          *Image    `orm:"null;rel(one);on_delete(set_null)"`
-	Intro         string
+	Id            int               `json:"id"`
+	Name          string            `json:"name"`
+	Price         float32           `json:"price"`
+	ReleaseTime   time.Time         `json:"release_time"`
+	Publisher     string            `json:"publisher"`
+	Enable        bool              `json:"enable"`
+	Band          *Image            `orm:"null;rel(one);on_delete(set_null)"`
+	Intro         string            `orm:"size(1024)"`
 	Tags          []*Tag            `orm:"rel(m2m)"`
 	PreviewImages []*Image          `orm:"rel(m2m)"`
 	Goods         []*Good           `orm:"reverse(many)"`

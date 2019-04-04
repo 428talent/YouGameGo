@@ -373,12 +373,13 @@ func (c *ApiUserController) RecoveryPassword() {
 
 func (c *ApiUserController) GetInventoryGame() {
 	c.WithErrorContext(func() {
-		claims, err := c.GetAuth()
+		page, pageSize := c.GetPage()
+		userParam := c.Controller.Ctx.Input.Param(":id")
+		userId,err := strconv.Atoi(userParam)
 		if err != nil {
 			panic(err)
 		}
-		page, pageSize := c.GetPage()
-		count, gameList, err := service.GetGameWithUserInventory(claims.UserId, service.PageOption{Page: page, PageSize: pageSize})
+		count, gameList, err := service.GetGameWithUserInventory(userId, service.PageOption{Page: page, PageSize: pageSize})
 		result := serializer.SerializeMultipleTemplate(gameList, serializer.NewGameTemplate(serializer.DefaultGameTemplateType), map[string]interface{}{
 			"site": util.GetSiteAndPortUrl(c.Controller),
 		})
