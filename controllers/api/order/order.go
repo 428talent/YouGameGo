@@ -24,20 +24,37 @@ func (c *ApiOrderController) CreateOrder() {
 			ModelTemplate: serializer.NewOrderTemplate(serializer.DefaultOrderTemplateType),
 			Validate: func(v *api.CreateView) {
 				request := v.Parser.(*parser.CreateOrderParser)
-
-				goodValidator := GoodValidate{}
-				isValid := goodValidator.Check(map[string]interface{}{
-					"goodList": request.Goods,
-				})
-				if !isValid {
-					panic(api.InvalidateError)
+				if request.Goods != nil {
+					goodValidator := GoodValidate{}
+					isValid := goodValidator.Check(map[string]interface{}{
+						"goodList": request.Goods,
+					})
+					if !isValid {
+						panic(api.InvalidateError)
+					}
 				}
 			},
 			OnSave: func(v *api.CreateView) error {
 				request := v.Parser.(*parser.CreateOrderParser)
+				goodIds := make([]int64, 0)
+				if request.UserCart != 0 {
+					cartQueryBuilder := service.CartQueryBuilder{}
+					cartQueryBuilder.InUser(request.UserCart)
+					cartQueryBuilder.WithEnable("visit")
+					_, cartItems, err := cartQueryBuilder.Query()
+					if err != nil {
+						panic(err)
+					}
+					for _, cartItem := range cartItems {
+						goodIds = append(goodIds, int64(cartItem.Good.Id))
+					}
+
+				} else {
+					goodIds = request.Goods
+				}
 				orderModel := v.Model.(*models.Order)
 				orderModel.User = c.User
-				err := service.CreateOrder(orderModel, request.Goods)
+				err := service.CreateOrder(orderModel, goodIds)
 				if err != nil {
 					return err
 				}

@@ -6,7 +6,8 @@ import (
 )
 
 type CreateOrderParser struct {
-	Goods []int64 `json:"goods"`
+	Goods    []int64 `json:"goods"`
+	UserCart int64   `json:"user_cart"`
 }
 
 func (p *CreateOrderParser) Parse(c beego.Controller) error {
