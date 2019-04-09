@@ -18,11 +18,12 @@ func EncryptSha1(data string) (*string, error) {
 }
 
 func EncryptSha1WithSalt(data string) (*string, error) {
+
 	appConfig, err := config.NewConfig("ini", "./conf/app_local.conf")
 	if err != nil {
 		return nil, err
 	}
-	salt := appConfig.String("salt")
+	salt := GetConfigItem("APPLICATION_SALT","salt",appConfig,"")
 
 	enData, err := EncryptSha1(data + salt)
 	if err != nil {

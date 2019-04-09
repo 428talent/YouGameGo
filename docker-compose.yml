@@ -1,22 +1,25 @@
 version: '2'
 services:
-  yougame-repository:
+  server:
     build:
       context: .
     ports:
       - "6969:8888"
     environment:
-      APPLICATION_MYSQL_HOST : yougame_db
-      APPLICATION_MYSQL_PORT : "3306"
+      APPLICATION_MYSQL_HOST: "114.115.150.138"
+      APPLICATION_MYSQL_PORT: "3306"
       APPLICATION_LOG_HOST: "http://logstash:6000"
-    networks:
-      - docker-elk_elk
-      - database_default
-      - compose_api
-networks:
-  database_default:
-    external: true
-  docker-elk_elk:
-    external: true
-  compose_api:
-    external: true
+      APPLICATION_MYSQL_USERNAME: "root"
+      APPLICATION_MYSQL_PASSWORD: ""
+      APPLICATION_REDIS_HOST: "localhost:6379"
+      APPLICATION_REDIS_PASSWORD: ""
+      APPLICATION_LOG_ID: "repository"
+      APPLICATION_LOG_INSTANCE_ID: "main-service"
+      APPLICATION_MAIL_USERNAME: ""
+      APPLICATION_MAIL_PASSWORD: ""
+      APPLICATION_MAIL_HOST: ""
+      APPLICATION_MAIL_ADDRESS: ""
+      APPLICATION_MAIL_ENABLE: "false"
+      APPLICATION_MQ_URL: "amqp://localhost:5672/"
+      APPLICATION_SALT: "salt"
+      APPLICATION_SECRET: "secret"

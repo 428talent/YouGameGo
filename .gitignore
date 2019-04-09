@@ -67,3 +67,5 @@ fabric.properties
 
 /static/
 
+.env
+main
